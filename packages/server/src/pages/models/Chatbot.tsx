@@ -131,7 +131,7 @@ export default function Chatbot({ className = "" }: ChatbotProps) {
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                         <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
-                            <Icon name="MessageCircle" className="w-8 h-8 text-accent-foreground" />
+                            <Icon name="MessageSquare" className="w-8 h-8 text-accent-foreground" />
                         </div>
                         <h4 className="text-xl font-semibold text-foreground mb-2">Welcome to AI Chat</h4>
                         <p className="text-muted-foreground max-w-md">Start a conversation by typing a message below. I'm here to help!</p>

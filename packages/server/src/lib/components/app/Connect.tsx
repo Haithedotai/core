@@ -13,21 +13,13 @@ import {
 } from "../ui/dropdown-menu"
 import Icon from "../custom/Icon";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
 
-interface ConnectProps {
-    isMobile?: boolean;
-    onProClick?: () => void;
-    onFaucetClick?: () => void;
-}
-
-export default function Connect({ isMobile = false, onProClick, onFaucetClick }: ConnectProps) {
+export default function Connect() {
     const { ready, authenticated, user, login, logout } = usePrivy();
-    const [showFaucet, setShowFaucet] = useState(false);
 
     if (!ready) return (
         <Button disabled variant="outline" className="rounded-sm">
-            <Skeleton className="w-24 h-2 bg-neo-beige-1-dark" />
+            <Skeleton className="w-24 h-2 bg-muted" />
         </Button>
     );
 
@@ -47,14 +39,14 @@ export default function Connect({ isMobile = false, onProClick, onFaucetClick }:
                 <Button variant="outline">
                     <Avatar className="size-6">
                         <AvatarImage src={localStorage.getItem(`profile_image_${user?.id}`) || undefined} className="object-cover" />
-                        <AvatarFallback className="text-xs font-black bg-neo-yellow-1 border border-black">
+                        <AvatarFallback className="text-xs font-black bg-primary text-primary-foreground border border-border">
                             {user?.wallet?.address?.slice(0, 1)?.toUpperCase() || "U"}
                         </AvatarFallback>
                     </Avatar>
-                    <span className="font-bold text-zinc-950 text-xs">{truncateAddress(user?.wallet?.address ?? "")}</span>
+                    <span className="font-bold text-foreground text-xs">{truncateAddress(user?.wallet?.address ?? "")}</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="mt-2">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
@@ -66,7 +58,7 @@ export default function Connect({ isMobile = false, onProClick, onFaucetClick }:
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
                     logout();
-                }} className="font-bold text-zinc-800">
+                }} className="font-bold text-muted-foreground">
                     <Icon name="LogOut" className="mr-2 w-4 h-4" />
                     Disconnect
                 </DropdownMenuItem>

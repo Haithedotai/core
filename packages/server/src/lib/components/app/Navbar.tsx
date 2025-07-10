@@ -18,13 +18,7 @@ export default function Navbar() {
       <div className="flex gap-2 items-center">
         <Link to="/" className="text-sm font-medium">
           <Button variant={location.pathname === "/" ? "default" : "ghost"} className="rounded-sm">
-            Seller
-          </Button>
-        </Link>
-
-        <Link to="/" className="text-sm font-medium">
-          <Button variant={location.pathname === "/" ? "default" : "ghost"} className="rounded-sm">
-            Buyer
+            Home
           </Button>
         </Link>
 
