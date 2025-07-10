@@ -9,7 +9,7 @@ import HomePage from "./home";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import CreatorPage from './creator';
 import ModelPage from './models';
-import { z } from 'zod';
+import ChatbotPage from './chatbot';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -48,8 +48,16 @@ const modelRoute = createRoute({
   },
 })
 
+// dynamic route for chatbot
+const chatbotRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/model/$id/chat',
+  component: function Chat() {
+    return withPageErrorBoundary(ChatbotPage)({});
+  },
+})
 
-const routeTree = rootRoute.addChildren([indexRoute, creatorRoute, modelRoute])
+const routeTree = rootRoute.addChildren([indexRoute, creatorRoute, modelRoute, chatbotRoute])
 const router = createRouter({
   routeTree,
 })
