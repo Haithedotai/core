@@ -1,10 +1,10 @@
 import { hc } from "hono/client";
-import type { ExampleType } from "@/api/routes/example"
+import type { ContextType } from "@/api/routes/context"
 
 const baseUrl = process.env.BUN_PUBLIC_SERVER_URL || "http://localhost:3000/api/v1";
 
 const client = {
-    example: hc<ExampleType>(`${baseUrl}/example`),
+    context: hc<ContextType>(`${baseUrl}/context`),
 };
 
 export default client;

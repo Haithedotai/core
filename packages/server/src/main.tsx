@@ -7,6 +7,7 @@ import router from "./pages/app";
 import { Toaster } from "sonner";
 import { RouterProvider } from "@tanstack/react-router";
 import "./globals.css";
+import { PrivyProvider } from "./lib/context/privy-provider";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -18,8 +19,10 @@ const app = (
     <ErrorBoundary>
       <QueryClientProvider>
         <ThemeProvider defaultTheme="dark" storageKey="theme">
-          <RouterProvider router={router} />
-          <Toaster position="bottom-right" />
+          <PrivyProvider>
+            <RouterProvider router={router} />
+            <Toaster position="bottom-right" />
+          </PrivyProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

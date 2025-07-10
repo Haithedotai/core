@@ -1,8 +1,8 @@
-import { DropdownMenu, DropdownMenuSeparator, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import Icon from "../custom/Icon";
 import { Button } from "../ui/button";
 import { Link } from "@tanstack/react-router";
 import { useLocation } from "@tanstack/react-router";
+import Connect from "./Connect";
 
 export default function Navbar() {
   const location = useLocation();
@@ -12,15 +12,23 @@ export default function Navbar() {
       {/* top left */}
       <div className="flex gap-2 items-center">
         <Icon name="Zap" className="size-8" />
-        <span className="text-2xl font-semibold">Genesis</span>
+        <span className="text-2xl font-semibold">Context</span>
       </div>
 
-      <div>
+      <div className="flex gap-2 items-center">
         <Link to="/" className="text-sm font-medium">
-          <Button variant={location.pathname === "/" ? "default" : "ghost"} size="sm">
-            Home
+          <Button variant={location.pathname === "/" ? "default" : "ghost"} className="rounded-sm">
+            Seller
           </Button>
         </Link>
+
+        <Link to="/" className="text-sm font-medium">
+          <Button variant={location.pathname === "/" ? "default" : "ghost"} className="rounded-sm">
+            Buyer
+          </Button>
+        </Link>
+
+        <Connect />
       </div>
     </nav>
   )
