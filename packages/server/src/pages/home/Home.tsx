@@ -117,7 +117,7 @@ export default function HomePage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 @3xl/main:grid-cols-2 gap-6">
                         {paginatedModels.map((model) => (
                             <Card key={model.id} className="group hover:shadow-lg transition-all duration-200 border-border bg-card">
                                 <div className="p-6">

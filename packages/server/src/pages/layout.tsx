@@ -8,14 +8,14 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-background [--navbar-height:5rem] md:[--sidebar-width:12rem]">
+    <div className="bg-background [--navbar-height:5rem] [--sidebar-width:0px] lg:[--sidebar-width:16rem]">
       <div className="h-[var(--navbar-height)] border-b-4 border-black">
         <Navbar />
       </div>
 
       <Sidebar />
 
-      <div className="ml-[var(--sidebar-width)] h-[calc(100dvh-var(--navbar-height))] @container/main">
+      <div className="lg:ml-[var(--sidebar-width)] h-[calc(100dvh-var(--navbar-height))] @container/main">
         {children}
       </div>
 

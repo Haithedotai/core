@@ -36,7 +36,7 @@ export default function CreatorSheet() {
         <Button variant="outline" className="rounded-sm">
           <Icon name="Zap" className="h-4 w-4 text-orange-400" />
           <span className="bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent font-semibold">
-            Become a creator
+            Get Started
           </span>
         </Button>
       </SheetTrigger>

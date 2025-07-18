@@ -62,12 +62,12 @@ export default function ModelPage() {
         <div className="min-h-full bg-background">
             {/* Header Section */}
             <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                    <div className="flex flex-col gap-4 sm:gap-6">
+                <div className="max-w-7xl mx-auto px-4 @sm/main:px-6 py-6 @sm/main:py-8">
+                    <div className="flex flex-col gap-4 @sm/main:gap-6">
                         {/* Breadcrumb */}
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <Link to="/">
-                                <Button variant="outline" className="w-full sm:w-auto">
+                                <Button variant="outline" className="w-full @sm/main:w-auto">
                                     <Icon name="ArrowLeft" className="h-4 w-4 mr-2" />
                                     Back
                                 </Button>
@@ -80,74 +80,72 @@ export default function ModelPage() {
                         </div>
 
                         {/* Model Header */}
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                                        <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">{model.name}</h1>
-                                        <Badge className={getStatusColor(model.status)} variant="secondary">
-                                            {model.status}
-                                        </Badge>
-                                    </div>
-                                    <p className="text-base sm:text-lg text-primary/80 font-medium mb-3">{model.type}</p>
-                                    <p className="text-muted-foreground text-base sm:text-lg">
-                                        {model.description}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                    <Link to="/model/$id/chat" params={{ id: model.id }}>
-                                        <Button size="lg" className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                                            <Icon name="MessageCircle" className="h-5 w-5" />
-                                            Start Chat
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </div>
-
-                            {/* Tags */}
-                            <div className="flex flex-wrap gap-2">
-                                {model.tags.map((tag) => (
-                                    <Badge key={tag} variant="outline" className="text-xs sm:text-sm">
-                                        {tag}
+                        <div className="flex flex-col @sm/main:flex-row @sm/main:items-start @sm/main:justify-between gap-4">
+                            <div className="flex-1">
+                                <div className="flex flex-col @sm/main:flex-row @sm/main:items-center gap-2 @sm/main:gap-3 mb-2">
+                                    <h1 className="text-2xl @sm/main:text-3xl font-bold text-foreground truncate">{model.name}</h1>
+                                    <Badge className={getStatusColor(model.status)} variant="secondary">
+                                        {model.status}
                                     </Badge>
-                                ))}
+                                </div>
+                                <p className="text-base @sm/main:text-lg text-primary/80 font-medium mb-3">{model.type}</p>
+                                <p className="text-muted-foreground text-base @sm/main:text-lg">
+                                    {model.description}
+                                </p>
                             </div>
-
-                            {/* Stats */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                    <Icon name="MessageSquare" className="h-4 w-4 flex-shrink-0" />
-                                    <span className="truncate">{model.usageCount.toLocaleString()} uses</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Icon name="Star" className="h-4 w-4 flex-shrink-0 fill-current text-yellow-500" />
-                                    <span className="truncate">{model.rating} rating</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Icon name="Calendar" className="h-4 w-4 flex-shrink-0" />
-                                    <span className="truncate">Created {formatDate(model.createdAt)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Icon name="RefreshCw" className="h-4 w-4 flex-shrink-0" />
-                                    <span className="truncate">Updated {formatDate(model.lastUpdated)}</span>
-                                </div>
+                            <div className="flex flex-col @sm/main:flex-row items-stretch @sm/main:items-center gap-3">
+                                <Link to="/model/$id/chat" params={{ id: model.id }}>
+                                    <Button size="lg" className="w-full @sm/main:w-auto gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                                        <Icon name="MessageCircle" className="h-5 w-5" />
+                                        Start Chat
+                                    </Button>
+                                </Link>
                             </div>
+                        </div>
 
-                            {/* Creator */}
-                            <div className="flex items-center gap-3 pt-4 border-t border-border">
-                                <Avatar className="h-8 w-8 flex-shrink-0">
-                                    <div className="h-full w-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
-                                        {model.creator.avatar}
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-2">
+                            {model.tags.map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-xs @sm/main:text-sm">
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-1 @sm/main:grid-cols-2 @lg/main:grid-cols-4 gap-3 @sm/main:gap-6 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                                <Icon name="MessageSquare" className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{model.usageCount.toLocaleString()} uses</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Icon name="Star" className="h-4 w-4 flex-shrink-0 fill-current text-yellow-500" />
+                                <span className="truncate">{model.rating} rating</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Icon name="Calendar" className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">Created {formatDate(model.createdAt)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Icon name="RefreshCw" className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">Updated {formatDate(model.lastUpdated)}</span>
+                            </div>
+                        </div>
+
+                        {/* Creator */}
+                        <div className="flex items-center gap-3 pt-4 border-t border-border">
+                            <Avatar className="h-8 w-8 flex-shrink-0">
+                                <div className="h-full w-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+                                    {model.creator.avatar}
+                                </div>
+                            </Avatar>
+                            <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-foreground font-medium truncate">Created by {model.creator.name}</span>
+                                {model.creator.verified && (
+                                    <div className="h-4 w-4 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                                        <div className="h-2 w-2 bg-primary-foreground rounded-full" />
                                     </div>
-                                </Avatar>
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-foreground font-medium truncate">Created by {model.creator.name}</span>
-                                    {model.creator.verified && (
-                                        <div className="h-4 w-4 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                                            <div className="h-2 w-2 bg-primary-foreground rounded-full" />
-                                        </div>
-                                    )}
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -155,13 +153,13 @@ export default function ModelPage() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <div className="max-w-7xl mx-auto px-4 @sm/main:px-6 py-6 @sm/main:py-8">
                 <div className="max-w-full">
                     {/* Model Information */}
                     <div className="space-y-8">
                         <div>
                             <h3 className="font-semibold text-foreground mb-6 text-xl">Model Information</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 @sm/main:grid-cols-2 @lg/main:grid-cols-3 gap-6">
                                 <div className="space-y-4">
                                     <div>
                                         <span className="text-sm text-muted-foreground block mb-1">Model Type</span>
@@ -203,7 +201,7 @@ export default function ModelPage() {
                             <h3 className="font-semibold text-foreground mb-4 text-xl">Tags</h3>
                             <div className="flex flex-wrap gap-2">
                                 {model.tags.map((tag) => (
-                                    <Badge key={tag} variant="outline" className="text-xs sm:text-sm">
+                                    <Badge key={tag} variant="outline" className="text-xs @sm/main:text-sm">
                                         {tag}
                                     </Badge>
                                 ))}

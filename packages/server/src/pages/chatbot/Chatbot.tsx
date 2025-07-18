@@ -156,7 +156,7 @@ export default function ChatbotPage() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <Link to="/">
-                                <Button variant="outline" className="w-full sm:w-auto">
+                                <Button variant="outline" className="w-full @sm/main:w-auto">
                                     <Icon name="ArrowLeft" className="h-4 w-4 mr-2" />
                                     Back
                                 </Button>

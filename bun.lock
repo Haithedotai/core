@@ -65,7 +65,7 @@
         "tailwindcss-animate": "^1.0.7",
         "wagmi": "^2.15.6",
         "zod": "^3.24.2",
-        "zustand": "^5.0.5",
+        "zustand": "^5.0.6",
       },
       "devDependencies": {
         "@tailwindcss/typography": "^0.5.16",
