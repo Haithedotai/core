@@ -12,6 +12,7 @@ import ModelPage from './models';
 import ChatbotPage from './chatbot';
 import Onboarding from './onboarding';
 import Dashboard from './dashboard';
+import Landing from './landing';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -77,7 +78,15 @@ const dashboardRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, creatorRoute, modelRoute, chatbotRoute, onboardingRoute, dashboardRoute])
+const landingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/landing',
+  component: function LandingRoute() {
+    return withPageErrorBoundary(Landing)({});
+  },
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, creatorRoute, modelRoute, chatbotRoute, onboardingRoute, dashboardRoute, landingRoute])
 const router = createRouter({
   routeTree,
 })
