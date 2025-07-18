@@ -10,6 +10,8 @@ import { useAnalytics } from '../lib/hooks/use-analytics';
 import CreatorPage from './creator';
 import ModelPage from './models';
 import ChatbotPage from './chatbot';
+import Onboarding from './onboarding';
+import Dashboard from './dashboard';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -57,7 +59,25 @@ const chatbotRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, creatorRoute, modelRoute, chatbotRoute])
+// onboarding route
+const onboardingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/onboarding',
+  component: function OnboardingRoute() {
+    return withPageErrorBoundary(Onboarding)({});
+  },
+})
+
+// dashboard route
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard',
+  component: function DashboardRoute() {
+    return withPageErrorBoundary(Dashboard)({});
+  },
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, creatorRoute, modelRoute, chatbotRoute, onboardingRoute, dashboardRoute])
 const router = createRouter({
   routeTree,
 })

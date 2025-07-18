@@ -1,4 +1,6 @@
-import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { env } from "@/env";
 
-const db = new Database("haithe.db", { create: true });
-db.exec("PRAGMA journal_mode = WAL;");
+const sql = neon(env.DATABASE_URL);
+export const db = drizzle({ client: sql });

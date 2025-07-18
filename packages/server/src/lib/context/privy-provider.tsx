@@ -8,7 +8,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
                 loginMethods: ["wallet"],
                 appearance: {
                     theme: "light",
-                    landingHeader: "Sign in to Haithe"
+                    landingHeader: "Sign in to Haithe",
                 }
             }}
         >

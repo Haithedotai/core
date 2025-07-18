@@ -8,12 +8,12 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-background [--navbar-height:5rem] sm:[--sidebar-width:0rem]">
+    <div className="bg-background [--navbar-height:5rem] md:[--sidebar-width:12rem]">
       <div className="h-[var(--navbar-height)] border-b-4 border-black">
         <Navbar />
       </div>
 
-      {/* <Sidebar /> */}
+      <Sidebar />
 
       <div className="ml-[var(--sidebar-width)] h-[calc(100dvh-var(--navbar-height))] @container/main">
         {children}

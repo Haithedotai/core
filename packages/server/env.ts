@@ -3,6 +3,7 @@ const envKeys = [
   "BUN_VERSION",
   "BUN_PUBLIC_PRIVY_APP_ID",
   "GEMINI_API_KEY",
+  "DATABASE_URL",
 ] as const;
 
 type ENV = Record<(typeof envKeys)[number], string>;

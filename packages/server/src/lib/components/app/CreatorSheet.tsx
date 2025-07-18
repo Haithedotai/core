@@ -9,9 +9,26 @@ import {
   SheetDescription,
 } from "../ui/sheet";
 import Icon from "../custom/Icon";
+import { usePrivy } from "@privy-io/react-auth";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function CreatorSheet() {
   const [open, setOpen] = useState(false);
+  const { authenticated, login } = usePrivy();
+  const navigate = useNavigate();
+
+  const handleStartCreating = () => {
+    if (!authenticated) {
+      // Close sheet and prompt to connect wallet
+      setOpen(false);
+      login();
+      return;
+    }
+    
+    // User is authenticated, navigate to onboarding
+    setOpen(false);
+    navigate({ to: "/onboarding" });
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -116,10 +133,7 @@ export default function CreatorSheet() {
           <div className="border-t px-6 py-6 bg-card/50">
             <Button
               className="w-full h-12 text-base font-semibold"
-              onClick={() => {
-                setOpen(false);
-                console.log("Starting creator journey...");
-              }}
+              onClick={handleStartCreating}
             >
               Start Creating
               <Icon name="ArrowRight" className="ml-2 h-4 w-4" />

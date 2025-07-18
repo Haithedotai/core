@@ -10,12 +10,12 @@ type Props = {
 export function Image({ src, alt, className, ...props }: Props) {
   return (
     <img
-      src={src ?? "/images/placeholder.png"}
+      src={src ?? "/static/haitheLogo.png"}
       alt={alt || "default"}
       className={cn(className)}
       {...props}
       onError={(e) => {
-        e.currentTarget.src = "/images/placeholder.png";
+        e.currentTarget.src = "/static/haitheLogo.png";
       }}
     />
   );
