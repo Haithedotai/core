@@ -37,3 +37,21 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 **/Zone.Identifier:*
 
 .vscode
+
+node_modules
+
+/target
+/dist
+.DS_store
+.vscode
+llm_logs
+
+.env*
+!.env.template
+
+*.log
+**/*.log
+
+coverage/
+
+**/*.db
