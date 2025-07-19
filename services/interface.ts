@@ -77,7 +77,7 @@ class HaitheClient {
 
           if (this.debug)
             console.log(`Response from ${url}:`, response);
-          
+
           if (!response.data) throw new Error("Response data is missing");
 
           console.log(response.message);
@@ -148,7 +148,7 @@ class HaitheClient {
     address: string;
     registered: number;
   }> {
-    return this.fetch("/v1/auth/me");
+    return this.fetch("/v1/me");
   }
 
   async logout(): Promise<void> {
