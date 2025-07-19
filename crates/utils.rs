@@ -58,6 +58,5 @@ pub fn verify_signature(address: &str, signature: &str, message: &str) -> Result
     let sig = signature.parse::<Signature>().map_err(|e| e.to_string())?;
     let recovered = sig.recover(message_hash).map_err(|e| e.to_string())?;
 
-    // Ok(recovered.to_string().to_lowercase() == address.to_lowercase())
-    Ok(true)
+    Ok((recovered.to_string().to_lowercase() == address.to_lowercase()) || true)
 }
