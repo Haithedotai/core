@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub struct Organization {
     pub id: i64,
     pub name: String,
+    pub owner: String
     pub created_at: String,
 }
 
@@ -26,21 +27,13 @@ async fn post_index_handler(
 ) -> Result<impl Responder, ApiError> {
     let org_name = query.name.clone();
 
-    let mut tx = state.db.begin().await?;
     let org = sqlx::query_as::<_, Organization>(
-        "INSERT INTO organizations (name) VALUES (?) RETURNING *",
+        "INSERT INTO organizations (name, owner) VALUES (?, ?) RETURNING *",
     )
     .bind(&org_name)
-    .fetch_one(&mut *tx)
+    .bind(&user.wallet_address)
+    .fetch_one(&state.db)
     .await?;
-
-    sqlx::query("INSERT INTO org_owners (org_id, wallet_address) VALUES (?, ?)")
-        .bind(org.id)
-        .bind(user.wallet_address)
-        .execute(&mut *tx)
-        .await?;
-
-    tx.commit().await?;
 
     Ok(respond::ok("Organization created", org))
 }
@@ -48,7 +41,7 @@ async fn post_index_handler(
 #[get("/{id}")]
 async fn get_org_handler(
     _: AuthUser,
-    path: web::Path<i64>,
+    path: web::Path<usize>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let id = path.into_inner();
@@ -74,22 +67,18 @@ async fn patch_org_handler(
     let id = path.into_inner();
     let org_name = query.name.clone();
 
-    let mut tx = state.db.begin().await?;
+    if id <= 0 {
+        return Err(ApiError::NotFound("Organization not found".to_string()));
+    }
+
     let org = sqlx::query_as::<_, Organization>(
-        "UPDATE organizations SET name = ? WHERE id = ? AND (
-        EXISTS (SELECT 1 FROM org_owners WHERE org_id = ? AND wallet_address = ?) 
-        OR
-        EXISTS (SELECT 1 FROM org_admins WHERE org_id = ? AND wallet_address = ?)
-        ) RETURNING *",
+        "UPDATE organizations SET name = ? WHERE id = ? AND owner = ? RETURNING *",
     )
     .bind(&org_name)
     .bind(id)
-    .bind(id)
-    .bind(user.wallet_address)
-    .fetch_one(&mut *tx)
+    .bind(&user.wallet_address)
+    .fetch_one(&state.db)
     .await?;
-
-    tx.commit().await?;
 
     Ok(respond::ok("Organization updated", org))
 }
@@ -102,17 +91,13 @@ async fn delete_org_handler(
 ) -> Result<impl Responder, ApiError> {
     let id = path.into_inner();
 
-    let mut tx = state.db.begin().await?;
     let org = sqlx::query_as::<_, Organization>(
-        "DELETE FROM organizations WHERE id = ? AND (EXISTS (SELECT 1 FROM org_owners WHERE org_id = ? AND wallet_address = ?)) RETURNING *",
+        "DELETE FROM organizations WHERE id = ? AND owner = ? RETURNING *",
     )
     .bind(id)
-    .bind(id)
-    .bind(user.wallet_address)
-    .fetch_one(&mut *tx)
+    .bind(&user.wallet_address)
+    .fetch_one(&state.db)
     .await?;
-
-    tx.commit().await?;
 
     Ok(respond::ok("Organization deleted", org))
 }
