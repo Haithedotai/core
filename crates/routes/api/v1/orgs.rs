@@ -1,10 +1,8 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{error::ApiError, respond, state::AppState};
-use crate::{bail_internal, utils};
-use actix_web::{HttpRequest, Responder, delete, get, patch, post, web};
+use actix_web::{Responder, delete, get, patch, post, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Organization {

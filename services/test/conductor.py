@@ -19,6 +19,7 @@ def find_cargo():
         return cargo_path
     
     home = os.path.expanduser("~")
+    print("HOME ", home)
     common_paths = [
         os.path.join(home, ".cargo", "bin", "cargo"),
         "/usr/local/cargo/bin/cargo",
@@ -48,7 +49,6 @@ def find_bun():
     return None
 
 def wait_for_server(port, timeout=30):
-    """Wait for server to be ready by checking if it responds to requests."""
     server_url = f"http://localhost:{port}/health"
     print(f"Waiting for server at {server_url} to be ready...")
     
@@ -71,6 +71,7 @@ def wait_for_server(port, timeout=30):
 
 def main():
     cargo_cmd = find_cargo()
+
     if not cargo_cmd:
         print("Error: cargo not found. Rust install karlo bhaiya!")
         sys.exit(1)
@@ -95,6 +96,7 @@ def main():
 
     server_process = None
     try:
+        os.makedirs("services/test/logs", exist_ok=True)
         with open("services/test/logs/conductor.server.log", "w") as log_file:
             print("Starting server...")
             server_process = subprocess.Popen(
