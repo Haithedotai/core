@@ -11,7 +11,7 @@ struct GetNonceQuery {
 }
 
 #[get("/nonce")]
-async fn nonce_handler(
+async fn get_nonce_handler(
     query: web::Query<GetNonceQuery>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
@@ -37,7 +37,7 @@ struct PostLoginQuery {
 }
 
 #[post("/login")]
-async fn login_handler(
+async fn post_login_handler(
     req: HttpRequest,
     query: web::Query<PostLoginQuery>,
     state: web::Data<AppState>,
@@ -86,7 +86,7 @@ async fn login_handler(
         "#,
     )
     .bind(&address)
-    .bind(&token)
+    .bind(&format!("Bearer {}", token))
     .bind(&ip)
     .bind(&user_agent)
     .execute(&state.db)
@@ -101,19 +101,8 @@ async fn login_handler(
     ))
 }
 
-#[get("/me")]
-async fn me_handler(user: AuthUser) -> Result<impl Responder, ApiError> {
-    Ok(respond::ok(
-        "Account fetched",
-        serde_json::json!({
-            "address": user.wallet_address,
-            "registered": user.created_at,
-        }),
-    ))
-}
-
 #[post("/logout")]
-async fn logout_handler(
+async fn post_logout_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
@@ -126,8 +115,7 @@ async fn logout_handler(
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(nonce_handler)
-        .service(login_handler)
-        .service(me_handler)
-        .service(logout_handler);
+    cfg.service(get_nonce_handler)
+        .service(post_login_handler)
+        .service(post_logout_handler);
 }
