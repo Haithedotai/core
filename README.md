@@ -1,3 +1,3 @@
-# Haithe - Context
+# Haithe 
 
 Create context aware agentic AIs.

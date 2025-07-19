@@ -1,13 +1,21 @@
 import * as viem from "viem";
+import "../data/types.d.ts";
 
 class HaitheClient {
   private walletClient: viem.WalletClient;
   private baseUrl: string = "";
   private authToken: string | null = null;
   private _persistentStorage: MinimalPersistentStorage | null = null;
+  private debug = false;
 
-  constructor(options: { walletClient: viem.WalletClient; baseUrl: string }) {
+  constructor(options: {
+    walletClient: viem.WalletClient;
+    baseUrl: string;
+    debug?: boolean;
+  }) {
     const { walletClient, baseUrl } = options;
+
+    this.debug = !!options.debug;
 
     this.walletClient = walletClient;
     this.baseUrl = baseUrl;
@@ -31,23 +39,33 @@ class HaitheClient {
     this.setAuthToken(token);
   }
 
-  private fetch<T>(uri: string): Promise<T> {
+  private fetch<T>(
+    uri: string,
+    args?: Omit<Parameters<typeof fetch>[1], "headers">
+  ): Promise<T> {
     if (!this.baseUrl) {
       throw new Error("Base URL is not set");
     }
     if (!uri.startsWith("/")) {
       uri = `/${uri}`;
     }
-    const url = new URL(uri, this.baseUrl);
+    const base = this.baseUrl.endsWith("/")
+      ? this.baseUrl.slice(0, -1)
+      : this.baseUrl;
+    const url = base + uri;
 
     return new Promise((resolve, reject) => {
       fetch(url.toString(), {
+        ...args,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.authToken}`,
         },
       })
         .then((response) => {
+          if (this.debug) {
+            console.log(`Fetched: ${url.toString()} -> ${response.status}`);
+          }
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
@@ -113,7 +131,8 @@ class HaitheClient {
       });
 
       const { token } = await this.fetch<{ token: string }>(
-        `/v1/auth/login?address=${address}&signature=${signature}`
+        `/v1/auth/login?address=${address}&signature=${signature}`,
+        { method: "POST" }
       );
 
       this.setAuthToken(token);
@@ -138,6 +157,121 @@ class HaitheClient {
       }
     });
   }
+
+  createOrganization(name: string): Promise<{
+    id: number;
+    name: string;
+    owner: string;
+    created_at: string;
+  }> {
+    return this.fetch(`/v1/orgs?name=${encodeURIComponent(name)}`, {
+      method: "POST",
+    });
+  }
+
+  getOrganization(id: number): Promise<{
+    id: number;
+    name: string;
+    owner: string;
+    created_at: string;
+  }> {
+    return this.fetch(`/v1/orgs/${id}`);
+  }
+
+  updateOrganization(
+    id: number,
+    name: string
+  ): Promise<{
+    id: number;
+    name: string;
+    owner: string;
+    created_at: string;
+  }> {
+    return this.fetch(`/v1/orgs/${id}?name=${encodeURIComponent(name)}`, {
+      method: "PATCH",
+    });
+  }
+
+  deleteOrganization(id: number): Promise<{
+    id: number;
+    name: string;
+    owner: string;
+    created_at: string;
+  }> {
+    return this.fetch(`/v1/orgs/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  getOrganizationMembers(orgId: number): Promise<
+    Array<{
+      org_id: number;
+      wallet_address: string;
+      role: string;
+      created_at: string;
+    }>
+  > {
+    return this.fetch(`/v1/orgs/${orgId}/members`);
+  }
+
+  addOrganizationMember(
+    orgId: number,
+    walletAddress: string,
+    role: "admin" | "member"
+  ): Promise<{
+    org_id: number;
+    wallet_address: string;
+    role: string;
+    created_at: string;
+  }> {
+    return this.fetch(
+      `/v1/orgs/${orgId}/members?wallet_address=${encodeURIComponent(
+        walletAddress
+      )}&role=${role}`,
+      {
+        method: "POST",
+      }
+    );
+  }
+
+  updateOrganizationMemberRole(
+    orgId: number,
+    walletAddress: string,
+    role: "admin" | "member"
+  ): Promise<{
+    org_id: number;
+    wallet_address: string;
+    role: string;
+    created_at: string;
+  }> {
+    return this.fetch(
+      `/v1/orgs/${orgId}/members?wallet_address=${encodeURIComponent(
+        walletAddress
+      )}&role=${role}`,
+      {
+        method: "PATCH",
+      }
+    );
+  }
+
+  removeOrganizationMember(
+    orgId: number,
+    walletAddress: string
+  ): Promise<{
+    org_id: number;
+    wallet_address: string;
+    role: string;
+    created_at: string;
+  }> {
+    return this.fetch(
+      `/v1/orgs/${orgId}/members?wallet_address=${encodeURIComponent(
+        walletAddress
+      )}`,
+      {
+        method: "DELETE",
+      }
+    );
+  }
 }
 
 type MinimalPersistentStorage = {
@@ -145,3 +279,5 @@ type MinimalPersistentStorage = {
   getItem: (key: string) => any;
   removeItem: (key: string) => void;
 };
+
+export { HaitheClient };
