@@ -49,9 +49,7 @@ class HaitheClient {
     if (!uri.startsWith("/")) {
       uri = `/${uri}`;
     }
-    const base = this.baseUrl.endsWith("/")
-      ? this.baseUrl.slice(0, -1)
-      : this.baseUrl;
+    const base = this.baseUrl.endsWith("/") ? this.baseUrl.slice(0, -1) : this.baseUrl;
     const url = base + uri;
 
     return new Promise((resolve, reject) => {
@@ -76,6 +74,10 @@ class HaitheClient {
             throw new Error(
               "Api call was not successful : " + response.message
             );
+
+          if (this.debug)
+            console.log(`Response from ${url}:`, response);
+          
           if (!response.data) throw new Error("Response data is missing");
 
           console.log(response.message);
@@ -149,13 +151,19 @@ class HaitheClient {
     return this.fetch("/v1/auth/me");
   }
 
-  logout(): void {
-    this.fetch("/v1/auth/logout").then(() => {
-      this.setAuthToken(null);
-      if (this._persistentStorage) {
-        this._persistentStorage.removeItem("authToken");
+  async logout(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.isLoggedIn()) {
+        return reject(new Error("Not logged in"));
       }
-    });
+      this.fetch("/v1/auth/logout", { method: "POST" }).then(() => {
+        this.setAuthToken(null);
+        if (this._persistentStorage) {
+          this._persistentStorage.removeItem("authToken");
+        }
+        resolve();
+      });
+    })
   }
 
   createOrganization(name: string): Promise<{

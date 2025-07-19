@@ -18,6 +18,13 @@ const walletClient = viem.createWalletClient({
 test("login", async () => {
   const client = new HaitheClient({ walletClient, baseUrl, debug: true });
   await client.login();
+  expect(client.isLoggedIn()).toBe(true);
 })
 
+test("logout", async () => {
+  const client = new HaitheClient({ walletClient, baseUrl, debug: true });
+  await client.login();
+  await client.logout();
+  expect(client.isLoggedIn()).toBe(false);
+});
 
