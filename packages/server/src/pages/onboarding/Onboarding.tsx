@@ -77,7 +77,7 @@ export default function OnboardingPage() {
       setCurrentUser(onboardedUser);
 
       // Navigate to marketplace
-      navigate({ to: '/marketplace' });
+      navigate({ to: '/dashboard' });
     } catch (error) {
       console.error('Onboarding failed:', error);
     } finally {
@@ -314,9 +314,9 @@ export default function OnboardingPage() {
   );
 
   return (
-    <div className="h-full bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-6">
+    <div className="h-full flex items-center justify-center">
       <div className="w-full max-w-3xl">
-        <Card className="border-0 shadow-xl">
+        <Card className="border-0 shadow-none">
           <CardHeader className="text-center pb-10">
             <div className="flex items-center justify-center gap-6 mb-8">
               {[1, 2, 3].map((step) => (

@@ -128,13 +128,6 @@ export default function Connect() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                    <Link to="/profile">
-                        <Icon name="User" className="size-4 mr-2" />
-                        Profile
-                    </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
                     <Link to="/dashboard">
                         <Icon name="LayoutDashboard" className="size-4 mr-2" />
                         Dashboard
@@ -158,9 +151,25 @@ export default function Connect() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
+                    <Link to="/profile">
+                        <Icon name="User" className="size-4 mr-2" />
+                        Profile
+                    </Link>
+                </DropdownMenuItem>
+
+
+                <DropdownMenuItem asChild>
                     <Link to="/organization">
                         <Icon name="Building" className="size-4 mr-2" />
                         Organization
+                    </Link>
+                </DropdownMenuItem>
+
+
+                <DropdownMenuItem asChild>
+                    <Link to="/analytics">
+                        <Icon name="TrendingUp" className="size-4 mr-2" />
+                        Analytics
                     </Link>
                 </DropdownMenuItem>
 
@@ -182,10 +191,10 @@ export default function Connect() {
 
                 <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-destructive focus:text-destructive"
+                    className="text-red-400 focus:text-red-400"
                 >
                     <Icon name="LogOut" className="size-4 mr-2" />
-                    Sign out
+                    Disconnect
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

@@ -24,7 +24,7 @@ export default function CreatorSheet() {
       login();
       return;
     }
-    
+
     // User is authenticated, navigate to onboarding
     setOpen(false);
     navigate({ to: "/onboarding" });
@@ -34,10 +34,8 @@ export default function CreatorSheet() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" className="rounded-sm">
-          <Icon name="Zap" className="h-4 w-4 text-orange-400" />
-          <span className="bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent font-semibold">
-            Get Started
-          </span>
+          <Icon name="Zap" className="h-4 w-4" />
+          Get Started
         </Button>
       </SheetTrigger>
       <SheetContent className="px-0 w-full sm:w-[480px]">
@@ -49,7 +47,7 @@ export default function CreatorSheet() {
                 <div>
                   <SheetTitle className="text-2xl font-bold">
                     <span className="bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent font-semibold">
-                      Become a creator
+                      Get Started
                     </span>
                   </SheetTitle>
                   <SheetDescription className="text-base text-muted-foreground">

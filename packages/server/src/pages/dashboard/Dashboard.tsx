@@ -57,7 +57,7 @@ function StatsCard({ title, value, icon, trend, description, gradient = "from-bl
         </div>
 
         <div className="space-y-2">
-          <div className="text-3xl font-bold leading-none group-hover:scale-105 transition-transform duration-300">
+          <div className="text-3xl font-bold leading-none">
             {value}
           </div>
           <div className="text-sm font-medium opacity-90 leading-relaxed">
@@ -296,8 +296,8 @@ export default function DashboardPage() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-full bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center p-6">
-        <Card className="max-w-md w-full border-0 shadow-2xl">
+      <div className="min-h-full flex items-center justify-center p-6">
+        <Card className="max-w-md w-full border-1 shadow-lg">
           <CardContent className="text-center space-y-8 p-8">
             <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
               <Icon name="User" className="size-10 text-primary" />
@@ -321,19 +321,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-background via-background/95 to-muted/10">
+    <div className="min-h-full">
       {/* Header */}
       <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm supports-[backdrop-filter]:bg-card/20">
-        <div className="max-w-7xl mx-auto px-6 py-8 @lg/main:py-12">
-          <div className="flex flex-col @lg/main:flex-row @lg/main:items-center @lg/main:justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-6 py-8 @xl/main:py-12">
+          <div className="flex flex-col gap-6 @xl/main:flex-row @2xl/main:items-center @2xl/main:justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-bold text-lg">
-                  {currentUser.name?.[0] || 'U'}
-                </div>
                 <div>
                   <h1 className="text-3xl @lg/main:text-4xl font-bold text-foreground leading-tight">
-                    Welcome back, {currentUser.name || 'User'}!
+                    Welcome, {currentUser.name || 'User'}!
                   </h1>
                   <p className="text-muted-foreground text-lg leading-relaxed">
                     Manage your AI projects and marketplace presence
@@ -341,10 +338,10 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-
+            
             {currentOrganization && (
-              <Card className="border-0 shadow-lg bg-gradient-to-r from-card to-card/80">
-                <CardContent className="flex items-center gap-3 p-4">
+              <Card className="flex h-fit">
+                <CardContent className="flex items-center gap-3 p-3">
                   <div className="p-2 rounded-lg bg-primary/10">
                     <Icon name="Building" className="size-5 text-primary" />
                   </div>
@@ -355,6 +352,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             )}
+
           </div>
         </div>
       </div>
@@ -544,7 +542,7 @@ export default function DashboardPage() {
               </TabsContent>
 
               <TabsContent value="projects" className="mt-0">
-                <Card className="border-0 shadow-lg">
+                <Card className="border-0 shadow-none">
                   <CardHeader className="pb-6 bg-gradient-to-r from-card to-card/80">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-3 text-xl">
@@ -623,7 +621,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         <Button asChild size="lg" className="shadow-lg bg-purple-600 hover:bg-purple-700">
-                          <Link to="/marketplace">
+                          <Link to="/">
                             <Icon name="Store" className="size-4 mr-2" />
                             Browse Marketplace
                           </Link>

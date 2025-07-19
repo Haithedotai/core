@@ -15,7 +15,7 @@ export default function Layout({
 
       <Sidebar />
 
-      <div className="lg:ml-[var(--sidebar-width)] h-[calc(100dvh-var(--navbar-height))] @container/main">
+      <div className="lg:ml-[var(--sidebar-width)] h-[calc(100dvh-var(--navbar-height))] @container/main px-4">
         {children}
       </div>
 

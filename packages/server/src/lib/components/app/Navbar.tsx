@@ -23,8 +23,8 @@ export default function Navbar() {
       {/* Left side - Logo and main navigation */}
       <div className="flex items-center gap-6">
         <Link to="/" className="flex gap-2 items-center">
-          <Icon name="Zap" className="size-8 text-primary" />
-          <span className="text-2xl font-semibold">Haithe</span>
+          <Icon name="Zap" className="size-8 text-orange-400" />
+          <span className="text-2xl font-semibold bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Haithe</span>
         </Link>
       </div>
 
@@ -34,11 +34,11 @@ export default function Navbar() {
         {authenticated && currentUser && currentOrganization && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="rounded-md gap-2">
+              <Button variant="outline" className="rounded-md gap-2">
                 <Icon name="Building" className="size-4" />
-                <span className="hidden sm:inline max-w-32 truncate">
+                <p className="hidden sm:inline">
                   {currentOrganization.name}
-                </span>
+                </p>
                 <Icon name="ChevronDown" className="size-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -63,63 +63,10 @@ export default function Navbar() {
         )}
 
         {/* Creator sheet for onboarding */}
-        {!authenticated || !currentUser?.onboarded ? (
-          <CreatorSheet />
-        ) : (
-          <Button variant="outline" className="rounded-md gap-2" asChild>
-            <Link to="/create">
-              <Icon name="Plus" className="size-4" />
-              <span className="hidden sm:inline">Create</span>
-            </Link>
-          </Button>
-        )}
+        {!authenticated || !currentUser?.onboarded && <CreatorSheet />}
 
         {/* Connect wallet / User menu */}
         <Connect />
-
-        {/* Mobile menu */}
-        <div className="lg:hidden">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-md">
-                <Icon name="Menu" className="size-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 mt-2">
-              <DropdownMenuItem asChild>
-                <Link to="/marketplace">
-                  <Icon name="Store" className="size-4" />
-                  Marketplace
-                </Link>
-              </DropdownMenuItem>
-
-              {authenticated && currentUser && (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard">
-                      <Icon name="LayoutDashboard" className="size-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/projects">
-                      <Icon name="FolderOpen" className="size-4" />
-                      Projects
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/analytics">
-                      <Icon name="TrendingUp" className="size-4" />
-                      Analytics
-                    </Link>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
     </nav>
   );

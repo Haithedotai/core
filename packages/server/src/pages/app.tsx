@@ -12,7 +12,6 @@ import ModelPage from './models';
 import ChatbotPage from './chatbot';
 import Onboarding from './onboarding';
 import Dashboard from './dashboard';
-import Marketplace from './marketplace';
 import Profile from './profile';
 import Settings from './settings';
 import Projects from './projects';
@@ -39,14 +38,6 @@ const indexRoute = createRoute({
   path: '/',
   component: function Index() {
     return withPageErrorBoundary(HomePage)({});
-  },
-})
-
-const marketplaceRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/marketplace',
-  component: function MarketplaceRoute() {
-    return withPageErrorBoundary(Marketplace)({});
   },
 })
 
@@ -168,7 +159,6 @@ const createItemRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  marketplaceRoute,
   creatorRoute,
   modelRoute,
   chatbotRoute,
