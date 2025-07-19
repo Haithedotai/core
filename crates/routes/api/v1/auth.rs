@@ -18,6 +18,7 @@ async fn get_nonce_handler(
     let address = query.address.to_lowercase();
     let nonce = Uuid::new_v4().to_string();
 
+
     let mut registry = state
         .nonce_registry
         .lock()

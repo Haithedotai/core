@@ -1,7 +1,7 @@
 use crate::lib::state;
 use crate::routes::routes;
 use actix_web::middleware;
-use actix_web::{App, HttpResponse, HttpServer, Responder, web};
+use actix_web::{App, HttpResponse, HttpRequest, HttpServer, Responder, web};
 use serde_json::json;
 use sqlx::{Executor, SqlitePool};
 use state::AppState;
@@ -14,7 +14,15 @@ mod macros;
 mod routes;
 mod utils;
 
-async fn health() -> impl Responder {
+async fn health(req: HttpRequest,) -> impl Responder {    
+    let conn_info = req.connection_info(); // Keep the temporary alive
+    let ip = conn_info
+        .realip_remote_addr()
+        .unwrap_or("unknown")
+        .to_string();
+
+    println!("Health check from IP: {}", ip);
+
     HttpResponse::Ok().json(json!({ "status": "ok" }))
 }
 
