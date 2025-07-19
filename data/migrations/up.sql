@@ -19,22 +19,17 @@ CREATE TABLE
     IF NOT EXISTS organizations (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-CREATE TABLE
-    IF NOT EXISTS org_owners (
-        org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
-        wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
+        owner TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (org_id, wallet_address)
+        UNIQUE (name, owner)
     );
 
 CREATE TABLE
-    IF NOT EXISTS org_admins (
+    IF NOT EXISTS org_members (
         org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
         wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
-        PRIMARY KEY (org_id, wallet_address)
+        role TEXT NOT NULL CHECK (role IN ('admin', 'member')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
 CREATE TABLE
@@ -42,7 +37,8 @@ CREATE TABLE
         id TEXT PRIMARY KEY,
         org_id TEXT NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
         name TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (name)
     );
 
 CREATE TABLE

@@ -1,7 +1,7 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{error::ApiError, respond, state::AppState};
 use crate::{bail_internal, utils};
-use actix_web::{HttpRequest, Responder, get, post, web};
+use actix_web::{HttpRequest, Responder, get, patch, post, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -64,6 +64,62 @@ async fn get_org_handler(
     Ok(respond::ok("Organization retrieved", org))
 }
 
+#[patch("/{id}")]
+async fn patch_org_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    query: web::Query<PostOrgQuery>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
+    let org_name = query.name.clone();
+
+    let mut tx = state.db.begin().await?;
+    let org = sqlx::query_as::<_, Organization>(
+        "UPDATE organizations SET name = ? WHERE id = ? AND (
+        EXISTS (SELECT 1 FROM org_owners WHERE org_id = ? AND wallet_address = ?) 
+        OR
+        EXISTS (SELECT 1 FROM org_admins WHERE org_id = ? AND wallet_address = ?)
+        ) RETURNING *",
+    )
+    .bind(&org_name)
+    .bind(id)
+    .bind(id)
+    .bind(user.wallet_address)
+    .fetch_one(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok(respond::ok("Organization updated", org))
+}
+
+#[delete("/{id}")]
+async fn delete_org_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
+
+    let mut tx = state.db.begin().await?;
+    let org = sqlx::query_as::<_, Organization>(
+        "DELETE FROM organizations WHERE id = ? AND (EXISTS (SELECT 1 FROM org_owners WHERE org_id = ? AND wallet_address = ?)) RETURNING *",
+    )
+    .bind(id)
+    .bind(id)
+    .bind(user.wallet_address)
+    .fetch_one(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok(respond::ok("Organization deleted", org))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(post_index_handler).service(get_org_handler);
+    cfg.service(post_index_handler)
+        .service(get_org_handler)
+        .service(patch_org_handler)
+        .service(delete_org_handler);
 }
