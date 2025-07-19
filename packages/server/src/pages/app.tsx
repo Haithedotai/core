@@ -20,6 +20,7 @@ import Purchases from './purchases';
 import Organization from './organization';
 import Help from './help';
 import Create from './create';
+import Landing from './landing';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -157,6 +158,14 @@ const createItemRoute = createRoute({
   },
 })
 
+const landingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/landing',
+  component: function LandingRoute() {
+    return withPageErrorBoundary(Landing)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   creatorRoute,
@@ -171,7 +180,8 @@ const routeTree = rootRoute.addChildren([
   purchasesRoute,
   organizationRoute,
   helpRoute,
-  createItemRoute
+  createItemRoute,
+  landingRoute
 ])
 
 const router = createRouter({

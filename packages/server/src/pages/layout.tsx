@@ -1,12 +1,10 @@
 import Navbar from "@/src/lib/components/app/Navbar";
 import Sidebar from "@/src/lib/components/app/Sidebar";
 import ThemeSwitch from "@/src/lib/components/custom/ThemeSwitch";
+// import { useMouseGlow } from "../lib/utils";
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
+  // const mousePosition = useMouseGlow();
   return (
     <div className="bg-background [--navbar-height:5rem] [--sidebar-width:0px] lg:[--sidebar-width:16rem]">
       <div className="h-[var(--navbar-height)] border-b-4 border-black">
@@ -23,5 +21,5 @@ export default function Layout({
         <ThemeSwitch />
       </div>
     </div>
-  )
+  );
 }
