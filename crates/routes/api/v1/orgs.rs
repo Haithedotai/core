@@ -1,7 +1,7 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{error::ApiError, respond, state::AppState};
 use crate::{bail_internal, utils};
-use actix_web::{HttpRequest, Responder, get, patch, post, web};
+use actix_web::{HttpRequest, Responder, get, patch, post, delete, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -66,7 +66,7 @@ async fn post_index_handler(
 #[get("/{id}")]
 async fn get_org_handler(
     _: AuthUser,
-    path: web::Path<usize>,
+    path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let id = path.into_inner();
@@ -175,7 +175,7 @@ async fn post_org_members_handler(
     };
 
     if owner_check == 0 && admin_check == 0 {
-        return Err(ApiError::Forbidden("Only organization owners and admins can add members".to_string()));
+        return Err(ApiError::Forbidden);
     }
 
     if query.role != "admin" && query.role != "member" {
@@ -224,7 +224,7 @@ async fn patch_org_members_handler(
     };
 
     if owner_check == 0 && admin_check == 0 {
-        return Err(ApiError::Forbidden("Only organization owners and admins can remove members".to_string()));
+        return Err(ApiError::Forbidden);
     }
 
     
@@ -270,7 +270,7 @@ async fn delete_org_members_handler(
     };
 
     if owner_check == 0 && admin_check == 0 {
-        return Err(ApiError::Forbidden("Only organization owners and admins can remove members".to_string()));
+        return Err(ApiError::Forbidden);
     }
 
     let member = sqlx::query_as::<_, OrgMember>(
