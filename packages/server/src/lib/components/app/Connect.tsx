@@ -1,7 +1,6 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { truncateAddress } from "../../utils";
 import {

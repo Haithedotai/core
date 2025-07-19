@@ -34,8 +34,8 @@ export default function CreatorSheet() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" className="rounded-sm">
-          <Icon name="Zap" className="h-4 w-4" />
-          Get Started
+          <Icon name="Zap" className="h-4 w-4 text-orange-400" />
+          <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Get Started</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="px-0 w-full sm:w-[480px]">
