@@ -1,4 +1,4 @@
-import { test, expect, mock, describe } from "bun:test";
+import { test, expect, mock, describe, beforeEach } from "bun:test";
 import * as viem from "viem";
 import { hardhat } from "viem/chains"
 import { HaitheClient } from "../interface";
@@ -43,5 +43,63 @@ describe("Authentication", () => {
 
     const profile = await client.profile();
     expect(profile.address).toBe(walletClient.account.address.toLowerCase());
+  });
+});
+
+
+
+describe("Organizations", () => {
+  let client: HaitheClient;
+  let orgId: number;
+
+  beforeEach(async () => {
+    client = new HaitheClient({ walletClient, baseUrl, debug: true });
+    await client.login();
+  });
+
+  test("create organization", async () => {
+    const orgName = `Test Org ${Date.now()}`;
+    const org = await client.createOrganization(orgName);
+
+    expect(org.name).toBe(orgName);
+    expect(org.owner).toBe(walletClient.account.address.toLowerCase());
+    expect(typeof org.id).toBe("number");
+    expect(typeof org.created_at).toBe("string");
+
+    orgId = org.id;
+  });
+
+  test("get organization", async () => {
+    const orgName = `Test Org ${Date.now()}`;
+    const createdOrg = await client.createOrganization(orgName);
+
+    const org = await client.getOrganization(createdOrg.id);
+    expect(org.id).toBe(createdOrg.id);
+    expect(org.name).toBe(orgName);
+    expect(org.owner).toBe(walletClient.account.address.toLowerCase());
+  });
+
+
+  test("update organization", async () => {
+    const orgName = `Test Org ${Date.now()}`;
+    const createdOrg = await client.createOrganization(orgName);
+
+    const newName = `Updated Org ${Date.now()}`;
+    const updatedOrg = await client.updateOrganization(createdOrg.id, newName);
+
+    expect(updatedOrg.id).toBe(createdOrg.id);
+    expect(updatedOrg.name).toBe(newName);
+    expect(updatedOrg.owner).toBe(walletClient.account.address.toLowerCase());
+  });
+
+  test("delete organization", async () => {
+    const orgName = `Test Org ${Date.now()}`;
+    const createdOrg = await client.createOrganization(orgName);
+
+    expect(
+      await client.deleteOrganization(createdOrg.id)
+    ).rejects.toThrow();
+
+
   });
 });
