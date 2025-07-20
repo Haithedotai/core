@@ -1,5 +1,6 @@
 use actix_web::{HttpResponse, Responder, http::StatusCode};
 use serde::Serialize;
+use serde_json::json;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,12 +14,23 @@ where
     data: Option<T>,
 }
 
-pub fn ok<T: Serialize>(message: &str, data: T) -> impl Responder {
-    HttpResponse::Ok().json(ApiResponse {
-        success: true,
-        message: message.to_string(),
-        data: Some(data),
-    })
+pub fn ok<T: Serialize + 'static>(message: &str, data: impl Into<Option<T>>) -> impl Responder {
+    let data = data.into();
+
+    let should_treat_as_none = std::any::TypeId::of::<T>() == std::any::TypeId::of::<()>();
+
+    match data {
+        Some(d) if !should_treat_as_none => HttpResponse::Ok().json(ApiResponse {
+            success: true,
+            message: message.to_string(),
+            data: Some(d),
+        }),
+        _ => HttpResponse::Ok().json(json!({
+            "success": true,
+            "message": message,
+            "data": {}
+        })),
+    }
 }
 
 pub fn err(message: &str, status: u16) -> HttpResponse {
