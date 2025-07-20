@@ -84,6 +84,41 @@ describe("Authentication via HaitheClient", () => {
         });
     });
 
+    describe("API Key Management", () => {
+        beforeEach(async () => {
+            await client.login();
+            try {
+                await client.disableApiKey();
+            } catch (e) {
+            }
+        });
+
+        test("should generate API key when logged in", async () => {
+            const result = await client.generateApiKey();
+
+            expect(result).toHaveProperty("api_key");
+            expect(result).toHaveProperty("message");
+            expect(result).toHaveProperty("issued_at");
+            expect(result.api_key).toBeString();
+        });
+
+        test("should disable API key when logged in", async () => {
+            await client.generateApiKey();
+            await client.disableApiKey();
+            await client.generateApiKey();
+        });
+
+        test("should throw error when generating API key without login", async () => {
+            await client.logout();
+            expect(client.generateApiKey()).rejects.toThrow("Not logged in");
+        });
+
+        test("should throw error when disabling API key without login", async () => {
+            await client.logout();
+            expect(client.disableApiKey()).rejects.toThrow("Not logged in");
+        });
+    });
+
     describe("Multiple Users", () => {
         test("should handle different wallet addresses", async () => {
             const client2 = new HaitheClient({
