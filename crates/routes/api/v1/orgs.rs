@@ -154,6 +154,8 @@ async fn post_org_members_handler(
 ) -> Result<impl Responder, ApiError> {
     let org_id = path.into_inner();
 
+    let wallet_address = query.wallet_address.to_lowercase();
+
     let owner_check = sqlx::query_scalar::<_, i64>(
         "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
     )
@@ -186,7 +188,7 @@ async fn post_org_members_handler(
         "INSERT INTO org_members (org_id, wallet_address, role) VALUES (?, ?, ?) RETURNING org_id, wallet_address, role, created_at"
     )
     .bind(org_id)
-    .bind(&query.wallet_address)
+    .bind(&wallet_address)
     .bind(&query.role)
     .fetch_one(&state.db)
     .await?;
@@ -202,6 +204,8 @@ async fn patch_org_members_handler(
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let org_id = path.into_inner();
+
+    let wallet_address = query.wallet_address.to_lowercase();
 
     let owner_check = sqlx::query_scalar::<_, i64>(
         "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
@@ -233,7 +237,7 @@ async fn patch_org_members_handler(
     )
     .bind(&query.role)
     .bind(org_id)
-    .bind(&query.wallet_address)
+    .bind(&wallet_address)
     .fetch_one(&state.db)
     .await?;
 
@@ -248,6 +252,8 @@ async fn delete_org_members_handler(
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let org_id = path.into_inner();
+
+    let wallet_address = query.wallet_address.to_lowercase();
 
     let owner_check = sqlx::query_scalar::<_, i64>(
         "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
@@ -277,7 +283,7 @@ async fn delete_org_members_handler(
         "DELETE FROM org_members WHERE org_id = ? AND wallet_address = ? RETURNING org_id, wallet_address, role, created_at"
     )
     .bind(org_id)
-    .bind(&query.wallet_address)
+    .bind(&wallet_address)
     .fetch_one(&state.db)
     .await?;
 
