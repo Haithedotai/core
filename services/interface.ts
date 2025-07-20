@@ -1,7 +1,7 @@
 import * as viem from "viem";
-import { 
-  HaitheAuthClient, 
-  HaitheOrgsClient, 
+import {
+  HaitheAuthClient,
+  HaitheOrgsClient,
   HaitheProjectsClient,
   MinimalPersistentStorage,
   Organization,
@@ -59,6 +59,14 @@ export class HaitheClient {
 
   profile(): Promise<UserProfile> {
     return this.auth.profile();
+  }
+
+  generateApiKey(): Promise<{ api_key: string; message: string; issued_at: number }> {
+    return this.auth.generateApiKey();
+  }
+
+  disableApiKey(): Promise<void> {
+    return this.auth.disableApiKey();
   }
 
   logout(): Promise<void> {

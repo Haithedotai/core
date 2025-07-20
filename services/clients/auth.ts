@@ -98,11 +98,27 @@ export class HaitheAuthClient extends BaseClient {
     return this.fetch("/v1/me", this.authToken);
   }
 
+  async generateApiKey(): Promise<{ api_key: string; message: string; issued_at: number }> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+
+    return this.fetch("/v1/me/api-key", this.authToken);
+  }
+
+  async disableApiKey(): Promise<void> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+
+    await this.fetch("/v1/me/api-key/disable", this.authToken, { method: "POST" });
+  }
+
   async logout(): Promise<void> {
     if (!this.isLoggedIn()) {
       throw new Error("Not logged in");
     }
-    
+
     await this.fetch("/v1/auth/logout", this.authToken, { method: "POST" });
     this.setAuthToken(null);
     if (this._persistentStorage) {
