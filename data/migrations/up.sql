@@ -29,7 +29,8 @@ CREATE TABLE
         org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
         wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         role TEXT NOT NULL CHECK (role IN ('admin', 'member')),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (org_id, wallet_address)
     );
 
 CREATE TABLE
