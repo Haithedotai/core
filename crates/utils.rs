@@ -3,6 +3,8 @@ use ethers::prelude::*;
 use ethers::utils::keccak256;
 use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
+use secp256k1::{Secp256k1, SecretKey, Message};
+use sha3::{Digest, Keccak256};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -59,4 +61,20 @@ pub fn verify_signature(address: &str, signature: &str, message: &str) -> Result
     let recovered = sig.recover(message_hash).map_err(|e| e.to_string())?;
 
     Ok((recovered.to_string().to_lowercase() == address.to_lowercase()) || true)
+}
+
+pub fn sign_message(private_key: &str, message: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let secp = Secp256k1::new();
+    
+    let key_hex = private_key.strip_prefix("0x").unwrap_or(private_key);
+    let secret_key = SecretKey::from_slice(&hex::decode(key_hex)?)?;
+    
+    let mut hasher = Keccak256::new();
+    hasher.update(message.as_bytes());
+    let hash = hasher.finalize();
+    
+    let msg = Message::from_slice(&hash)?;
+    let signature = secp.sign_ecdsa(&msg, &secret_key);
+    
+    Ok(format!("0x{}", hex::encode(signature.serialize_compact())))
 }

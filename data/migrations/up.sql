@@ -3,6 +3,7 @@ CREATE TABLE
     IF NOT EXISTS accounts (
         wallet_address TEXT PRIMARY KEY,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        api_key_last_issued_at TIMESTAMP,
         UNIQUE (wallet_address)
     );
 
@@ -21,7 +22,7 @@ CREATE TABLE
         name TEXT NOT NULL,
         owner TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (name, owner)
+        UNIQUE (name)
     );
 
 CREATE TABLE
