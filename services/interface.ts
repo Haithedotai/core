@@ -1,26 +1,32 @@
 import * as viem from "viem";
-import "../data/types.d.ts";
+import { 
+  HaitheAuthClient, 
+  HaitheOrgsClient, 
+  HaitheProjectsClient,
+  MinimalPersistentStorage,
+  Organization,
+  OrganizationMember,
+  Project,
+  ProjectMember,
+  UserProfile
+} from "./clients";
 
-class HaitheClient {
-  private walletClient: viem.WalletClient;
-  private baseUrl: string = "";
-  private authToken: string | null = null;
-  private _persistentStorage: MinimalPersistentStorage | null = null;
-  private debug = false;
+export class HaitheClient {
+  public auth: HaitheAuthClient;
+  public orgs: HaitheOrgsClient;
+  public projects: HaitheProjectsClient;
 
   constructor(options: {
     walletClient: viem.WalletClient;
     baseUrl: string;
     debug?: boolean;
   }) {
-    const { walletClient, baseUrl } = options;
-
-    this.debug = !!options.debug;
-
-    this.walletClient = walletClient;
-    this.baseUrl = baseUrl;
+    this.auth = new HaitheAuthClient(options);
+    this.orgs = new HaitheOrgsClient(this.auth, { debug: options.debug });
+    this.projects = new HaitheProjectsClient(this.auth, { debug: options.debug });
   }
 
+  // Backward compatibility methods - delegate to auth client
   static ensureWeb3Ready(
     walletClient: viem.WalletClient
   ): walletClient is viem.WalletClient<
@@ -28,264 +34,126 @@ class HaitheClient {
     viem.Chain,
     viem.Account
   > {
-    return !(
-      !walletClient ||
-      !walletClient.account ||
-      !walletClient.account.address
-    );
-  }
-
-  private persistAuthToken(token: string): void {
-    this.setAuthToken(token);
-  }
-
-  private fetch<T>(
-    uri: string,
-    args?: Omit<Parameters<typeof fetch>[1], "headers">
-  ): Promise<T> {
-    if (!this.baseUrl) {
-      throw new Error("Base URL is not set");
-    }
-    if (!uri.startsWith("/")) {
-      uri = `/${uri}`;
-    }
-    const base = this.baseUrl.endsWith("/") ? this.baseUrl.slice(0, -1) : this.baseUrl;
-    const url = base + uri;
-
-    return new Promise((resolve, reject) => {
-      fetch(url.toString(), {
-        ...args,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.authToken}`,
-        },
-      })
-        .then((response) => {
-          if (this.debug) {
-            console.log(`Fetched: ${url.toString()} -> ${response.status}`);
-          }
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((response) => {
-          if (!response.success)
-            throw new Error(
-              "Api call was not successful : " + response.message
-            );
-
-          if (this.debug)
-            console.log(`Response from ${url}:`, response);
-
-          if (!response.data) throw new Error("Response data is missing");
-
-          console.log(response.message);
-          resolve(response.data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  }
-
-  private syncAuthTokenFromStorage(): void {
-    if (this._persistentStorage) {
-      const token = this._persistentStorage.getItem("authToken");
-      if (token) {
-        this.setAuthToken(token);
-      }
-    }
-  }
-
-  isWeb3Ready(): boolean {
-    return !!this.walletClient && !!this.walletClient.account?.address;
+    return HaitheAuthClient.ensureWeb3Ready(walletClient);
   }
 
   set persistentStorage(engine: MinimalPersistentStorage) {
-    this._persistentStorage = engine;
-    this.syncAuthTokenFromStorage();
-    this.authToken && this.persistAuthToken(this.authToken);
+    this.auth.persistentStorage = engine;
   }
 
-  private setAuthToken(token: string | null): void {
-    this.authToken = token;
+  isWeb3Ready(): boolean {
+    return this.auth.isWeb3Ready();
   }
 
   isLoggedIn(): boolean {
-    return !!this.authToken;
+    return this.auth.isLoggedIn();
+  }
+
+  getAuthToken(): string | null {
+    return this.auth.getAuthToken();
   }
 
   login(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      if (!HaitheClient.ensureWeb3Ready(this.walletClient)) {
-        return reject(new Error("Wallet client is not ready"));
-      }
-
-      const address = this.walletClient.account.address;
-
-      const { nonce } = await this.fetch<{ nonce: string }>(
-        `/v1/auth/nonce?address=${address}`
-      );
-
-      const signature = await this.walletClient.signMessage({
-        message: nonce,
-      });
-
-      const { token } = await this.fetch<{ token: string }>(
-        `/v1/auth/login?address=${address}&signature=${signature}`,
-        { method: "POST" }
-      );
-
-      this.setAuthToken(token);
-      this.persistAuthToken(token);
-
-      resolve();
-    });
+    return this.auth.login();
   }
 
-  profile(): Promise<{
-    address: string;
-    registered: number;
-  }> {
-    return this.fetch("/v1/me");
+  profile(): Promise<UserProfile> {
+    return this.auth.profile();
   }
 
-  async logout(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      if (!this.isLoggedIn()) {
-        return reject(new Error("Not logged in"));
-      }
-      this.fetch("/v1/auth/logout", { method: "POST" }).then(() => {
-        this.setAuthToken(null);
-        if (this._persistentStorage) {
-          this._persistentStorage.removeItem("authToken");
-        }
-        resolve();
-      });
-    })
+  logout(): Promise<void> {
+    return this.auth.logout();
   }
 
-  createOrganization(name: string): Promise<{
-    id: number;
-    name: string;
-    owner: string;
-    created_at: string;
-  }> {
-    return this.fetch(`/v1/orgs?name=${encodeURIComponent(name)}`, {
-      method: "POST",
-    });
+  // Backward compatibility - delegate to orgs client
+  createOrganization(name: string): Promise<Organization> {
+    return this.orgs.createOrganization(name);
   }
 
-  getOrganization(id: number): Promise<{
-    id: number;
-    name: string;
-    owner: string;
-    created_at: string;
-  }> {
-    return this.fetch(`/v1/orgs/${id}`);
+  getOrganization(id: number): Promise<Organization> {
+    return this.orgs.getOrganization(id);
   }
 
-  updateOrganization(
-    id: number,
-    name: string
-  ): Promise<{
-    id: number;
-    name: string;
-    owner: string;
-    created_at: string;
-  }> {
-    return this.fetch(`/v1/orgs/${id}?name=${encodeURIComponent(name)}`, {
-      method: "PATCH",
-    });
+  updateOrganization(id: number, name: string): Promise<Organization> {
+    return this.orgs.updateOrganization(id, name);
   }
 
-  deleteOrganization(id: number): Promise<{
-    id: number;
-    name: string;
-    owner: string;
-    created_at: string;
-  }> {
-    return this.fetch(`/v1/orgs/${id}`, {
-      method: "DELETE",
-    });
+  deleteOrganization(id: number): Promise<Organization> {
+    return this.orgs.deleteOrganization(id);
   }
 
-  getOrganizationMembers(orgId: number): Promise<
-    Array<{
-      org_id: number;
-      wallet_address: string;
-      role: string;
-      created_at: string;
-    }>
-  > {
-    return this.fetch(`/v1/orgs/${orgId}/members`);
+  getOrganizationMembers(orgId: number): Promise<OrganizationMember[]> {
+    return this.orgs.getOrganizationMembers(orgId);
   }
 
   addOrganizationMember(
     orgId: number,
     walletAddress: string,
     role: "admin" | "member"
-  ): Promise<{
-    org_id: number;
-    wallet_address: string;
-    role: string;
-    created_at: string;
-  }> {
-    return this.fetch(
-      `/v1/orgs/${orgId}/members?wallet_address=${encodeURIComponent(
-        walletAddress
-      )}&role=${role}`,
-      {
-        method: "POST",
-      }
-    );
+  ): Promise<OrganizationMember> {
+    return this.orgs.addOrganizationMember(orgId, walletAddress, role);
   }
 
   updateOrganizationMemberRole(
     orgId: number,
     walletAddress: string,
     role: "admin" | "member"
-  ): Promise<{
-    org_id: number;
-    wallet_address: string;
-    role: string;
-    created_at: string;
-  }> {
-    return this.fetch(
-      `/v1/orgs/${orgId}/members?wallet_address=${encodeURIComponent(
-        walletAddress
-      )}&role=${role}`,
-      {
-        method: "PATCH",
-      }
-    );
+  ): Promise<OrganizationMember> {
+    return this.orgs.updateOrganizationMemberRole(orgId, walletAddress, role);
   }
 
   removeOrganizationMember(
     orgId: number,
     walletAddress: string
-  ): Promise<{
-    org_id: number;
-    wallet_address: string;
-    role: string;
-    created_at: string;
-  }> {
-    return this.fetch(
-      `/v1/orgs/${orgId}/members?wallet_address=${encodeURIComponent(
-        walletAddress
-      )}`,
-      {
-        method: "DELETE",
-      }
-    );
+  ): Promise<OrganizationMember> {
+    return this.orgs.removeOrganizationMember(orgId, walletAddress);
+  }
+
+  // New project methods - delegate to projects client
+  createProject(orgId: number, name: string): Promise<Project> {
+    return this.projects.createProject(orgId, name);
+  }
+
+  getProject(id: number): Promise<Project> {
+    return this.projects.getProject(id);
+  }
+
+  updateProject(id: number, name: string): Promise<Project> {
+    return this.projects.updateProject(id, name);
+  }
+
+  deleteProject(id: number): Promise<Project> {
+    return this.projects.deleteProject(id);
+  }
+
+  getProjectMembers(projectId: number): Promise<ProjectMember[]> {
+    return this.projects.getProjectMembers(projectId);
+  }
+
+  addProjectMember(
+    projectId: number,
+    walletAddress: string,
+    role: "admin" | "developer" | "viewer"
+  ): Promise<ProjectMember> {
+    return this.projects.addProjectMember(projectId, walletAddress, role);
+  }
+
+  updateProjectMemberRole(
+    projectId: number,
+    walletAddress: string,
+    role: "admin" | "developer" | "viewer"
+  ): Promise<ProjectMember> {
+    return this.projects.updateProjectMemberRole(projectId, walletAddress, role);
+  }
+
+  removeProjectMember(
+    projectId: number,
+    walletAddress: string
+  ): Promise<ProjectMember> {
+    return this.projects.removeProjectMember(projectId, walletAddress);
   }
 }
 
-type MinimalPersistentStorage = {
-  setItem: (key: string, value: any) => void;
-  getItem: (key: string) => any;
-  removeItem: (key: string) => void;
-};
+export * from "./clients";
 
-export { HaitheClient };
+export default HaitheClient;
