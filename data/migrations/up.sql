@@ -35,16 +35,16 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS projects (
-        id TEXT PRIMARY KEY,
-        org_id TEXT NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+        id INTEGER PRIMARY KEY,
+        org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (name)
+        UNIQUE (name, org_id)
     );
 
 CREATE TABLE
     IF NOT EXISTS project_members (
-        project_id TEXT NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+        project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
         wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         role TEXT NOT NULL CHECK (role IN ('admin', 'developer', 'viewer')),
         PRIMARY KEY (project_id, wallet_address)
@@ -52,8 +52,8 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS products (
-        id TEXT PRIMARY KEY,
-        project_id TEXT NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+        id INTEGER PRIMARY KEY,
+        project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         config JSON DEFAULT '{}',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -61,8 +61,8 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS api_keys (
-        id TEXT PRIMARY KEY,
-        project_id TEXT NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+        id INTEGER PRIMARY KEY,
+        project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
         created_by TEXT NOT NULL REFERENCES accounts (wallet_address),
         name TEXT NOT NULL,
         hashed_key TEXT NOT NULL,
