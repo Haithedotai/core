@@ -3,10 +3,13 @@ use crate::lib::{error::ApiError, respond, state::AppState};
 use actix_web::{Responder, get, patch, post, delete, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
+
 
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Organization {
     pub id: i64,
+    pub organization_uid: String,
     pub name: String,
     pub owner: String,
     pub created_at: String,
@@ -50,11 +53,14 @@ async fn post_index_handler(
 ) -> Result<impl Responder, ApiError> {
     let org_name = query.name.clone();
 
+    let organization_uid = Uuid::new_v4().to_string().replace("-", "");
+
     let org = sqlx::query_as::<_, Organization>(
-        "INSERT INTO organizations (name, owner) VALUES (?, ?) RETURNING *",
+        "INSERT INTO organizations (name, owner, organization_uid) VALUES (?, ?, ?) RETURNING *",
     )
     .bind(&org_name)
     .bind(&user.wallet_address)
+    .bind(&organization_uid)
     .fetch_one(&state.db)
     .await?;
 

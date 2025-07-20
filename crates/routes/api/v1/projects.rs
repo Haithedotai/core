@@ -3,11 +3,14 @@ use crate::lib::{error::ApiError, respond, state::AppState};
 use actix_web::{get, patch, post, delete, web, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
+
 
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Project {
-    pub id: i64,          // INTEGER PRIMARY KEY
-    pub org_id: i64,      // INTEGER
+    pub id: i64,
+    pub org_id: i64,
+    pub project_uid: String,
     pub name: String,
     pub created_at: String,
 }
@@ -132,11 +135,14 @@ async fn create_project_handler(
         return Err(ApiError::NotFound("Organization not found".to_string()));
     }
 
+    let project_uid = Uuid::new_v4().to_string().replace("-", "");
+
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name) VALUES (?, ?) RETURNING *"
+        "INSERT INTO projects (org_id, name) VALUES (?, ?, ?) RETURNING *"
     )
     .bind(query.org_id)
     .bind(&query.name)
+    .bind(&project_uid)
     .fetch_one(&state.db)
     .await?;
 
