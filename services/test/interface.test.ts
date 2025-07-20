@@ -96,10 +96,10 @@ describe("Organizations", () => {
     const orgName = `Test Org ${Date.now()}`;
     const createdOrg = await client.createOrganization(orgName);
 
-    expect(
-      await client.deleteOrganization(createdOrg.id)
-    ).rejects.toThrow();
+    const deletedOrg = await client.deleteOrganization(createdOrg.id);
 
-
+    expect(deletedOrg.id).toBe(createdOrg.id);
+    expect(deletedOrg.name).toBe(orgName);
+    expect(deletedOrg.owner).toBe(walletClient.account.address.toLowerCase());
   });
 });
