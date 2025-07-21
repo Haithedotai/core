@@ -1,13 +1,20 @@
-use crate::lib::{error::ApiError, state::AppState};
+use crate::lib::{ error::ApiError, state::AppState };
 use crate::utils;
-use actix_web::{FromRequest, HttpRequest, web};
-use futures_util::future::{Ready, ready};
+use actix_web::{ FromRequest, HttpRequest, web };
+use futures_util::future::{ Ready, ready };
 use sqlx::FromRow;
 
 #[derive(Debug, Clone, FromRow)]
 pub struct AuthUser {
     pub wallet_address: String,
     pub created_at: String,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct ApiCaller {
+    pub wallet_address: String,
+    pub org_id: i64,
+    pub project_id: i64,
 }
 
 impl FromRequest for AuthUser {
@@ -25,6 +32,7 @@ impl FromRequest for AuthUser {
         };
 
         let Some(claims) = utils::decode_auth_header(token_header) else {
+            
             return ready(Err(ApiError::Unauthorized));
         };
 
@@ -38,23 +46,22 @@ impl FromRequest for AuthUser {
 
         let result = futures_executor::block_on(async move {
             // Check that the token matches the one stored in DB
-            let token_from_db: Option<String> =
-                sqlx::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
-                    .bind(&wallet_address)
-                    .fetch_optional(&db)
-                    .await
-                    .map_err(|_| ApiError::Internal("DB error".into()))?;
+            let token_from_db: Option<String> = sqlx
+                ::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
+                .bind(&wallet_address)
+                .fetch_optional(&db).await
+                .map_err(|_| ApiError::Internal("DB error".into()))?;
 
             match token_from_db {
                 Some(token) if token == token_header => {
                     // Token matches, proceed
-                    let user = sqlx::query_as::<_, AuthUser>(
-                        "SELECT wallet_address, created_at FROM accounts WHERE wallet_address = ?",
-                    )
-                    .bind(&wallet_address)
-                    .fetch_optional(&db)
-                    .await
-                    .map_err(|_| ApiError::Internal("DB error".into()))?;
+                    let user = sqlx
+                        ::query_as::<_, AuthUser>(
+                            "SELECT wallet_address, created_at FROM accounts WHERE wallet_address = ?"
+                        )
+                        .bind(&wallet_address)
+                        .fetch_optional(&db).await
+                        .map_err(|_| ApiError::Internal("DB error".into()))?;
 
                     user.ok_or(ApiError::Unauthorized)
                 }
@@ -63,5 +70,43 @@ impl FromRequest for AuthUser {
         });
 
         ready(result)
+    }
+}
+
+impl FromRequest for ApiCaller {
+    type Error = ApiError;
+    type Future = Ready<Result<Self, Self::Error>>;
+
+    fn from_request(req: &HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
+        let auth_header = req
+            .headers()
+            .get("Authorization")
+            .and_then(|v| v.to_str().ok());
+
+        let org_uid_header = req
+            .headers()
+            .get("Haithe-Organization")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.parse::<i64>().ok())
+            .or_else(|| {
+                req.headers()
+                    .get("OpenAI-Organization")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<i64>().ok())
+            })
+            .ok_or_else(|| ApiError::BadRequest("Missing or invalid Organization header".into()))?;
+
+        let proj_uid_header = req
+            .headers()
+            .get("Haithe-Project")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.parse::<i64>().ok())
+            .or_else(|| {
+                req.headers()
+                    .get("OpenAI-Project")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse::<i64>().ok())
+            })
+            .ok_or_else(|| ApiError::BadRequest("Missing or invalid Project header".into()))?;
     }
 }

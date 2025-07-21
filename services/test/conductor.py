@@ -13,6 +13,7 @@ TEST_ENV = {
     }
 
 TEST_FILES = [
+    "services/test/api.test.ts",
     "services/test/auth.test.ts",
     "services/test/orgs.test.ts",
     "services/test/projects.test.ts",

@@ -1,13 +1,15 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{error::ApiError, respond, state::AppState};
-use actix_web::{get, patch, post, delete, web, Responder};
+use actix_web::{Responder, delete, get, patch, post, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Project {
-    pub id: i64,          // INTEGER PRIMARY KEY
-    pub org_id: i64,      // INTEGER
+    pub id: i64,
+    pub org_id: i64,
+    pub project_uid: String,
     pub name: String,
     pub created_at: String,
 }
@@ -53,7 +55,7 @@ async fn can_manage_org(
     db: &sqlx::SqlitePool,
 ) -> Result<bool, sqlx::Error> {
     let owner_check = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
+        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?",
     )
     .bind(org_id)
     .bind(user_wallet)
@@ -81,12 +83,10 @@ async fn can_manage_project(
     db: &sqlx::SqlitePool,
 ) -> Result<bool, sqlx::Error> {
     // Get the org_id for this project
-    let org_id: Option<i64> = sqlx::query_scalar(
-        "SELECT org_id FROM projects WHERE id = ?"
-    )
-    .bind(project_id)
-    .fetch_optional(db)
-    .await?;
+    let org_id: Option<i64> = sqlx::query_scalar("SELECT org_id FROM projects WHERE id = ?")
+        .bind(project_id)
+        .fetch_optional(db)
+        .await?;
 
     let org_id = match org_id {
         Some(id) => id,
@@ -116,27 +116,28 @@ async fn create_project_handler(
     query: web::Query<CreateProjectQuery>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-
     if !can_manage_org(&user.wallet_address, query.org_id, &state.db).await? {
         return Err(ApiError::Forbidden);
     }
 
-    let org_exists = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM organizations WHERE id = ?"
-    )
-    .bind(query.org_id)
-    .fetch_one(&state.db)
-    .await?;
+    let org_exists =
+        sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM organizations WHERE id = ?")
+            .bind(query.org_id)
+            .fetch_one(&state.db)
+            .await?;
 
     if org_exists == 0 {
         return Err(ApiError::NotFound("Organization not found".to_string()));
     }
 
+    let project_uid = Uuid::new_v4().to_string().replace("-", "");
+
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name) VALUES (?, ?) RETURNING *"
+        "INSERT INTO projects (org_id, name) VALUES (?, ?, ?) RETURNING *",
     )
     .bind(query.org_id)
     .bind(&query.name)
+    .bind(&project_uid)
     .fetch_one(&state.db)
     .await?;
 
@@ -152,7 +153,7 @@ async fn get_project_handler(
     let project_id = path.into_inner();
 
     let project = sqlx::query_as::<_, Project>(
-        "SELECT id, org_id, name, created_at FROM projects WHERE id = ?"
+        "SELECT id, org_id, name, created_at FROM projects WHERE id = ?",
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -176,7 +177,7 @@ async fn update_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "UPDATE projects SET name = ? WHERE id = ? RETURNING id, org_id, name, created_at"
+        "UPDATE projects SET name = ? WHERE id = ? RETURNING id, org_id, name, created_at",
     )
     .bind(&query.name)
     .bind(project_id)
@@ -200,7 +201,7 @@ async fn delete_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, name, created_at"
+        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, name, created_at",
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -219,12 +220,10 @@ async fn get_project_members_handler(
     let project_id = path.into_inner();
 
     // Check if project exists
-    let project_exists = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM projects WHERE id = ?"
-    )
-    .bind(project_id)
-    .fetch_one(&state.db)
-    .await?;
+    let project_exists = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM projects WHERE id = ?")
+        .bind(project_id)
+        .fetch_one(&state.db)
+        .await?;
 
     if project_exists == 0 {
         return Err(ApiError::NotFound("Project not found".to_string()));
@@ -250,14 +249,11 @@ async fn add_project_member_handler(
     let project_id = path.into_inner();
     let wallet_address = query.wallet_address.to_lowercase();
 
-
     // Check if project exists
-    let project_exists = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM projects WHERE id = ?"
-    )
-    .bind(project_id)
-    .fetch_one(&state.db)
-    .await?;
+    let project_exists = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM projects WHERE id = ?")
+        .bind(project_id)
+        .fetch_one(&state.db)
+        .await?;
 
     if project_exists == 0 {
         return Err(ApiError::NotFound("Project not found".to_string()));
@@ -269,7 +265,9 @@ async fn add_project_member_handler(
     }
 
     if !matches!(query.role.as_str(), "admin" | "developer" | "viewer") {
-        return Err(ApiError::BadRequest("Role must be 'admin', 'developer', or 'viewer'".to_string()));
+        return Err(ApiError::BadRequest(
+            "Role must be 'admin', 'developer', or 'viewer'".to_string(),
+        ));
     }
 
     let member = sqlx::query_as::<_, ProjectMember>(
@@ -299,7 +297,9 @@ async fn update_project_member_handler(
     }
 
     if !matches!(query.role.as_str(), "admin" | "developer" | "viewer") {
-        return Err(ApiError::BadRequest("Role must be 'admin', 'developer', or 'viewer'".to_string()));
+        return Err(ApiError::BadRequest(
+            "Role must be 'admin', 'developer', or 'viewer'".to_string(),
+        ));
     }
 
     let member = sqlx::query_as::<_, ProjectMember>(

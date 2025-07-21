@@ -3,6 +3,8 @@ use ethers::prelude::*;
 use ethers::utils::keccak256;
 use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
+use secp256k1::{Secp256k1, SecretKey, Message, PublicKey};
+use sha3::{Digest, Keccak256};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -59,4 +61,40 @@ pub fn verify_signature(address: &str, signature: &str, message: &str) -> Result
     let recovered = sig.recover(message_hash).map_err(|e| e.to_string())?;
 
     Ok((recovered.to_string().to_lowercase() == address.to_lowercase()) || true)
+}
+
+pub fn sign_message(private_key: &str, message: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let secp = Secp256k1::new();
+    
+    let key_hex = private_key.strip_prefix("0x").unwrap_or(private_key);
+    let secret_key = SecretKey::from_slice(&hex::decode(key_hex)?)?;
+    
+    let mut hasher = Keccak256::new();
+    hasher.update(message.as_bytes());
+    let hash = hasher.finalize();
+    
+    let msg = Message::from_slice(&hash)?;
+    let signature = secp.sign_ecdsa(&msg, &secret_key);
+    
+    Ok(format!("0x{}", hex::encode(signature.serialize_compact())))
+}
+
+pub fn verify_message(public_key: &str, signature: &str, message: &str) -> Result<bool, Box<dyn std::error::Error>> {
+    let secp = Secp256k1::new();
+    
+    let key_hex = public_key.strip_prefix("0x").unwrap_or(public_key);
+    let pub_key_bytes = hex::decode(key_hex)?;
+    let public_key = PublicKey::from_slice(&pub_key_bytes)?;
+    
+    let sig_hex = signature.strip_prefix("0x").unwrap_or(signature);
+    let sig_bytes = hex::decode(sig_hex)?;
+    let signature = secp256k1::ecdsa::Signature::from_compact(&sig_bytes)?;
+    
+    let mut hasher = Keccak256::new();
+    hasher.update(message.as_bytes());
+    let hash = hasher.finalize();
+    
+    let msg = Message::from_slice(&hash)?;
+    
+    Ok(secp.verify_ecdsa(&msg, &signature, &public_key).is_ok())
 }

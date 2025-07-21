@@ -40,5 +40,7 @@ futures-util = "0.3.31"
 futures-executor = "0.3.31"
 thiserror = "2.0.12"
 stderrlog = "0.6.0"
+secp256k1 = "0.28"
+sha3 = "0.10"
 hex = "0.4.3"
 bincode = { version = "2.0.1", features = ["serde"] }

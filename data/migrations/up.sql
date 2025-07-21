@@ -3,6 +3,7 @@ CREATE TABLE
     IF NOT EXISTS accounts (
         wallet_address TEXT PRIMARY KEY,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        api_key_last_issued_at TIMESTAMP,
         UNIQUE (wallet_address)
     );
 
@@ -18,10 +19,12 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS organizations (
         id INTEGER PRIMARY KEY,
+        organization_uid TEXT NOT NULL,
         name TEXT NOT NULL,
         owner TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (name, owner)
+        UNIQUE (name),
+        UNIQUE (organization_uid)
     );
 
 CREATE TABLE
@@ -36,10 +39,13 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS projects (
         id INTEGER PRIMARY KEY,
+        project_uid TEXT NOT NULL,
         org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (name, org_id)
+        UNIQUE (name, org_id),
+        UNIQUE (project_uid)
+
     );
 
 CREATE TABLE

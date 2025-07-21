@@ -1,12 +1,14 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{error::ApiError, respond, state::AppState};
-use actix_web::{Responder, get, patch, post, delete, web};
+use actix_web::{Responder, delete, get, patch, post, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Organization {
     pub id: i64,
+    pub organization_uid: String,
     pub name: String,
     pub owner: String,
     pub created_at: String,
@@ -50,11 +52,14 @@ async fn post_index_handler(
 ) -> Result<impl Responder, ApiError> {
     let org_name = query.name.clone();
 
+    let organization_uid = Uuid::new_v4().to_string().replace("-", "");
+
     let org = sqlx::query_as::<_, Organization>(
-        "INSERT INTO organizations (name, owner) VALUES (?, ?) RETURNING *",
+        "INSERT INTO organizations (name, owner, organization_uid) VALUES (?, ?, ?) RETURNING *",
     )
     .bind(&org_name)
     .bind(&user.wallet_address)
+    .bind(&organization_uid)
     .fetch_one(&state.db)
     .await?;
 
@@ -155,7 +160,7 @@ async fn post_org_members_handler(
     let wallet_address = query.wallet_address.to_lowercase();
 
     let owner_check = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
+        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?",
     )
     .bind(org_id)
     .bind(&user.wallet_address)
@@ -179,7 +184,9 @@ async fn post_org_members_handler(
     }
 
     if query.role != "admin" && query.role != "member" {
-        return Err(ApiError::BadRequest("Role must be 'admin' or 'member'".to_string()));
+        return Err(ApiError::BadRequest(
+            "Role must be 'admin' or 'member'".to_string(),
+        ));
     }
 
     let member = sqlx::query_as::<_, OrgMember>(
@@ -206,7 +213,7 @@ async fn patch_org_members_handler(
     let wallet_address = query.wallet_address.to_lowercase();
 
     let owner_check = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
+        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?",
     )
     .bind(org_id)
     .bind(&user.wallet_address)
@@ -229,7 +236,6 @@ async fn patch_org_members_handler(
         return Err(ApiError::Forbidden);
     }
 
-    
     let member = sqlx::query_as::<_, OrgMember>(
         "UPDATE org_members SET role = ? WHERE org_id = ? AND wallet_address = ? RETURNING org_id, wallet_address, role, created_at"
     )
@@ -254,7 +260,7 @@ async fn delete_org_members_handler(
     let wallet_address = query.wallet_address.to_lowercase();
 
     let owner_check = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?"
+        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?",
     )
     .bind(org_id)
     .bind(&user.wallet_address)
@@ -287,7 +293,6 @@ async fn delete_org_members_handler(
 
     Ok(respond::ok("Member removed from organization", member))
 }
-
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(post_index_handler)

@@ -6,6 +6,7 @@ export type MinimalPersistentStorage = {
 
 export interface Organization {
   id: number;
+  organization_uid: string;
   name: string;
   owner: string;
   created_at: string;
@@ -20,6 +21,7 @@ export interface OrganizationMember {
 
 export interface Project {
   id: number;
+  project_uid: string;
   org_id: number;
   name: string;
   created_at: string;
