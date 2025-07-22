@@ -20,7 +20,9 @@ pub struct ParsedApiKey {
 }
 
 pub fn parse_api_key(api_key: &str) -> Result<ParsedApiKey, Box<dyn std::error::Error>> {
-    let parts: Vec<&str> = api_key.split('.').collect();
+    let api_key_without_prefix = api_key.strip_prefix("sk-").unwrap_or(api_key);
+
+    let parts: Vec<&str> = api_key_without_prefix.split('.').collect();
     
     if parts.len() != 3 {
         return Err("Invalid API key format. Expected A.N.S (address.nonce.signature)".into());

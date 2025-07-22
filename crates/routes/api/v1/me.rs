@@ -111,7 +111,7 @@ async fn get_api_key_handler(
         .map_err(|_| ApiError::Internal("TEE private key not configured".into()))?;
 
     let timestamp = chrono::Utc::now().timestamp();
-    let address = &user.wallet_address;
+    let address = user.wallet_address.strip_prefix("0x").unwrap_or(&user.wallet_address);
     let nonce = Uuid::new_v4().to_string();
 
     let message = format!("{}.{}.{}", timestamp, address, nonce);
@@ -119,7 +119,7 @@ async fn get_api_key_handler(
     let signature = crate::utils::sign_message(&tee_private_key, &message)
         .map_err(|_| ApiError::Internal("Failed to sign API key".into()))?;
 
-    let api_key = format!("{}.{}.{}", address, nonce, signature);
+    let api_key = format!("sk-{}.{}.{}", signature, nonce, address);
 
     sqlx::query(
         "UPDATE accounts SET api_key_last_issued_at = CURRENT_TIMESTAMP WHERE wallet_address = ?").bind(
