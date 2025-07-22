@@ -9,6 +9,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import "./globals.css";
 import { PrivyProvider } from "./lib/context/privy-provider";
 import { WagmiProvider } from "./lib/context/wagmi-provider";
+import { ServicesProvider } from "./lib/context/services-provider";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -22,8 +23,10 @@ const app = (
         <ThemeProvider defaultTheme="dark" storageKey="theme">
           <PrivyProvider>
             <WagmiProvider>
-              <RouterProvider router={router} />
-              <Toaster position="bottom-right" />
+              <ServicesProvider>
+                <RouterProvider router={router} />
+                <Toaster position="bottom-right" />
+              </ServicesProvider>
             </WagmiProvider>
           </PrivyProvider>
         </ThemeProvider>

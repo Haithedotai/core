@@ -2,6 +2,7 @@ const envKeys = [
   "BUN_PUBLIC_SERVER_URL",
   "BUN_VERSION",
   "BUN_PUBLIC_PRIVY_APP_ID",
+  "BUN_PUBLIC_RUST_SERVER_URL",
   "GEMINI_API_KEY",
   "DATABASE_URL",
 ] as const;

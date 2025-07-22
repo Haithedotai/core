@@ -21,6 +21,7 @@ import Organization from './organization';
 import Help from './help';
 import Create from './create';
 import Landing from './landing';
+import Test from './test/test';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -166,6 +167,14 @@ const landingRoute = createRoute({
   },
 })
 
+const testRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/test',
+  component: function TestRoute() {
+    return withPageErrorBoundary(Test)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   creatorRoute,
@@ -181,7 +190,8 @@ const routeTree = rootRoute.addChildren([
   organizationRoute,
   helpRoute,
   createItemRoute,
-  landingRoute
+  landingRoute,
+  testRoute
 ])
 
 const router = createRouter({

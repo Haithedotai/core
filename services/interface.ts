@@ -3,12 +3,12 @@ import {
   HaitheAuthClient,
   HaitheOrgsClient,
   HaitheProjectsClient,
-  MinimalPersistentStorage,
-  Organization,
-  OrganizationMember,
-  Project,
-  ProjectMember,
-  UserProfile
+  type MinimalPersistentStorage,
+  type Organization,
+  type OrganizationMember,
+  type Project,
+  type ProjectMember,
+  type UserProfile
 } from "./clients";
 
 export class HaitheClient {

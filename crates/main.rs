@@ -8,6 +8,7 @@ use state::AppState;
 use std::collections::HashMap;
 use std::fs;
 use std::sync::Mutex;
+use actix_cors::Cors;
 
 mod lib;
 mod macros;
@@ -50,6 +51,14 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
+            .wrap(
+                Cors::default()
+                    .allowed_origin("http://localhost:3000")
+                    .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "OPTIONS"])
+                    .allowed_headers(vec![actix_web::http::header::AUTHORIZATION, actix_web::http::header::CONTENT_TYPE])
+                    .supports_credentials()
+                    .max_age(3600)
+            )
             .app_data(global_app_state.clone())
             .route("/health", web::get().to(health))
             .configure(routes)
