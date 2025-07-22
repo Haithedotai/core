@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
-import { Badge } from "@/src/lib/components/ui/badge";
-import { Separator } from "@/src/lib/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/lib/components/ui/tabs";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
-import { useAppStore } from "@/src/lib/stores/useAppStore";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
+import { formatDate } from "@/src/lib/utils";
 
 interface StatsCardProps {
   title: string;
@@ -90,8 +88,8 @@ function QuickActionsSection() {
                   <Icon name="Plus" className="size-4 text-primary" />
                 </div>
                 <div className="text-left">
-                  <div className="font-medium">Create New</div>
-                  <div className="text-xs text-muted-foreground">Start a new project</div>
+                  <div className="font-medium">New Tool</div>
+                  <div className="text-xs text-muted-foreground">Create a new tool</div>
                 </div>
               </div>
             </Link>
@@ -222,28 +220,21 @@ export default function DashboardPage() {
 
   const profile = profileQuery.data;
 
+  console.log(profile);
+
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h1 className="text-4xl font-bold text-foreground leading-tight">
-                Welcome back
+                Welcome back!
               </h1>
-              <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl">
-                {profile.address ? `Registered since ${new Date(profile.registered * 1000).toLocaleDateString()}` : 'Manage your AI infrastructure and monitor performance'}
+              <p className="text-muted-foreground text-md leading-relaxed max-w-2xl">
+                {profile.address ? `Registered since ${formatDate(profile.registered, "MMM D, YYYY")}` : 'Manage your AI infrastructure and monitor performance'}
               </p>
-            </div>
-            
-            <div className="flex gap-3">
-              <Button asChild>
-                <Link to="/create">
-                  <Icon name="Plus" className="size-4 mr-2" />
-                  Create New
-                </Link>
-              </Button>
             </div>
           </div>
         </div>

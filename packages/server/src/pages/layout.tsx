@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // const mousePosition = useMouseGlow();
   return (
     <div className="bg-background [--navbar-height:5rem] [--sidebar-width:0px] lg:[--sidebar-width:16rem]">
-      <div className="h-[var(--navbar-height)] border-b-4 border-black">
+      <div className="h-[var(--navbar-height)]">
         <Navbar />
       </div>
 

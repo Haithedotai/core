@@ -48,6 +48,7 @@ export function useHaitheApi() {
             },
             onSuccess: () => {
                 toast.success('Logged out successfully');
+                navigate({ to: '/' });
                 queryClient.clear(); // Clear all cache on logout
             },
             onError: (error) => {
