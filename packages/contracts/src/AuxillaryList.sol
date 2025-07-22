@@ -3,13 +3,13 @@ pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AuxillaryList is Ownable {
-    uint256[] private _values;
-    mapping(uint256 => uint256) private _valueIndexes;
-    mapping(uint256 => bool) private _valueExists;
+    address[] private _values;
+    mapping(address => uint256) private _valueIndexes;
+    mapping(address => bool) private _valueExists;
 
     constructor() Ownable(msg.sender) {}
 
-    function add(uint256 value_) public onlyOwner {
+    function add(address value_) public onlyOwner {
         if (_valueExists[value_]) return;
 
         _values.push(value_);
@@ -17,12 +17,12 @@ contract AuxillaryList is Ownable {
         _valueExists[value_] = true;
     }
 
-    function safeAdd(uint256 value_) external onlyOwner {
+    function safeAdd(address value_) external onlyOwner {
         require(!_valueExists[value_], "Value already exists");
         add(value_);
     }
 
-    function remove(uint256 value_) public onlyOwner {
+    function remove(address value_) public onlyOwner {
         if (!_valueExists[value_]) return;
 
         uint256 deletionIndex = _valueIndexes[value_];
@@ -30,7 +30,7 @@ contract AuxillaryList is Ownable {
 
         // Move the last element to the place of the element to be removed
         if (deletionIndex != lastIndex) {
-            uint256 lastElement = _values[lastIndex];
+            address lastElement = _values[lastIndex];
             _values[deletionIndex] = lastElement;
             _valueIndexes[lastElement] = deletionIndex; // Update the index for the previously last element
         }
@@ -40,16 +40,16 @@ contract AuxillaryList is Ownable {
         delete _valueExists[value_];
     }
 
-    function safeRemove(uint256 value_) external onlyOwner {
+    function safeRemove(address value_) external onlyOwner {
         require(_valueExists[value_], "Value does not exist");
         remove(value_);
     }
 
-    function contains(uint256 value_) external view returns (bool) {
+    function contains(address value_) external view returns (bool) {
         return _valueExists[value_];
     }
 
-    function indexOf(uint256 value_) external view returns (uint256) {
+    function indexOf(address value_) external view returns (uint256) {
         return _valueIndexes[value_];
     }
 
@@ -57,7 +57,7 @@ contract AuxillaryList is Ownable {
         return _values.length;
     }
 
-    function getAll() external view returns (uint256[] memory) {
+    function getAll() external view returns (address[] memory) {
         return _values;
     }
 }

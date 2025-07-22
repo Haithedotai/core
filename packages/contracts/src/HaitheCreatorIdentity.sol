@@ -1,29 +1,54 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import {ERC721URIStorage, ERC721} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract HaitheCreatorIdentity is ERC721 {
+contract HaitheCreatorIdentity is ERC721URIStorage {
     address private _orchestrator;
     address private _owner;
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
 
-    mapping(uint256 => string) public keySeeds;
+    uint256 private _nextTokenId;
+
+    mapping(uint256 => bytes32) public pvtKeySeeds;
+    mapping(uint256 => string) public pubKeys;
+
+    function determineNextSeed(address for_) public view returns (bytes32) {
+        return bytes32(abi.encodePacked(for_, _nextTokenId));
+    }
 
     constructor(address owner_) ERC721("Haithe Creator Identity", "HaitheCID") {
         _owner = owner_;
     }
 
-    function mint(address to_, uint256 uri_) external {
+    function mint(
+        address to_,
+        string memory uri_,
+        bytes32 pvtKeySeed_,
+        string memory pubKey_
+    ) external returns (uint256) {
         require(msg.sender == _orchestrator, "Only orchestrator can mint");
+        require(
+            pvtKeySeed_ == determineNextSeed(to_),
+            "Invalid private key seed"
+        );
 
-        _tokenIds.increment();
+        _nextTokenId++;
 
-        _mint(to_, _tokenIds.current());
-        _setTokenURI(_tokenIds.current(), uri_);
+        _mint(to_, _nextTokenId);
+        _setTokenURI(_nextTokenId, uri_);
 
-        return _tokenIds.current();
+        pvtKeySeeds[_nextTokenId] = pvtKeySeed_;
+        pubKeys[_nextTokenId] = pubKey_;
+
+        return _nextTokenId;
     }
+
+    // function _transfer(
+    //     address from,
+    //     address to,
+    //     uint256 tokenId,
+    //     uint256 batchSize
+    // ) internal override {
+    //     require(from == address(0), "Token not transferable");
+    // }
 }

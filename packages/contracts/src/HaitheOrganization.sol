@@ -8,14 +8,13 @@ contract HaitheOrganization {
     string public name;
     address public owner;
     AuxillaryList public enabledProducts;
-
     HaitheOrchestrator private _orchestrator;
 
     constructor(string memory name_, address owner_) {
         name = name_;
         owner = owner_;
         _orchestrator = HaitheOrchestrator(msg.sender);
-        purchases = new AuxillaryList();
+        enabledProducts = new AuxillaryList();
     }
 
     function balance() external view returns (uint256) {
@@ -27,5 +26,20 @@ contract HaitheOrganization {
         require(_orchestrator.isProduct(product), "Product is not registered");
 
         enabledProducts.add(product);
+    }
+
+    function disableProduct(address product) external {
+        require(msg.sender == owner, "Only owner can disable products");
+        require(enabledProducts.contains(product), "Product is not enabled");
+
+        enabledProducts.remove(product);
+    }
+
+    function transferOwnership(address newOwner) external {
+        require(msg.sender == owner, "Only owner can transfer ownership");
+        require(newOwner != address(0), "Invalid new owner address");
+        require(newOwner != owner, "New owner must be different");
+
+        owner = newOwner;
     }
 }
