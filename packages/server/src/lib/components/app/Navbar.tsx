@@ -1,22 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import Connect from "./Connect";
 import CreatorSheet from "./CreatorSheet";
-import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { usePrivy } from "@privy-io/react-auth";
-import { useAppStore } from "../../stores/useAppStore";
-import Icon from "../custom/Icon";
+import { useHaitheApi } from "../../hooks/use-haithe-api";
 
 export default function Navbar() {
   const { authenticated } = usePrivy();
-  const { currentUser, currentOrganization } = useAppStore();
+  const api = useHaitheApi();
+
+  // Check if user is fully authenticated
+  const isHaitheLoggedIn = api.isLoggedIn();
 
   return (
     <nav className="fixed top-0 gap-2 h-[var(--navbar-height)] w-full z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-8 lg:px-4">
@@ -35,43 +28,11 @@ export default function Navbar() {
 
 
       {/* Right side - User info and actions */}
-      <div className="flex gap-3 items-center">
-        {/* Organization selector */}
-        {authenticated && currentUser && currentOrganization && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="rounded-md gap-2">
-                <Icon name="Building" className="size-4" />
-                <p className="hidden sm:inline">
-                  {currentOrganization.name}
-                </p>
-                <Icon name="ChevronDown" className="size-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel>Organizations</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Icon name="Building" className="size-4" />
-                {currentOrganization.name}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Icon name="Plus" className="size-4" />
-                Create Organization
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Icon name="Settings" className="size-4" />
-                Manage Organizations
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-
-        {/* Creator sheet for onboarding */}
-        {!authenticated || !currentUser?.onboarded && <CreatorSheet />}
-
-        {/* Connect wallet / User menu */}
+      <div className="flex items-center gap-4">
+        {/* {authenticated && isHaitheLoggedIn && (
+          <CreatorSheet />
+        )} */}
+        
         <Connect />
       </div>
     </nav>

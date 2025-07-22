@@ -1,12 +1,12 @@
 import { useParams } from "@tanstack/react-router";
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Textarea } from "@/src/lib/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
-import { useApi } from "@/src/lib/hooks/use-api";
-import { mockModels } from "@/src/lib/data/mockModels";
+import { useHaitheClient } from "@/src/lib/context/services-provider";
 
 interface Message {
     id: string;
@@ -19,20 +19,32 @@ export default function ChatbotPage() {
     const { id } = useParams({
         from: '/model/$id/chat'
     });
-
-    // Find the model by ID
-    const model = useMemo(() => {
-        return mockModels.find(m => m.id === id);
-    }, [id]);
-
-    // Chatbot state and functionality
+    
+    const client = useHaitheClient();
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState("");
-    const [isTyping, setIsTyping] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    const { generateStream, streamResponse } = useApi();
+    // Show wallet connection prompt if no client
+    if (!client) {
+        return (
+            <div className="min-h-full bg-background flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <Icon name="Wallet" className="size-16 text-muted-foreground mx-auto" />
+                    <div className="space-y-2">
+                        <h3 className="text-xl font-medium">Wallet Required</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto">
+                            Please connect your wallet to use the chatbot.
+                        </p>
+                    </div>
+                    <Button asChild>
+                        <Link to="/">Connect Wallet</Link>
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,228 +54,176 @@ export default function ChatbotPage() {
         scrollToBottom();
     }, [messages]);
 
-    const adjustTextareaHeight = () => {
-        const textarea = textareaRef.current;
-        if (textarea) {
-            textarea.style.height = "auto";
-            textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
-        }
-    };
+    const sendMessage = async () => {
+        if (!inputValue.trim() || isLoading) return;
 
-    const handleSendMessage = () => {
-        if (inputValue.trim() === "") return;
-
-        const newMessage: Message = {
+        const userMessage: Message = {
             id: Date.now().toString(),
-            content: inputValue,
+            content: inputValue.trim(),
             isUser: true,
-            timestamp: new Date(),
+            timestamp: new Date()
         };
 
-        setMessages(prev => [...prev, newMessage]);
-        const currentPrompt = inputValue;
+        setMessages(prev => [...prev, userMessage]);
         setInputValue("");
-        setIsTyping(true);
+        setIsLoading(true);
 
-        // Reset textarea height
-        if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
+        try {
+            // TODO: Implement actual AI model chat when API is available
+            // For now, we'll add a placeholder response
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const aiResponse: Message = {
+                id: (Date.now() + 1).toString(),
+                content: "I'm a placeholder response. Once we integrate with the AI model APIs, I'll be able to provide real responses using the selected model.",
+                isUser: false,
+                timestamp: new Date()
+            };
+
+            setMessages(prev => [...prev, aiResponse]);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            const errorMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                content: "Sorry, I encountered an error. Please try again.",
+                isUser: false,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
         }
-
-        // Create initial empty bot message for streaming
-        const botMessageId = `bot-${Date.now()}`;
-        const initialBotMessage: Message = {
-            id: botMessageId,
-            content: "",
-            isUser: false,
-            timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, initialBotMessage]);
-
-        // Call the actual AI stream API
-        generateStream.mutate(currentPrompt, {
-            onSuccess: () => {
-                setIsTyping(false);
-            },
-            onError: () => {
-                setIsTyping(false);
-                // Update the bot message with error content
-                setMessages(prev => prev.map(msg =>
-                    msg.id === botMessageId
-                        ? { ...msg, content: "Sorry, I encountered an error while processing your request. Please try again." }
-                        : msg
-                ));
-            }
-        });
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            handleSendMessage();
+            sendMessage();
         }
     };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setInputValue(e.target.value);
-        adjustTextareaHeight();
-    };
-
-    // Effect to handle streaming response
-    useEffect(() => {
-        if (streamResponse) {
-            setMessages(prev => {
-                // Find the last bot message and update it with streaming content
-                const updatedMessages = [...prev];
-                for (let i = updatedMessages.length - 1; i >= 0; i--) {
-                    if (!updatedMessages[i].isUser && updatedMessages[i].content !== streamResponse) {
-                        updatedMessages[i] = { ...updatedMessages[i], content: streamResponse };
-                        break;
-                    }
-                }
-                return updatedMessages;
-            });
-        }
-    }, [streamResponse]);
-
-    // If model not found, show error state
-    if (!model) {
-        return (
-            <div className="min-h-full bg-background">
-                <div className="max-w-7xl mx-auto px-6 py-16">
-                    <div className="text-center">
-                        <Icon name="Brain" className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                        <h1 className="text-2xl font-bold text-foreground mb-2">Model Not Found</h1>
-                        <p className="text-muted-foreground mb-6">
-                            The model with ID "{id}" could not be found.
-                        </p>
-                        <Link to="/">
-                            <Button>
-                                <Icon name="ArrowLeft" className="h-4 w-4 mr-2" />
-                                Back to Browse Models
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
-        <div className="h-full bg-background flex flex-col">
-            <div className="flex-shrink-0 max-w-7xl mx-auto px-6 py-4 w-full">
-                <div className="pb-4">
+        <div className="min-h-full bg-background flex flex-col">
+            {/* Header */}
+            <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
+                <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <Link to="/">
-                                <Button variant="outline" className="w-full @sm/main:w-auto">
-                                    <Icon name="ArrowLeft" className="h-4 w-4 mr-2" />
-                                    Back
+                        <div className="flex items-center gap-4">
+                            <Link to="/model/$id" params={{ id }}>
+                                <Button variant="outline" size="sm">
+                                    <Icon name="ArrowLeft" className="size-4 mr-2" />
+                                    Back to Model
                                 </Button>
                             </Link>
-                            <Link to="/" className="hover:text-primary transition-colors">
-                                Browse Models
-                            </Link>
-                            <Icon name="ChevronRight" className="h-4 w-4" />
-                            <span className="text-foreground truncate">{model.name}</span>
+                            <div>
+                                <h1 className="text-2xl font-bold text-foreground">Chat Interface</h1>
+                                <p className="text-muted-foreground">Model ID: {id}</p>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            {model.tags.slice(0, 3).map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
+                        <Badge variant="secondary" className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                            Ready
+                        </Badge>
                     </div>
                 </div>
             </div>
 
-            {/* Chat Interface */}
-            <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto bg-background overflow-hidden px-6">
-                {/* Chat Messages */}
-                <div className="flex-1 p-6 overflow-y-auto bg-background min-h-0">
+            {/* Chat Area */}
+            <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6">
+                {/* Messages */}
+                <div className="flex-1 py-6 space-y-4 overflow-y-auto">
                     {messages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center">
-                            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
-                                <Icon name="MessageSquare" className="w-8 h-8 text-accent-foreground" />
+                        <div className="text-center py-20 space-y-6">
+                            <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                                <Icon name="MessageSquare" className="size-8 text-primary" />
                             </div>
-                            <h4 className="text-xl font-semibold text-foreground mb-2">Start chatting with {model.name}</h4>
-                            <p className="text-muted-foreground max-w-md">Ask questions, get insights, and explore what this {model.type.toLowerCase()} model can do for you.</p>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-medium">Start a conversation</h3>
+                                <p className="text-muted-foreground max-w-md mx-auto">
+                                    Type a message below to begin chatting with the AI model.
+                                </p>
+                            </div>
+                            
+                            {/* Suggested prompts */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto mt-8">
+                                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow" 
+                                      onClick={() => setInputValue("Hello! Can you help me understand what you can do?")}>
+                                    <CardDescription className="text-center">
+                                        Ask about capabilities
+                                    </CardDescription>
+                                </Card>
+                                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+                                      onClick={() => setInputValue("What kind of tasks are you best at?")}>
+                                    <CardDescription className="text-center">
+                                        Explore use cases
+                                    </CardDescription>
+                                </Card>
+                            </div>
                         </div>
                     ) : (
-                        <div className="space-y-6">
-                            {messages.map((message, index) => (
+                        messages.map((message) => (
+                            <div
+                                key={message.id}
+                                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                            >
                                 <div
-                                    key={message.id}
-                                    className={`flex ${message.isUser ? "justify-end" : "justify-start"} animate-in slide-in-from-bottom-2 duration-300`}
-                                    style={{ animationDelay: `${index * 100}ms` }}
+                                    className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                                        message.isUser
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-muted text-muted-foreground'
+                                    }`}
                                 >
-                                    <div className={`flex gap-3 max-w-[80%] ${message.isUser ? "flex-row-reverse" : "flex-row"}`}>
-                                        {/* Avatar */}
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${message.isUser
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-secondary text-secondary-foreground"
-                                            }`}>
-                                            {message.isUser ? "You" : "AI"}
-                                        </div>
-
-                                        {/* Message bubble */}
-                                        <div className={`px-4 py-3 rounded-lg shadow-sm border ${message.isUser
-                                            ? "bg-primary text-primary-foreground border-border rounded-br-sm"
-                                            : "bg-card text-card-foreground border-border rounded-bl-sm"
-                                            }`}>
-                                            {/* Show typing indicator if this is an empty bot message and typing is active */}
-                                            {!message.isUser && message.content === "" && isTyping ? (
-                                                <div className="flex gap-1">
-                                                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                                                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                                                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                                                    <p className={`text-xs mt-2 ${message.isUser ? "text-primary-foreground/70" : "text-muted-foreground"
-                                                        }`}>
-                                                        {message.timestamp.toLocaleTimeString([], {
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        })}
-                                                    </p>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <p className="whitespace-pre-wrap">{message.content}</p>
+                                    <p className={`text-xs mt-1 opacity-70`}>
+                                        {message.timestamp.toLocaleTimeString()}
+                                    </p>
                                 </div>
-                            ))}
-
-                            <div ref={messagesEndRef} />
+                            </div>
+                        ))
+                    )}
+                    
+                    {isLoading && (
+                        <div className="flex justify-start">
+                            <div className="bg-muted text-muted-foreground rounded-lg px-4 py-3 max-w-[80%]">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex gap-1">
+                                        <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
+                                        <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                                        <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                                    </div>
+                                    <span className="text-sm">AI is thinking...</span>
+                                </div>
+                            </div>
                         </div>
                     )}
+                    
+                    <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-border bg-card p-4">
-                    <div className="flex gap-3 items-end">
-                        <div className="flex-1 relative">
-                            <Textarea
-                                ref={textareaRef}
-                                value={inputValue}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyPress}
-                                placeholder="Type your message..."
-                                rows={1}
-                            />
-                            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-                                Press Enter to send
-                            </div>
-                        </div>
+                <div className="py-4 border-t border-border">
+                    <div className="flex gap-3">
+                        <Textarea
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Type your message here..."
+                            className="flex-1 min-h-[60px] max-h-[120px] resize-none"
+                            disabled={isLoading}
+                        />
                         <Button
-                            onClick={handleSendMessage}
-                            disabled={inputValue.trim() === ""}
-                            className="px-6 py-4 rounded-md transition-all duration-200"
-                            variant="default"
+                            onClick={sendMessage}
+                            disabled={!inputValue.trim() || isLoading}
+                            size="lg"
+                            className="self-end"
                         >
-                            <Icon name="SendHorizontal" className="w-5 h-5" />
+                            {isLoading ? (
+                                <Icon name="Loader" className="size-4 animate-spin" />
+                            ) : (
+                                <Icon name="Send" className="size-4" />
+                            )}
                         </Button>
                     </div>
                 </div>

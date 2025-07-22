@@ -8,17 +8,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src
 import { Separator } from "@/src/lib/components/ui/separator";
 import Icon from "@/src/lib/components/custom/Icon";
 import { usePrivy } from "@privy-io/react-auth";
-import { useAppStore } from "@/src/lib/stores/useAppStore";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 
 type OnboardingStep = 'welcome' | 'organization' | 'profile';
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user } = usePrivy();
-  const { completeOnboarding, setCurrentUser, setCurrentOrganization, users } = useAppStore();
+  const api = useHaitheApi();
 
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
-  const [loading, setLoading] = useState(false);
 
   // Organization form state
   const [orgForm, setOrgForm] = useState({
@@ -51,318 +50,269 @@ export default function OnboardingPage() {
   const handleCompleteOnboarding = async () => {
     if (!user?.wallet?.address) return;
 
-    setLoading(true);
     try {
-      // Complete onboarding with user and organization data
-      const onboardedUser = await completeOnboarding(
-        user.wallet.address,
-        {
-          name: profileForm.name,
-          bio: profileForm.bio || null,
-          email: user.email?.address || null,
-          profile: {
-            company: profileForm.company || undefined,
-            location: profileForm.location || undefined,
-            website: profileForm.website || undefined,
-          }
-        },
-        {
-          name: orgForm.name,
-          description: orgForm.description || null,
-          website: orgForm.website || null,
-        }
-      );
+      // Step 1: Ensure user is logged in to HaitheClient
+      if (!api.isLoggedIn()) {
+        api.login.mutate();
+      }
+      
+      // Step 3: Create organization if provided
+      if (orgForm.name.trim()) {
+        api.createOrganization.mutate(orgForm.name.trim());
+      }
 
-      // Set the current user
-      setCurrentUser(onboardedUser);
-
-      // Navigate to marketplace
-      navigate({ to: '/dashboard' });
+      // Step 4: Redirect to dashboard
+      navigate({ to: "/dashboard" });
+      
     } catch (error) {
-      console.error('Onboarding failed:', error);
-    } finally {
-      setLoading(false);
+      console.error('Failed to complete onboarding:', error);
     }
   };
 
-  const renderWelcomeStep = () => (
-    <div className="space-y-10">
-      <div className="text-center space-y-6">
-        <div className="mx-auto w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
-          <Icon name="Zap" className="w-12 h-12 text-primary" />
-        </div>
-        <div className="space-y-3">
-          <h2 className="text-3xl font-bold text-foreground leading-tight">Welcome to Haithe!</h2>
-          <p className="text-muted-foreground text-xl leading-relaxed">
-            Let's get you set up with your organization and profile
-          </p>
-        </div>
-      </div>
+  const nextStep = () => {
+    switch (currentStep) {
+      case 'welcome':
+        setCurrentStep('organization');
+        break;
+      case 'organization':
+        setCurrentStep('profile');
+        break;
+      case 'profile':
+        handleCompleteOnboarding();
+        break;
+    }
+  };
 
-      <div className="grid grid-cols-1 @md/main:grid-cols-3 gap-6">
-        <Card className="p-6 text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
-            <Icon name="Store" className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-          <h3 className="font-semibold text-base mb-2 leading-relaxed">Create & Sell</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Build AI tools and knowledge bases for others to use
-          </p>
-        </Card>
-
-        <Card className="p-6 text-center">
-          <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4">
-            <Icon name="ShoppingCart" className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-          <h3 className="font-semibold text-base mb-2 leading-relaxed">Buy & Build</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Purchase AI components and create custom workflows
-          </p>
-        </Card>
-
-        <Card className="p-6 text-center">
-          <div className="mx-auto w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
-            <Icon name="Shield" className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          </div>
-          <h3 className="font-semibold text-base mb-2 leading-relaxed">Validate & Verify</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Help ensure quality and security of AI components
-          </p>
-        </Card>
-      </div>
-
-      <div className="text-center space-y-6">
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-          You can use Haithe for any or all of these purposes. Let's start with setting up your organization.
-        </p>
-        <Button
-          onClick={() => setCurrentStep('organization')}
-          className="w-full max-w-sm h-12 text-base"
-        >
-          Get Started
-          <Icon name="ArrowRight" className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderOrganizationStep = () => (
-    <div className="space-y-8">
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold text-foreground leading-tight">Create Your Organization</h2>
-        <p className="text-muted-foreground text-lg leading-relaxed">
-          Set up your organization to start using the platform
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor="orgName" className="text-base">Organization Name *</Label>
-          <Input
-            id="orgName"
-            value={orgForm.name}
-            onChange={(e) => setOrgForm(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="e.g., Acme Corporation"
-            className="h-12 text-base"
-          />
-        </div>
-
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor="orgDescription" className="text-base">Description</Label>
-          <Textarea
-            id="orgDescription"
-            value={orgForm.description}
-            onChange={(e) => setOrgForm(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Brief description of your organization..."
-            className="text-base resize-none"
-            rows={4}
-          />
-        </div>
-
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor="orgWebsite" className="text-base">Website</Label>
-          <Input
-            id="orgWebsite"
-            type="url"
-            value={orgForm.website}
-            onChange={(e) => setOrgForm(prev => ({ ...prev, website: e.target.value }))}
-            placeholder="https://example.com"
-            className="h-12 text-base"
-          />
-        </div>
-      </div>
-
-      <div className="flex gap-4">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentStep('welcome')}
-          className="flex-1 h-12 text-base"
-        >
-          <Icon name="ArrowLeft" className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <Button
-          onClick={() => setCurrentStep('profile')}
-          disabled={!canContinueOrganization}
-          className="flex-1 h-12 text-base"
-        >
-          Continue
-          <Icon name="ArrowRight" className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderProfileStep = () => (
-    <div className="space-y-8">
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold text-foreground leading-tight">Complete Your Profile</h2>
-        <p className="text-muted-foreground text-lg leading-relaxed">
-          Tell others about yourself and your work
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor="userName" className="text-base">Your Name *</Label>
-          <Input
-            id="userName"
-            value={profileForm.name}
-            onChange={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="e.g., John Doe"
-            className="h-12 text-base"
-          />
-        </div>
-
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor="userBio" className="text-base">Bio</Label>
-          <Textarea
-            id="userBio"
-            value={profileForm.bio}
-            onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
-            placeholder="Tell us about yourself and your expertise..."
-            className="text-base resize-none"
-            rows={4}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 @md/main:grid-cols-2 gap-6">
-          <div className="flex flex-col space-y-2">
-            <Label htmlFor="userCompany" className="text-base">Company</Label>
-            <Input
-              id="userCompany"
-              value={profileForm.company}
-              onChange={(e) => setProfileForm(prev => ({ ...prev, company: e.target.value }))}
-              placeholder="Your company name"
-              className="h-12 text-base"
-            />
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <Label htmlFor="userLocation" className="text-base">Location</Label>
-            <Input
-              id="userLocation"
-              value={profileForm.location}
-              onChange={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="e.g., San Francisco, CA"
-              className="h-12 text-base"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor="userWebsite" className="text-base">Personal Website</Label>
-          <Input
-            id="userWebsite"
-            type="url"
-            value={profileForm.website}
-            onChange={(e) => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
-            placeholder="https://yoursite.com"
-            className="h-12 text-base"
-          />
-        </div>
-      </div>
-
-      <div className="flex gap-4">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentStep('organization')}
-          className="flex-1 h-12 text-base"
-        >
-          <Icon name="ArrowLeft" className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <Button
-          onClick={handleCompleteOnboarding}
-          disabled={!canContinueProfile || loading}
-          className="flex-1 h-12 text-base"
-        >
-          {loading ? (
-            <>
-              <Icon name="Loader" className="w-4 h-4 mr-2 animate-spin" />
-              Setting up...
-            </>
-          ) : (
-            <>
-              Complete Setup
-              <Icon name="Check" className="w-4 h-4 ml-2" />
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
-  );
+  const prevStep = () => {
+    switch (currentStep) {
+      case 'organization':
+        setCurrentStep('welcome');
+        break;
+      case 'profile':
+        setCurrentStep('organization');
+        break;
+    }
+  };
 
   return (
-    <div className="h-full flex items-center justify-center">
-      <div className="w-full max-w-3xl">
-        <Card className="border-0 shadow-none">
-          <CardHeader className="text-center pb-10">
-            <div className="flex items-center justify-center gap-6 mb-8">
-              {[1, 2, 3].map((step) => (
-                <div key={step} className="flex items-center">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${getStepNumber(currentStep) >= step
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
-                      }`}
-                  >
-                    {getStepNumber(currentStep) > step ? (
-                      <Icon name="Check" className="size-4" />
-                    ) : (
-                      step
-                    )}
-                  </div>
-                  {step < 3 && (
-                    <div
-                      className={`w-16 h-0.5 mx-3 transition-colors ${getStepNumber(currentStep) > step ? 'bg-primary' : 'bg-muted'
-                        }`}
-                    />
-                  )}
-                </div>
-              ))}
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Progress Indicator */}
+        <div className="flex justify-center space-x-4">
+          {[1, 2, 3].map((step) => (
+            <div
+              key={step}
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                step <= getStepNumber(currentStep)
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              {step}
             </div>
+          ))}
+        </div>
 
-            <div className="space-y-2">
-              <CardTitle className="text-3xl">
-                {currentStep === 'welcome' && 'Welcome to Haithe'}
-                {currentStep === 'organization' && 'Organization Setup'}
-                {currentStep === 'profile' && 'Profile Setup'}
-              </CardTitle>
-              <CardDescription className="text-base">
-                {currentStep === 'welcome' && 'Your gateway to AI collaboration'}
-                {currentStep === 'organization' && 'Step 2 of 3'}
-                {currentStep === 'profile' && 'Step 3 of 3'}
+        {/* Welcome Step */}
+        {currentStep === 'welcome' && (
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Welcome to Haithe!</CardTitle>
+              <CardDescription>
+                Let's get you set up with your AI infrastructure platform
               </CardDescription>
-            </div>
-          </CardHeader>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                  <Icon name="Zap" className="size-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Connected Wallet</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.wallet?.address ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}` : 'No wallet connected'}
+                  </p>
+                </div>
+              </div>
 
-          <CardContent className="pt-0 pb-10">
-            {currentStep === 'welcome' && renderWelcomeStep()}
-            {currentStep === 'organization' && renderOrganizationStep()}
-            {currentStep === 'profile' && renderProfileStep()}
-          </CardContent>
-        </Card>
+              <Separator />
+
+              <div className="space-y-4">
+                <h4 className="font-medium">What you'll get:</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Icon name="Check" className="size-4 text-green-600" />
+                    Create and manage AI agents
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Icon name="Check" className="size-4 text-green-600" />
+                    Design complex workflows
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Icon name="Check" className="size-4 text-green-600" />
+                    Access verified AI marketplace
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Icon name="Check" className="size-4 text-green-600" />
+                    Analytics and monitoring
+                  </li>
+                </ul>
+              </div>
+
+              <Button onClick={nextStep} className="w-full">
+                Get Started
+                <Icon name="ArrowRight" className="size-4 ml-2" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Organization Step */}
+        {currentStep === 'organization' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Organization</CardTitle>
+              <CardDescription>
+                Set up your organization to collaborate with team members (optional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="orgName">Organization Name</Label>
+                <Input
+                  id="orgName"
+                  placeholder="e.g., Acme AI Labs"
+                  value={orgForm.name}
+                  onChange={(e) => setOrgForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="orgDescription">Description (Optional)</Label>
+                <Textarea
+                  id="orgDescription"
+                  placeholder="What does your organization do?"
+                  value={orgForm.description}
+                  onChange={(e) => setOrgForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="orgWebsite">Website (Optional)</Label>
+                <Input
+                  id="orgWebsite"
+                  type="url"
+                  placeholder="https://example.com"
+                  value={orgForm.website}
+                  onChange={(e) => setOrgForm(prev => ({ ...prev, website: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={prevStep} className="flex-1">
+                  <Icon name="ArrowLeft" className="size-4 mr-2" />
+                  Back
+                </Button>
+                <Button onClick={nextStep} disabled={!canContinueOrganization} className="flex-1">
+                  Continue
+                  <Icon name="ArrowRight" className="size-4 ml-2" />
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <Button variant="link" onClick={() => {
+                  setOrgForm({ name: '', description: '', website: '' });
+                  nextStep();
+                }}>
+                  Skip for now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Profile Step */}
+        {currentStep === 'profile' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Your Profile</CardTitle>
+              <CardDescription>
+                Help others discover and connect with you (optional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="profileName">Display Name</Label>
+                <Input
+                  id="profileName"
+                  placeholder="Your name"
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="profileBio">Bio (Optional)</Label>
+                <Textarea
+                  id="profileBio"
+                  placeholder="Tell us about yourself..."
+                  value={profileForm.bio}
+                  onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profileCompany">Company (Optional)</Label>
+                  <Input
+                    id="profileCompany"
+                    placeholder="Company name"
+                    value={profileForm.company}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, company: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="profileLocation">Location (Optional)</Label>
+                  <Input
+                    id="profileLocation"
+                    placeholder="City, Country"
+                    value={profileForm.location}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="profileWebsite">Website (Optional)</Label>
+                <Input
+                  id="profileWebsite"
+                  type="url"
+                  placeholder="https://yourwebsite.com"
+                  value={profileForm.website}
+                  onChange={(e) => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={prevStep} className="flex-1">
+                  <Icon name="ArrowLeft" className="size-4 mr-2" />
+                  Back
+                </Button>
+                <Button onClick={handleCompleteOnboarding} disabled={!canContinueProfile} className="flex-1">
+                  Complete Setup
+                  <Icon name="Check" className="size-4 ml-2" />
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <Button variant="link" onClick={handleCompleteOnboarding}>
+                  Skip for now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import * as viem from "viem";
-import { MinimalPersistentStorage, UserProfile } from "../shared/types";
+import type { MinimalPersistentStorage, UserProfile } from "../shared/types";
 import { BaseClient } from "../shared/baseClient";
 
 export class HaitheAuthClient extends BaseClient {

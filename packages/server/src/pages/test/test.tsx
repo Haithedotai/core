@@ -4,7 +4,9 @@ import React, { useState } from "react";
 
 export default function Test() {
   const client = useHaitheClient();
-  const isLoggedIn = client.auth.isLoggedIn();
+  const isLoggedIn = client?.auth.isLoggedIn() || false;
+
+  console.log(isLoggedIn);
 
   // --- State for each function's result ---
   const [results, setResults] = useState<{ [key: string]: any }>({});
@@ -15,7 +17,7 @@ export default function Test() {
   // --- HaitheClient methods ---
   const isWeb3Ready = () => {
     try {
-      const ready = client.isWeb3Ready();
+      const ready = client?.isWeb3Ready() || false;
       setResult('isWeb3Ready', ready);
     } catch (error) {
       setResult('isWeb3Ready', error?.toString());
@@ -24,7 +26,7 @@ export default function Test() {
 
   const getAuthToken = () => {
     try {
-      const token = client.getAuthToken();
+      const token = client?.getAuthToken();
       setResult('getAuthToken', token);
     } catch (error) {
       setResult('getAuthToken', error?.toString());
@@ -33,7 +35,7 @@ export default function Test() {
 
   const profile = async () => {
     try {
-      const prof = await client.profile();
+      const prof = await client?.profile();
       setResult('profile', JSON.stringify(prof, null, 2));
     } catch (error) {
       setResult('profile', error?.toString());
@@ -42,7 +44,7 @@ export default function Test() {
 
   const generateApiKey = async () => {
     try {
-      const apiKey = await client.generateApiKey();
+      const apiKey = await client?.generateApiKey();
       setResult('generateApiKey', JSON.stringify(apiKey, null, 2));
     } catch (error) {
       setResult('generateApiKey', error?.toString());
@@ -51,7 +53,7 @@ export default function Test() {
 
   const disableApiKey = async () => {
     try {
-      await client.disableApiKey();
+      await client?.disableApiKey();
       setResult('disableApiKey', 'Success');
     } catch (error) {
       setResult('disableApiKey', error?.toString());
@@ -60,7 +62,7 @@ export default function Test() {
 
   const login = async () => {
     try {
-      const token = await client.auth.login();
+      const token = await client?.auth.login();
       setResult('login', token);
     } catch (error) {
       setResult('login', error?.toString());
@@ -69,7 +71,7 @@ export default function Test() {
 
   const logout = async () => {
     try {
-      await client.auth.logout();
+      await client?.auth.logout();
       setResult('logout', 'Success');
     } catch (error) {
       setResult('logout', error?.toString());
@@ -78,7 +80,7 @@ export default function Test() {
 
   const createOrganization = async () => {
     try {
-      const organization = await client.createOrganization("Test");
+      const organization = await client?.createOrganization("Test");
       setResult('createOrganization', JSON.stringify(organization, null, 2));
     } catch (error) {
       setResult('createOrganization', error?.toString());
@@ -87,7 +89,7 @@ export default function Test() {
 
   const getOrganization = async () => {
     try {
-      const org = await client.getOrganization(1); // placeholder id
+      const org = await client?.getOrganization(1); // placeholder id
       setResult('getOrganization', JSON.stringify(org, null, 2));
     } catch (error) {
       setResult('getOrganization', error?.toString());
@@ -96,7 +98,7 @@ export default function Test() {
 
   const updateOrganization = async () => {
     try {
-      const org = await client.updateOrganization(1, 'Updated Name'); // placeholder id/name
+      const org = await client?.updateOrganization(1, 'Updated Name'); // placeholder id/name
       setResult('updateOrganization', JSON.stringify(org, null, 2));
     } catch (error) {
       setResult('updateOrganization', error?.toString());
@@ -105,7 +107,7 @@ export default function Test() {
 
   const deleteOrganization = async () => {
     try {
-      const org = await client.deleteOrganization(1); // placeholder id
+      const org = await client?.deleteOrganization(1); // placeholder id
       setResult('deleteOrganization', JSON.stringify(org, null, 2));
     } catch (error) {
       setResult('deleteOrganization', error?.toString());
@@ -114,7 +116,7 @@ export default function Test() {
 
   const getOrganizationMembers = async () => {
     try {
-      const members = await client.getOrganizationMembers(1); // placeholder orgId
+      const members = await client?.getOrganizationMembers(1); // placeholder orgId
       setResult('getOrganizationMembers', JSON.stringify(members, null, 2));
     } catch (error) {
       setResult('getOrganizationMembers', error?.toString());
@@ -123,7 +125,7 @@ export default function Test() {
 
   const addOrganizationMember = async () => {
     try {
-      const member = await client.addOrganizationMember(1, '0x5071437be4b13e62522D2b48E9514FF36f68641d', 'member'); // placeholder orgId/address/role
+      const member = await client?.addOrganizationMember(1, '0x5071437be4b13e62522D2b48E9514FF36f68641d', 'member'); // placeholder orgId/address/role
       setResult('addOrganizationMember', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('addOrganizationMember', error?.toString());
@@ -132,7 +134,7 @@ export default function Test() {
 
   const updateOrganizationMemberRole = async () => {
     try {
-      const member = await client.updateOrganizationMemberRole(1, '0x5071437be4b13e62522D2b48E9514FF36f68641d', 'member'); // placeholder orgId/address/role
+      const member = await client?.updateOrganizationMemberRole(1, '0x5071437be4b13e62522D2b48E9514FF36f68641d', 'member'); // placeholder orgId/address/role
       setResult('updateOrganizationMemberRole', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('updateOrganizationMemberRole', error?.toString());
@@ -141,7 +143,7 @@ export default function Test() {
 
   const removeOrganizationMember = async () => {
     try {
-      const member = await client.removeOrganizationMember(1, '0xAA1bfB4D4eCDbc78A6f929D829fded3710D070D0'); // placeholder orgId/address
+      const member = await client?.removeOrganizationMember(1, '0xAA1bfB4D4eCDbc78A6f929D829fded3710D070D0'); // placeholder orgId/address
       setResult('removeOrganizationMember', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('removeOrganizationMember', error?.toString());
@@ -150,7 +152,7 @@ export default function Test() {
 
   const createProject = async () => {
     try {
-      const project = await client.createProject(1, 'Test 3'); // placeholder orgId/name
+      const project = await client?.createProject(1, 'Test 3'); // placeholder orgId/name
       setResult('createProject', JSON.stringify(project, null, 2));
     } catch (error) {
       setResult('createProject', error?.toString());
@@ -159,7 +161,7 @@ export default function Test() {
 
   const getProject = async () => {
     try {
-      const project = await client.getProject(1); // placeholder id
+      const project = await client?.getProject(1); // placeholder id
       setResult('getProject', JSON.stringify(project, null, 2));
     } catch (error) {
       setResult('getProject', error?.toString());
@@ -168,7 +170,7 @@ export default function Test() {
 
   const updateProject = async () => {
     try {
-      const project = await client.updateProject(1, 'Updated Project'); // placeholder id/name
+      const project = await client?.updateProject(1, 'Updated Project'); // placeholder id/name
       setResult('updateProject', JSON.stringify(project, null, 2));
     } catch (error) {
       setResult('updateProject', error?.toString());
@@ -177,7 +179,7 @@ export default function Test() {
 
   const deleteProject = async () => {
     try {
-      const project = await client.deleteProject(1); // placeholder id
+      const project = await client?.deleteProject(1); // placeholder id
       setResult('deleteProject', JSON.stringify(project, null, 2));
     } catch (error) {
       setResult('deleteProject', error?.toString());
@@ -186,7 +188,7 @@ export default function Test() {
 
   const getProjectMembers = async () => {
     try {
-      const members = await client.getProjectMembers(1); // placeholder projectId
+      const members = await client?.getProjectMembers(1); // placeholder projectId
       setResult('getProjectMembers', JSON.stringify(members, null, 2));
     } catch (error) {
       setResult('getProjectMembers', error?.toString());
@@ -195,7 +197,7 @@ export default function Test() {
 
   const addProjectMember = async () => {
     try {
-      const member = await client.addProjectMember(1, '0x123', 'developer'); // placeholder projectId/address/role
+      const member = await client?.addProjectMember(1, '0x123', 'developer'); // placeholder projectId/address/role
       setResult('addProjectMember', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('addProjectMember', error?.toString());
@@ -204,7 +206,7 @@ export default function Test() {
 
   const updateProjectMemberRole = async () => {
     try {
-      const member = await client.updateProjectMemberRole(1, '0x123', 'admin'); // placeholder projectId/address/role
+      const member = await client?.updateProjectMemberRole(1, '0x123', 'admin'); // placeholder projectId/address/role
       setResult('updateProjectMemberRole', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('updateProjectMemberRole', error?.toString());
@@ -213,7 +215,7 @@ export default function Test() {
 
   const removeProjectMember = async () => {
     try {
-      const member = await client.removeProjectMember(1, '0x123'); // placeholder projectId/address
+      const member = await client?.removeProjectMember(1, '0x123'); // placeholder projectId/address
       setResult('removeProjectMember', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('removeProjectMember', error?.toString());
