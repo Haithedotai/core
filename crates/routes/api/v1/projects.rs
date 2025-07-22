@@ -122,7 +122,7 @@ async fn create_project_handler(
 
     let org_exists =
         sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM organizations WHERE id = ?")
-            .bind(query.org_id)
+            .bind(&query.org_id)
             .fetch_one(&state.db)
             .await?;
 
@@ -133,9 +133,9 @@ async fn create_project_handler(
     let project_uid = Uuid::new_v4().to_string().replace("-", "");
 
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name) VALUES (?, ?, ?) RETURNING *",
+        "INSERT INTO projects (org_id, name, project_uid) VALUES (?, ?, ?) RETURNING *",
     )
-    .bind(query.org_id)
+    .bind(&query.org_id)
     .bind(&query.name)
     .bind(&project_uid)
     .fetch_one(&state.db)
