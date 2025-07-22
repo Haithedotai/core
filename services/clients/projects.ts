@@ -1,5 +1,5 @@
 import { BaseClient } from "../shared/baseClient";
-import { Project, ProjectMember } from "../shared/types";
+import type { Project, ProjectMember } from "../shared/types";
 import { HaitheAuthClient } from "./auth";
 
 export class HaitheProjectsClient extends BaseClient {

@@ -134,9 +134,16 @@ export default function Connect() {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
-                    <Link to="/projects">
-                        <Icon name="FolderOpen" className="size-4 mr-2" />
-                        Projects
+                    <Link to="/agents">
+                        <Icon name="Bot" className="size-4 mr-2" />
+                        Agents
+                    </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                    <Link to="/workflows">
+                        <Icon name="GitBranch" className="size-4 mr-2" />
+                        Workflows
                     </Link>
                 </DropdownMenuItem>
 
@@ -156,14 +163,12 @@ export default function Connect() {
                     </Link>
                 </DropdownMenuItem>
 
-
                 <DropdownMenuItem asChild>
                     <Link to="/organization">
                         <Icon name="Building" className="size-4 mr-2" />
                         Organization
                     </Link>
                 </DropdownMenuItem>
-
 
                 <DropdownMenuItem asChild>
                     <Link to="/analytics">

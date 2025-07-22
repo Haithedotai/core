@@ -2,13 +2,15 @@ export type VerificationStatus = 'unverified' | 'pending' | 'verified';
 export type ItemType = 'knowledge_base' | 'tool' | 'mcp' | 'prompt_set';
 export type ItemStatus = 'draft' | 'active' | 'inactive' | 'archived';
 export type ValidationStatus = 'unvalidated' | 'pending' | 'certified' | 'rejected';
-export type ProjectStatus = 'active' | 'development' | 'paused' | 'archived';
-export type ProjectType = 'workflow' | 'model' | 'experiment';
-export type ProjectPrivacy = 'public' | 'private' | 'organization';
+export type AgentStatus = 'active' | 'development' | 'paused' | 'archived';
+export type AgentType = 'workflow' | 'model' | 'experiment';
+export type AgentPrivacy = 'public' | 'private' | 'organization';
 export type PurchaseStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 export type ValidationStatusType = 'pending' | 'in_progress' | 'certified' | 'rejected';
 export type ValidationType = 'basic_review' | 'full_audit' | 'protocol_audit' | 'security_audit';
 export type MemberRole = 'owner' | 'admin' | 'member';
+export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'moonshot' | 'meta' | 'mistral' | 'groq';
+export type WorkflowStatus = 'draft' | 'active' | 'paused' | 'archived';
 
 export interface User {
   id: string;
@@ -103,7 +105,27 @@ export interface Validation {
   created_at: string;
 }
 
-export interface ProjectComponent {
+// New types for Models
+export interface Model {
+  id: string;
+  name: string;
+  description: string;
+  provider: ModelProvider;
+  model_id: string; // The actual model identifier (e.g., 'gpt-4', 'claude-3-sonnet')
+  version?: string;
+  context_length: number;
+  input_cost_per_token: number;
+  output_cost_per_token: number;
+  capabilities: string[]; // e.g., ['text', 'vision', 'code', 'function_calling']
+  max_output_tokens?: number;
+  organization_id: string;
+  is_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Rename Project to Agent
+export interface AgentComponent {
   id: string;
   name: string;
   type: ItemType | 'custom';
@@ -111,16 +133,47 @@ export interface ProjectComponent {
   configuration: Record<string, any>;
 }
 
-export interface Project {
+export interface Agent {
   id: string;
   name: string;
   description: string | null;
   user_id: string;
   organization_id: string;
-  project_type: ProjectType;
-  status: ProjectStatus;
-  privacy: ProjectPrivacy;
-  components: ProjectComponent[];
+  agent_type: AgentType;
+  status: AgentStatus;
+  privacy: AgentPrivacy;
+  components: AgentComponent[];
+  model_id?: string; // Associated model
+  members: string[]; // User IDs of members
+  created_at: string;
+  updated_at: string;
+}
+
+// New types for Workflows
+export interface WorkflowNode {
+  id: string;
+  agent_id: string;
+  position: { x: number; y: number };
+  configuration: Record<string, any>;
+}
+
+export interface WorkflowEdge {
+  id: string;
+  source_node_id: string;
+  target_node_id: string;
+  condition?: string; // Optional condition for the edge
+}
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description: string | null;
+  organization_id: string;
+  user_id: string;
+  status: WorkflowStatus;
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  metadata: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -165,15 +218,48 @@ export interface MarketplaceFilters {
 
 export interface ProjectFilters {
   search?: string;
-  project_type?: ProjectType[];
-  status?: ProjectStatus[];
-  privacy?: ProjectPrivacy[];
+  project_type?: AgentType[];
+  status?: AgentStatus[];
+  privacy?: AgentPrivacy[];
   sort_by?: 'name' | 'created_at' | 'updated_at';
   sort_order?: 'asc' | 'desc';
 }
 
+export interface AgentFilters {
+  search?: string;
+  agent_type?: AgentType[];
+  status?: AgentStatus[];
+  privacy?: AgentPrivacy[];
+  sort_by?: 'name' | 'created_at' | 'updated_at';
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface WorkflowFilters {
+  search?: string;
+  status?: WorkflowStatus[];
+  sort_by?: 'name' | 'created_at' | 'updated_at';
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface ModelFilters {
+  search?: string;
+  provider?: ModelProvider[];
+  capabilities?: string[];
+  sort_by?: 'name' | 'provider' | 'created_at';
+  sort_order?: 'asc' | 'desc';
+}
+
+// Update Dashboard Stats for new structure
 export interface DashboardStats {
-  // General stats for any user
+  // Organization stats
+  total_models?: number;
+  total_agents?: number;
+  total_workflows?: number;
+  active_agents?: number;
+  active_workflows?: number;
+  total_agent_runs?: number;
+  total_workflow_executions?: number;
+  // Legacy stats for backward compatibility
   total_items?: number;
   total_projects?: number;
   total_purchases?: number;

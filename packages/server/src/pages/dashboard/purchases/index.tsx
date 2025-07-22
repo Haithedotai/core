@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "../../layout";
 import PurchasesPage from "./Purchases";
 
 export default function Purchases() {

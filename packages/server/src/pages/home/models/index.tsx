@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "@/src/pages/layout";
 import ModelPage from "./Model";
 
 export default function Model() {

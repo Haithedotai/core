@@ -123,7 +123,7 @@ export default function Test() {
 
   const addOrganizationMember = async () => {
     try {
-      const member = await client.addOrganizationMember(1, '0x123', 'member'); // placeholder orgId/address/role
+      const member = await client.addOrganizationMember(1, '0x5071437be4b13e62522D2b48E9514FF36f68641d', 'member'); // placeholder orgId/address/role
       setResult('addOrganizationMember', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('addOrganizationMember', error?.toString());
@@ -132,7 +132,7 @@ export default function Test() {
 
   const updateOrganizationMemberRole = async () => {
     try {
-      const member = await client.updateOrganizationMemberRole(1, '0x123', 'admin'); // placeholder orgId/address/role
+      const member = await client.updateOrganizationMemberRole(1, '0x5071437be4b13e62522D2b48E9514FF36f68641d', 'member'); // placeholder orgId/address/role
       setResult('updateOrganizationMemberRole', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('updateOrganizationMemberRole', error?.toString());
@@ -141,7 +141,7 @@ export default function Test() {
 
   const removeOrganizationMember = async () => {
     try {
-      const member = await client.removeOrganizationMember(1, '0x123'); // placeholder orgId/address
+      const member = await client.removeOrganizationMember(1, '0xAA1bfB4D4eCDbc78A6f929D829fded3710D070D0'); // placeholder orgId/address
       setResult('removeOrganizationMember', JSON.stringify(member, null, 2));
     } catch (error) {
       setResult('removeOrganizationMember', error?.toString());
@@ -150,7 +150,7 @@ export default function Test() {
 
   const createProject = async () => {
     try {
-      const project = await client.createProject(1, 'Test Project'); // placeholder orgId/name
+      const project = await client.createProject(1, 'Test 3'); // placeholder orgId/name
       setResult('createProject', JSON.stringify(project, null, 2));
     } catch (error) {
       setResult('createProject', error?.toString());
@@ -221,10 +221,10 @@ export default function Test() {
   }
 
   // Helper component for test sections
-  const TestSection = ({ title, children, variant = "default" }: { 
-    title: string, 
-    children: React.ReactNode, 
-    variant?: "default" | "primary" | "secondary" 
+  const TestSection = ({ title, children, variant = "default" }: {
+    title: string,
+    children: React.ReactNode,
+    variant?: "default" | "primary" | "secondary"
   }) => {
     const getBorderColor = () => {
       switch (variant) {
@@ -253,15 +253,15 @@ export default function Test() {
   };
 
   // Helper component for test items
-  const TestItem = ({ label, onClick, result, variant = "default" }: { 
-    label: string, 
-    onClick: () => void, 
+  const TestItem = ({ label, onClick, result, variant = "default" }: {
+    label: string,
+    onClick: () => void,
     result: any,
     variant?: "default" | "destructive"
   }) => (
     <div className="space-y-2">
-      <Button 
-        onClick={onClick} 
+      <Button
+        onClick={onClick}
         variant={variant === "destructive" ? "destructive" : "outline"}
         className="w-full justify-start text-left"
       >
@@ -294,7 +294,7 @@ export default function Test() {
 
         {/* Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          
+
           {/* Client Status & Auth */}
           <TestSection title="Client Status & Authentication" variant="primary">
             <TestItem label="Check Web3 Ready" onClick={isWeb3Ready} result={results.isWeb3Ready} />

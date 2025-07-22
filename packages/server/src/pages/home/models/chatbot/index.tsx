@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "@/src/pages/layout";
 import ChatbotPage from "./Chatbot";
 
 export default function Chatbot() {

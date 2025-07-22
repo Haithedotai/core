@@ -48,6 +48,37 @@ export default function Sidebar() {
 
                 <Separator className="my-6" />
 
+                {/* AI Infrastructure - Only show if user has organization */}
+                {currentOrganization && (
+                    <>
+                        <div className="px-4 py-3">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-relaxed">AI Infrastructure</p>
+                        </div>
+                        <div className="space-y-2">
+                            <Button variant={isActive("/models") ? "outline" : "ghost"} className="w-full justify-start h-12 text-base" asChild>
+                                <Link to="/models">
+                                    <Icon name="Brain" className="size-5 mr-3" />
+                                    Models
+                                </Link>
+                            </Button>
+                            <Button variant={isActive("/agents") ? "outline" : "ghost"} className="w-full justify-start h-12 text-base" asChild>
+                                <Link to="/agents">
+                                    <Icon name="Bot" className="size-5 mr-3" />
+                                    Agents
+                                </Link>
+                            </Button>
+                            <Button variant={isActive("/workflows") ? "outline" : "ghost"} className="w-full justify-start h-12 text-base" asChild>
+                                <Link to="/workflows">
+                                    <Icon name="GitBranch" className="size-5 mr-3" />
+                                    Workflows
+                                </Link>
+                            </Button>
+                        </div>
+
+                        <Separator className="my-6" />
+                    </>
+                )}
+
                 {/* Tools & Features */}
                 <div className="space-y-2">
                     <div className="px-4 py-3">
@@ -57,12 +88,6 @@ export default function Sidebar() {
                         <Link to="/create">
                             <Icon name="Plus" className="size-5 mr-3" />
                             Create Item
-                        </Link>
-                    </Button>
-                    <Button variant={isActive("/projects") ? "outline" : "ghost"} className="w-full justify-start h-12 text-base" asChild>
-                        <Link to="/projects">
-                            <Icon name="FolderOpen" className="size-5 mr-3" />
-                            Projects
                         </Link>
                     </Button>
                     <Button variant={isActive("/analytics") ? "outline" : "ghost"} className="w-full justify-start h-12 text-base" asChild>

@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "@/src/pages/layout";
 import HelpPage from "./Help";
 
 export default function Help() {

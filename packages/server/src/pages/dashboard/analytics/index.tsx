@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "@/src/pages/layout";
 import AnalyticsPage from "./Analytics";
 
 export default function Analytics() {
