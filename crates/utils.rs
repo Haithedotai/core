@@ -12,6 +12,28 @@ pub struct Claims {
     pub exp: usize,  // expiration (timestamp)
 }
 
+#[derive(Debug)]
+pub struct ParsedApiKey {
+    pub address: String,
+    pub nonce: String,
+    pub signature: String,
+}
+
+pub fn parse_api_key(api_key: &str) -> Result<ParsedApiKey, Box<dyn std::error::Error>> {
+    let parts: Vec<&str> = api_key.split('.').collect();
+    
+    if parts.len() != 3 {
+        return Err("Invalid API key format. Expected A.N.S (address.nonce.signature)".into());
+    }
+    
+    Ok(ParsedApiKey {
+        address: parts[0].to_string(),
+        nonce: parts[1].to_string(),
+        signature: parts[2].to_string(),
+    })
+}
+
+
 pub fn generate_jwt(address: &str) -> String {
     let expiration = Utc::now()
         .checked_add_signed(Duration::days(3))
@@ -97,4 +119,23 @@ pub fn verify_message(public_key: &str, signature: &str, message: &str) -> Resul
     let msg = Message::from_slice(&hash)?;
     
     Ok(secp.verify_ecdsa(&msg, &signature, &public_key).is_ok())
+}
+
+
+pub fn verify_api_key(
+    public_key: &str, 
+    api_key: &str, 
+    db_timestamp: i64
+) -> Result<bool, Box<dyn std::error::Error>> {
+    let parsed = parse_api_key(api_key)?;
+    let message_to_verify = format!("{}.{}.{}", db_timestamp, parsed.address, parsed.nonce);
+    verify_message(public_key, &parsed.signature, &message_to_verify)
+}
+
+pub fn derive_public_key_from_private(private_key: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let secp = Secp256k1::new();
+    let key_hex = private_key.strip_prefix("0x").unwrap_or(private_key);
+    let secret_key = SecretKey::from_slice(&hex::decode(key_hex)?)?;
+    let public_key = PublicKey::from_secret_key(&secp, &secret_key);
+    Ok(format!("0x{}", hex::encode(public_key.serialize())))
 }
