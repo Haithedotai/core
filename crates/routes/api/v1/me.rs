@@ -119,7 +119,7 @@ async fn get_api_key_handler(
     let signature = crate::utils::sign_message(&tee_private_key, &message)
         .map_err(|_| ApiError::Internal("Failed to sign API key".into()))?;
 
-    let api_key = signature;
+    let api_key = format!("{}.{}.{}", address, nonce, signature);
 
     sqlx::query(
         "UPDATE accounts SET api_key_last_issued_at = CURRENT_TIMESTAMP WHERE wallet_address = ?").bind(
