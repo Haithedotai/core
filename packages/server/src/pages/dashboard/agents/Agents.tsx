@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Input } from "@/src/lib/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select";
+import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
@@ -21,12 +22,22 @@ export default function AgentsPage() {
   // Loading state
   if (profileQuery.isPending) {
     return (
-      <div className="min-h-full bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Icon name="Loader" className="size-16 text-muted-foreground mx-auto animate-spin" />
-          <div className="space-y-2">
-            <h3 className="text-xl font-medium">Loading Agents</h3>
-          </div>
+      <div className="min-h-full bg-background p-6 space-y-6">
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
         </div>
       </div>
     );

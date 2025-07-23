@@ -4,6 +4,7 @@ import { Button } from "@/src/lib/components/ui/button";
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Textarea } from "@/src/lib/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
+import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheClient } from "@/src/lib/context/services-provider";
@@ -186,15 +187,10 @@ export default function ChatbotPage() {
                     
                     {isLoading && (
                         <div className="flex justify-start">
-                            <div className="bg-muted text-muted-foreground rounded-lg px-4 py-3 max-w-[80%]">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex gap-1">
-                                        <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-                                        <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                                        <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                                    </div>
-                                    <span className="text-sm">AI is thinking...</span>
-                                </div>
+                            <div className="bg-muted rounded-lg px-4 py-3 max-w-[80%] space-y-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-4 w-20" />
                             </div>
                         </div>
                     )}

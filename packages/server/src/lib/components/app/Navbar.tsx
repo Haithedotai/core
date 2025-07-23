@@ -12,7 +12,7 @@ export default function Navbar() {
   const { data: userOrganizations, isLoading: isUserOrganizationsLoading } = api.getUserOrganizations();
 
   return (
-    <nav className="fixed top-0 gap-2 h-[var(--navbar-height)] w-full z-50 border-b flex items-center justify-between px-8 lg:px-4">
+    <nav className="fixed bg-background top-0 gap-2 h-[var(--navbar-height)] w-full z-50 border-b flex items-center justify-between px-8 lg:px-4">
       {/* Left side - Logo and main navigation */}
       <div className="flex items-center gap-6">
         <Link to="/" className="flex gap-2 items-center">

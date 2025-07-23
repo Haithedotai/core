@@ -28,9 +28,9 @@ const rootRoute = createRootRoute({
     useAnalytics();
 
     return (
-      <>
+      <div>
         <Outlet />
-      </>
+      </div>
     )
   },
 })

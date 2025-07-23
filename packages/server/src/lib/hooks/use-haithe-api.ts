@@ -30,9 +30,32 @@ export function useHaitheApi() {
                 if (!client) throw new Error("Wallet not connected");
                 return client.auth.login();
             },
-            onSuccess: () => {
+            onSuccess: async () => {
                 toast.success('Logged in successfully');
+                
+                // Invalidate queries to refresh data
                 queryClient.invalidateQueries({ queryKey: ['profile'] });
+                queryClient.invalidateQueries({ queryKey: ['organizations'] });
+                
+                // Wait a bit for queries to update, then check organizations
+                setTimeout(async () => {
+                    try {
+                        // Check if user has any organizations
+                        const organizations = await client?.getUserOrganizations();
+                        
+                        if (!organizations || organizations.length === 0) {
+                            // New user - redirect to onboarding
+                            navigate({ to: '/onboarding' });
+                        } else {
+                            // Existing user - redirect to dashboard  
+                            navigate({ to: '/dashboard' });
+                        }
+                    } catch (error) {
+                        console.error('Failed to check user organizations:', error);
+                        // On error, default to onboarding to be safe
+                        navigate({ to: '/onboarding' });
+                    }
+                }, 100);
             },
             onError: (error) => {
                 toast.error(error?.toString() || 'Login failed');

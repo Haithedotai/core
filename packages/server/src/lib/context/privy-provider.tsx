@@ -1,13 +1,16 @@
 import { PrivyProvider as PrivyProviderBase } from '@privy-io/react-auth';
+import { useTheme } from './theme-provider';
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
+    const { theme } = useTheme();
+
     return (
         <PrivyProviderBase
             appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
             config={{
                 loginMethods: ["wallet"],
                 appearance: {
-                    theme: "light",
+                    theme: theme === "dark" ? "dark" : "light",
                     landingHeader: "Sign in to Haithe",
                 }
             }}
