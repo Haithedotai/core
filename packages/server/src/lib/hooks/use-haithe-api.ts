@@ -32,7 +32,6 @@ export function useHaitheApi() {
             },
             onSuccess: () => {
                 toast.success('Logged in successfully');
-                navigate({ to: '/dashboard' });
                 queryClient.invalidateQueries({ queryKey: ['profile'] });
             },
             onError: (error) => {
@@ -119,6 +118,15 @@ export function useHaitheApi() {
                 return client.getOrganization(id);
             },
             enabled: !!id && !!client,
+        }),
+
+        getUserOrganizations: () => useQuery({
+            queryKey: ['organizations'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getUserOrganizations();
+            },
+            enabled: isLoggedIn() && !!client,
         }),
 
         updateOrganization: useMutation({

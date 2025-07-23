@@ -6,6 +6,7 @@ import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { formatDate } from "@/src/lib/utils";
+import { useStore } from "@/src/lib/hooks/use-store";
 
 interface StatsCardProps {
   title: string;
@@ -19,13 +20,13 @@ interface StatsCardProps {
   gradient?: string;
 }
 
-function StatsCard({ 
-  title, 
-  value, 
-  icon, 
-  trend, 
-  description, 
-  gradient = "from-primary/20 to-primary/5" 
+function StatsCard({
+  title,
+  value,
+  icon,
+  trend,
+  description,
+  gradient = "from-primary/20 to-primary/5"
 }: StatsCardProps) {
   return (
     <Card className="relative overflow-hidden">
@@ -41,12 +42,11 @@ function StatsCard({
             </CardTitle>
           </div>
           {trend && (
-            <div className={`flex items-center space-x-1 text-xs ${
-              trend.positive ? 'text-emerald-600' : 'text-red-600'
-            }`}>
-              <Icon 
-                name={trend.positive ? "TrendingUp" : "TrendingDown"} 
-                className="size-3" 
+            <div className={`flex items-center space-x-1 text-xs ${trend.positive ? 'text-emerald-600' : 'text-red-600'
+              }`}>
+              <Icon
+                name={trend.positive ? "TrendingUp" : "TrendingDown"}
+                className="size-3"
               />
               <span>{trend.value}%</span>
             </div>
@@ -94,7 +94,7 @@ function QuickActionsSection() {
               </div>
             </Link>
           </Button>
-          
+
           <Button variant="outline" className="justify-start h-auto p-4" asChild>
             <Link to="/agents">
               <div className="flex items-center gap-3">
@@ -108,7 +108,7 @@ function QuickActionsSection() {
               </div>
             </Link>
           </Button>
-          
+
           <Button variant="outline" className="justify-start h-auto p-4" asChild>
             <Link to="/workflows">
               <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ function QuickActionsSection() {
               </div>
             </Link>
           </Button>
-          
+
           <Button variant="outline" className="justify-start h-auto p-4" asChild>
             <Link to="/organization">
               <div className="flex items-center gap-3">
@@ -172,11 +172,11 @@ function RecentActivitySection() {
 export default function DashboardPage() {
   const api = useHaitheApi();
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   // Get profile data
   const profileQuery = api.profile();
   const isLoggedIn = api.isLoggedIn;
-  
+
   // Get utility values
   const isWeb3Ready = api.isWeb3Ready();
   const authToken = api.getAuthToken();
@@ -219,8 +219,7 @@ export default function DashboardPage() {
   }
 
   const profile = profileQuery.data;
-
-  console.log(profile);
+  const { selectedOrganizationId } = useStore();
 
   return (
     <div className="min-h-full bg-background">
@@ -273,28 +272,28 @@ export default function DashboardPage() {
                 value="0"
                 icon="FolderOpen"
                 description="Active projects"
-                gradient="from-blue-500/20 to-blue-500/5"
+                gradient="from-blue-500 to-blue-500/20"
               />
               <StatsCard
                 title="Active Agents"
                 value="0"
                 icon="Bot"
                 description="Running agents"
-                gradient="from-green-500/20 to-green-500/5"
+                gradient="from-green-500 to-green-500/20"
               />
               <StatsCard
                 title="Workflows"
                 value="0"
                 icon="GitBranch"
                 description="Automated flows"
-                gradient="from-purple-500/20 to-purple-500/5"
+                gradient="from-purple-500 to-purple-500/20"
               />
               <StatsCard
                 title="Auth Status"
                 value={authToken ? "Active" : "Inactive"}
                 icon="Shield"
                 description="Authentication token"
-                gradient="from-orange-500/20 to-orange-500/5"
+                gradient="from-orange-500 to-orange-500/20"
               />
             </div>
 

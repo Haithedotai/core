@@ -3,32 +3,41 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function Connect() {
     const { ready, authenticated, user, login: privyLogin, logout: privyLogout } = usePrivy();
     const api = useHaitheApi();
-    
+    const navigate = useNavigate();
+    const { data: userOrganizations, isLoading: isUserOrganizationsLoading } = api.getUserOrganizations();
+
     // Get authentication state
     const isWalletConnected = ready && authenticated && user?.wallet?.address;
     const isHaitheLoggedIn = api.isLoggedIn();
 
     // Get profile data when logged in
     const profileQuery = api.profile();
-    
+
     // Mutations
     const loginMutation = api.login;
     const logoutMutation = api.logout;
 
     const handleWalletConnect = async () => {
         try {
-            await privyLogin();
+            privyLogin();
         } catch (error) {
             console.error('Failed to connect wallet:', error);
         }
     };
 
-    const handleHaitheLogin = () => {
-        loginMutation.mutate();
+    const handleHaitheLogin = async () => {
+        await loginMutation.mutateAsync();
+
+        if (userOrganizations && userOrganizations.length === 0) {
+            await api.createOrganization.mutateAsync("Default");
+        }
+
+        navigate({ to: "/dashboard" });
     };
 
     const handleDisconnect = async () => {

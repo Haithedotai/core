@@ -78,6 +78,10 @@ export class HaitheClient {
     return this.orgs.createOrganization(name);
   }
 
+  getUserOrganizations(): Promise<Organization[]> {
+    return this.orgs.getUserOrganizations();
+  }
+
   getOrganization(id: number): Promise<Organization> {
     return this.orgs.getOrganization(id);
   }

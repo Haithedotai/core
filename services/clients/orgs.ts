@@ -10,6 +10,10 @@ export class HaitheOrgsClient extends BaseClient {
     this.authClient = authClient;
   }
 
+  getUserOrganizations(): Promise<Organization[]> {
+    return this.fetch(`/v1/me/orgs`, this.authClient.getAuthToken());
+  }
+
   createOrganization(name: string): Promise<Organization> {
     return this.fetch(
       `/v1/orgs?name=${encodeURIComponent(name)}`,

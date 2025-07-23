@@ -87,6 +87,15 @@ export default function Test() {
     }
   }
 
+  const getUserOrganizations = async () => {
+    try {
+      const organizations = await client?.getUserOrganizations();
+      setResult('getUserOrganizations', JSON.stringify(organizations, null, 2));
+    } catch (error) {
+      setResult('getUserOrganizations', error?.toString());
+    }
+  }
+
   const getOrganization = async () => {
     try {
       const org = await client?.getOrganization(1); // placeholder id
@@ -314,6 +323,7 @@ export default function Test() {
 
           {/* Organizations */}
           <TestSection title="Organization Management">
+            <TestItem label="Get User Organizations" onClick={getUserOrganizations} result={results.getUserOrganizations} />
             <TestItem label="Create Organization" onClick={createOrganization} result={results.createOrganization} />
             <TestItem label="Get Organization" onClick={getOrganization} result={results.getOrganization} />
             <TestItem label="Update Organization" onClick={updateOrganization} result={results.updateOrganization} />

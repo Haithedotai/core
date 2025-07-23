@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import Connect from "./Connect";
 import CreatorSheet from "./CreatorSheet";
+import OrganizationSelector from "./OrganizationSelector";
 import { usePrivy } from "@privy-io/react-auth";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 
 export default function Navbar() {
   const { authenticated } = usePrivy();
   const api = useHaitheApi();
-
-  // Check if user is fully authenticated
   const isHaitheLoggedIn = api.isLoggedIn();
+  const { data: userOrganizations, isLoading: isUserOrganizationsLoading } = api.getUserOrganizations();
 
   return (
     <nav className="fixed top-0 gap-2 h-[var(--navbar-height)] w-full z-50 border-b flex items-center justify-between px-8 lg:px-4">
@@ -33,6 +33,7 @@ export default function Navbar() {
           <CreatorSheet />
         )} */}
         
+        <OrganizationSelector />
         <Connect />
       </div>
     </nav>
