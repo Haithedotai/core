@@ -20,11 +20,14 @@ CREATE TABLE
     IF NOT EXISTS organizations (
         id INTEGER PRIMARY KEY,
         organization_uid TEXT NOT NULL,
+        address TEXT NOT NULL,
+        orchestrator_idx INTEGER NOT NULL,
         name TEXT NOT NULL,
         owner TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name),
         UNIQUE (organization_uid)
+        UNIQUE (address)
     );
 
 CREATE TABLE
