@@ -1,4 +1,4 @@
-{
+const definitions = {
   "tUSDT": {
     "abi": [
       {
@@ -671,4 +671,5 @@
       }
     ]
   }
-}
+}as const;
+export default definitions;

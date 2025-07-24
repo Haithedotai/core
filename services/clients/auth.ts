@@ -3,7 +3,8 @@ import type { MinimalPersistentStorage, UserProfile } from "../shared/types";
 import { BaseClient } from "../shared/baseClient";
 
 export class HaitheAuthClient extends BaseClient {
-  private walletClient: viem.WalletClient;
+  public walletClient: viem.WalletClient;
+  public publicClient: viem.PublicClient;
   private authToken: string | null = null;
   private _persistentStorage: MinimalPersistentStorage | null = null;
 
@@ -13,7 +14,16 @@ export class HaitheAuthClient extends BaseClient {
     debug?: boolean;
   }) {
     super(options.baseUrl, options.debug);
+
+    if (!options.walletClient.chain) {
+      throw new Error("Wallet client is required");
+    }
+
     this.walletClient = options.walletClient;
+    this.publicClient = viem.createPublicClient({
+      chain: options.walletClient.chain,
+      transport: viem.http(options.walletClient.chain.rpcUrls.default.http[0]),
+    });
   }
 
   static ensureWeb3Ready(

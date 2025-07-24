@@ -16,5 +16,5 @@ async fn get_completions_handler(api_caller: ApiCaller) -> Result<impl Responder
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
-    cfg.service(test_api_caller);
+    cfg.service(get_completions_handler);
 }

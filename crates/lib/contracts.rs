@@ -1,3 +1,12 @@
+use ethers::{
+    abi::Abi,
+    contract::Contract,
+    providers::{Http, Provider},
+    types::Address,
+};
+use serde::Deserialize;
+use std::{fs, sync::Arc};
+
 #[derive(Deserialize)]
 struct ContractInfo {
     abi: String,
@@ -10,7 +19,20 @@ struct Contracts {
     usdt: ContractInfo,
 }
 
-pub fn get_contract(name: &str, address: Option<&str>) {
+impl Contracts {
+    fn get(&self, name: &str) -> Option<&ContractInfo> {
+        match name {
+            "haithe_orchestrator" => Some(&self.haithe_orchestrator),
+            "usdt" => Some(&self.usdt),
+            _ => None,
+        }
+    }
+}
+
+pub fn get_contract(
+    name: &str,
+    address: Option<&str>,
+) -> Result<Contract<Provider<Http>>, Box<dyn std::error::Error>> {
     let file_content = fs::read_to_string("./contract.json")?;
     let contracts: Contracts = serde_json::from_str(&file_content)?;
 
@@ -24,5 +46,5 @@ pub fn get_contract(name: &str, address: Option<&str>) {
     };
     let abi: Abi = serde_json::from_str(&contracts.get(name).unwrap().abi)?;
 
-    Contract::new(address, abi, provider.clone()).expect("Failed to create contract instance");
+    Ok(Contract::new(address, abi, provider.clone()))
 }

@@ -42,7 +42,7 @@ const client = viem
   })
   .extend(viem.publicActions);
 
-const definitionsFile = Bun.file("../../definitions.json");
+const definitionsFile = "../../definitions";
 const definitions: Record<
   string,
   {
@@ -108,6 +108,17 @@ async function main() {
 }
 
 main().then(async () => {
-  await Bun.write(definitionsFile, JSON.stringify(definitions, null, 2));
+  await Bun.write(
+    Bun.file(definitionsFile + ".json"),
+    JSON.stringify(definitions, null, 2)
+  );
+
+  await Bun.write(
+    Bun.file(definitionsFile + ".ts"),
+    "const definitions = " +
+      JSON.stringify(definitions, null, 2) +
+      "as const;\nexport default definitions;\n"
+  );
+
   console.log("Deployment successful. Definitions written");
 });

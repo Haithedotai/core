@@ -8,7 +8,7 @@ import {
   type OrganizationMember,
   type Project,
   type ProjectMember,
-  type UserProfile
+  type UserProfile,
 } from "./clients";
 
 export class HaitheClient {
@@ -23,7 +23,9 @@ export class HaitheClient {
   }) {
     this.auth = new HaitheAuthClient(options);
     this.orgs = new HaitheOrgsClient(this.auth, { debug: options.debug });
-    this.projects = new HaitheProjectsClient(this.auth, { debug: options.debug });
+    this.projects = new HaitheProjectsClient(this.auth, {
+      debug: options.debug,
+    });
   }
 
   // Backward compatibility methods - delegate to auth client
@@ -61,7 +63,11 @@ export class HaitheClient {
     return this.auth.profile();
   }
 
-  generateApiKey(): Promise<{ api_key: string; message: string; issued_at: number }> {
+  generateApiKey(): Promise<{
+    api_key: string;
+    message: string;
+    issued_at: number;
+  }> {
     return this.auth.generateApiKey();
   }
 
@@ -155,7 +161,11 @@ export class HaitheClient {
     walletAddress: string,
     role: "admin" | "developer" | "viewer"
   ): Promise<ProjectMember> {
-    return this.projects.updateProjectMemberRole(projectId, walletAddress, role);
+    return this.projects.updateProjectMemberRole(
+      projectId,
+      walletAddress,
+      role
+    );
   }
 
   removeProjectMember(

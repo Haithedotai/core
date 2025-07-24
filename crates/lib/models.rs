@@ -1,9 +1,9 @@
-use alith::{LLM, client::backend_builders::openai};
+use alith::LLM;
 
-pub fn resolve_model(name: &str) {
-    let mut base_url: &str;
-    let mut api_key_to_use: &str;
-    let mut model_name: &str;
+pub fn resolve_model(name: &str) -> LLM {
+    let mut base_url: &str = "";
+    let mut api_key: String = String::new();
+    let mut model_name: &str = "";
 
     let gemini_models = [
         "gemini-2.0-flash",
@@ -14,7 +14,7 @@ pub fn resolve_model(name: &str) {
     ];
     if gemini_models.contains(&name) {
         base_url = "https://generativelanguage.googleapis.com/v1beta/openai";
-        api_key_to_use = std::env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY not set");
+        api_key = std::env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY not set");
 
         model_name = name;
     }
@@ -28,7 +28,7 @@ pub fn resolve_model(name: &str) {
     ];
     if openai_models.contains(&name) {
         base_url = "https://api.openai.com/v1";
-        api_key_to_use = "OPENAI_API_KEY";
+        api_key = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY not set");
 
         model_name = name;
     }
@@ -36,7 +36,7 @@ pub fn resolve_model(name: &str) {
     let deepseek_models = ["deepseek-chat", "deepseek-reasoner"];
     if deepseek_models.contains(&name) {
         base_url = "https://api.deepseek.com/v1";
-        api_key_to_use = "DEEPSEEK_API_KEY";
+        api_key = std::env::var("DEEPSEEK_API_KEY").expect("DEEPSEEK_API_KEY not set");
 
         model_name = name;
     }
@@ -44,19 +44,19 @@ pub fn resolve_model(name: &str) {
     let moonshot_models = ["kimi-k2"];
     if moonshot_models.contains(&name) {
         base_url = "https://api.moonshot.com/v1";
-        api_key_to_use = "MOONSHOT_API_KEY";
+        api_key = std::env::var("MOONSHOT_API_KEY").expect("MOONSHOT_API_KEY not set");
 
         model_name = name;
-        if (name == "kimi-k2") {
+        if name == "kimi-k2" {
             model_name = "kimi-k2-0711-preview";
         }
     }
 
-    if base_url.is_empty() || api_key_to_use.is_empty() || model_name.is_empty() {
+    if base_url == "" || api_key.is_empty() || model_name == "" {
         panic!("Model {} not found or not supported", name);
     }
 
-    LLM::openai_compatible_model(base_url, api_key_to_use, model_name).unwrap_or_else(|_| {
+    LLM::openai_compatible_model(base_url, &api_key, model_name).unwrap_or_else(|_| {
         panic!("Model {} not found or not supported", name);
-    });
+    })
 }

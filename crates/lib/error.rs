@@ -1,7 +1,6 @@
 use crate::lib::respond;
 use actix_web::{HttpResponse, ResponseError};
 use anyhow::Error as AnyError;
-use ethers::contract::ContractError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -18,8 +17,6 @@ pub enum ApiError {
     Internal(String),
     #[error("Database error: {0}")]
     Sqlx(#[from] sqlx::Error),
-    #[error("Contract error: {0}")]
-    Contract(#[from] ContractError),
 }
 
 impl ResponseError for ApiError {
@@ -36,7 +33,6 @@ impl ResponseError for ApiError {
             BadRequest(m) => (m.as_str(), 400),
             Internal(m) => (m.as_str(), 500),
             Sqlx(_) => ("Database error", 500),
-            Contract(_) => ("Contract error", 500),
         };
         respond::err(msg, status)
     }
@@ -45,5 +41,26 @@ impl ResponseError for ApiError {
 impl From<AnyError> for ApiError {
     fn from(err: AnyError) -> Self {
         ApiError::Internal(format!("Unhandled error: {}", err))
+    }
+}
+
+impl From<Box<dyn std::error::Error>> for ApiError {
+    fn from(err: Box<dyn std::error::Error>) -> Self {
+        ApiError::Internal(format!("Invalid Contract error: {}", err))
+    }
+}
+
+impl<M> From<ethers::contract::ContractError<M>> for ApiError
+where
+    M: ethers::providers::Middleware,
+{
+    fn from(err: ethers::contract::ContractError<M>) -> Self {
+        ApiError::Internal(format!("Contract error: {}", err))
+    }
+}
+
+impl From<ethers::contract::AbiError> for ApiError {
+    fn from(err: ethers::contract::AbiError) -> Self {
+        ApiError::Internal(format!("Contract RPC error: {}", err))
     }
 }

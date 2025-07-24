@@ -1,6 +1,7 @@
 import { BaseClient } from "../shared/baseClient";
 import type { Organization, OrganizationMember } from "../shared/types";
 import { HaitheAuthClient } from "./auth";
+import definitions from "../../definitions";
 
 export class HaitheOrgsClient extends BaseClient {
   private authClient: HaitheAuthClient;
@@ -14,12 +15,21 @@ export class HaitheOrgsClient extends BaseClient {
     return this.fetch(`/v1/me/orgs`, this.authClient.getAuthToken());
   }
 
-  createOrganization(name: string): Promise<Organization> {
-    return this.fetch(
-      `/v1/orgs?name=${encodeURIComponent(name)}`,
-      this.authClient.getAuthToken(),
-      { method: "POST" }
-    );
+  async createOrganization(name: string): Promise<Organization> {
+    if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    const hash = await this.authClient.walletClient.writeContract({
+      ...definitions.HaitheOrchestrator,
+      functionName: "createOrganization",
+      args: [name],
+    });
+    await this.authClient.publicClient.waitForTransactionReceipt({ hash });
+
+    return this.fetch(`/v1/orgs`, this.authClient.getAuthToken(), {
+      method: "POST",
+    });
   }
 
   getOrganization(id: number): Promise<Organization> {
@@ -35,11 +45,9 @@ export class HaitheOrgsClient extends BaseClient {
   }
 
   deleteOrganization(id: number): Promise<Organization> {
-    return this.fetch(
-      `/v1/orgs/${id}`,
-      this.authClient.getAuthToken(),
-      { method: "DELETE" }
-    );
+    return this.fetch(`/v1/orgs/${id}`, this.authClient.getAuthToken(), {
+      method: "DELETE",
+    });
   }
 
   getOrganizationMembers(orgId: number): Promise<OrganizationMember[]> {

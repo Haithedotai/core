@@ -50,31 +50,35 @@ async fn post_index_handler(
         sqlx::query_scalar("SELECT COALESCE(MAX(orchestrator_idx), 0) FROM organizations")
             .fetch_one(&state.db)
             .await?;
-    let onchain_length: ethers::types::U256 = contracts::get_contract("haithe_orchestrator", None)
+    let onchain_length: ethers::types::U256 = contracts::get_contract("HaitheOrchestrator", None)?
         .method::<_, ethers::types::U256>("organizationsCount", ())?
         .call()
         .await?;
 
     // iterate from highest_orchestrator_idx + 1 to onchain_length
-    for idx in (highest_orchestrator_idx + 1)..=onchain_length.parse::<i64>()? {
+    for idx in (highest_orchestrator_idx + 1)..=onchain_length.as_u64() as i64 {
         let organization_uid = Uuid::new_v4().to_string().replace("-", "");
         let organization_address: ethers::types::Address =
-            contracts::get_contract("haithe_orchestrator", None)
+            contracts::get_contract("HaitheOrchestrator", None)?
                 .method::<_, ethers::types::Address>("organizations", idx)?
                 .call()
                 .await?;
-        let organization_name: String =
-            contracts::get_contract("haithe_organization", organization_address)
-                .method::<_, String>("name", ())?
-                .call()
-                .await?;
-        let organization_owner: ethers::types::Address =
-            contracts::get_contract("haithe_organization", organization_address)
-                .method::<_, ethers::types::Address>("owner", ())?
-                .call()
-                .await?;
+        let organization_name: String = contracts::get_contract(
+            "HaitheOrganization",
+            Some(&organization_address.to_string()),
+        )?
+        .method::<_, String>("name", ())?
+        .call()
+        .await?;
+        let organization_owner: ethers::types::Address = contracts::get_contract(
+            "HaitheOrganization",
+            Some(&organization_address.to_string()),
+        )?
+        .method::<_, ethers::types::Address>("owner", ())?
+        .call()
+        .await?;
 
-        sqlx::query("INSERT OR IGNORE INTO accounts (name) VALUES (?);")
+        sqlx::query("INSERT OR IGNORE INTO accounts (wallet_address) VALUES (?);")
             .bind(&organization_owner.to_string())
             .execute(&state.db)
             .await?;
@@ -83,10 +87,10 @@ async fn post_index_handler(
             "INSERT INTO organizations (name, owner, organization_uid, orchestrator_idx, address) VALUES (?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(&organization_name)
-        .bind(&organization_owner)
+        .bind(&organization_owner.to_string())
         .bind(&organization_uid)
         .bind(idx)
-        .bind(&organization_address)
+        .bind(&organization_address.to_string())
         .fetch_one(&state.db)
         .await?;
     }
@@ -113,11 +117,16 @@ async fn get_org_handler(
     Ok(respond::ok("Organization retrieved", org))
 }
 
+#[derive(Deserialize)]
+struct PatchOrgQuery {
+    name: String,
+}
+
 #[patch("/{id}")]
 async fn patch_org_handler(
     user: AuthUser,
     path: web::Path<i64>,
-    query: web::Query<PostOrgQuery>,
+    query: web::Query<PatchOrgQuery>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let id = path.into_inner();
