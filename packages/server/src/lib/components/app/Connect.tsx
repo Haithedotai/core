@@ -87,7 +87,7 @@ export default function Connect() {
                     ) : (
                         <div className="flex items-center">
                             <Icon name="Shield" className="size-4 mr-2" />
-                            Sign in to Haithe
+                            Sign in
                         </div>
                     )}
                 </Button>
@@ -97,7 +97,7 @@ export default function Connect() {
                     className="py-2 px-4 rounded-md"
                     disabled={logoutMutation.isPending}
                 >
-                    Disconnect
+                    <Icon name="X" className="size-4" />
                 </Button>
             </div>
         );

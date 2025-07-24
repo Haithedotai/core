@@ -8,8 +8,14 @@ import {
   SheetClose,
 } from "@/src/lib/components/ui/sheet";
 import { useState } from "react";
+import Connect from "@/src/lib/components/app/Connect";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
+import Icon from "@/src/lib/components/custom/Icon";
 
 export function Navbar() {
+  const api = useHaitheApi();
+  const isHaitheLoggedIn = api.isLoggedIn;
+
   const navLinks = [
     ["Problem", "#problem"],
     ["Solution", "#solution"],
@@ -35,12 +41,12 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b border-white/10 bg-black/90 backdrop-blur-xl sticky top-0 z-50">
+    <nav className="border-b min-h-20 flex w-full items-center border-white/10 bg-black/50 backdrop-blur-xl fixed top-0 z-50 glass">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-3">
           <img
-            src="/static/haitheLogo.png"
+            src="/static/haitheLogo.webp"
             alt="Logo"
             className="h-8 w-8 lg:h-9 lg:w-9 overflow-hidden rounded-full object-cover"
           />
@@ -74,12 +80,16 @@ export function Navbar() {
         </div>
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center space-x-3 lg:space-x-4">
-          <Button
-            size="sm"
-            className="bg-white text-black hover:bg-white/90 border-0 font-semibold transition-all duration-300 hover:scale-105 text-sm lg:text-base px-4 lg:px-6"
-          >
-            Get Started
-          </Button>
+          {isHaitheLoggedIn() &&
+            <Button asChild variant="outline" size="lg" className="rounded-sm mx-4">
+              <Link to="/dashboard">
+                <Icon name="LayoutDashboard" className="size-4" />
+                Dashboard
+              </Link>
+            </Button>}
+          <div className="flex items-center justify-center">
+            <Connect />
+          </div>
         </div>
         {/* Hamburger for md and below using Sheet */}
         <div className="lg:hidden">
@@ -96,7 +106,7 @@ export function Navbar() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                 <div className="flex items-center space-x-3">
                   <img
-                    src="/static/haitheLogo.png"
+                    src="/static/haitheLogo.webp"
                     alt="Logo"
                     className="h-8 w-8 overflow-hidden rounded-full object-cover"
                   />
@@ -136,14 +146,17 @@ export function Navbar() {
                   )
                 ))}
                 <div className="flex flex-col gap-4 w-full max-w-xs mt-8">
-                  <SheetClose asChild>
-                    <Button
-                      size="lg"
-                      className="mx-4 bg-white text-black hover:bg-white/90 border-0 font-semibold transition-all duration-300 text-lg"
-                    >
-                      Get Started
-                    </Button>
-                  </SheetClose>
+                  {isHaitheLoggedIn() &&
+                    <Button asChild variant="outline" size="lg" className="rounded-sm mx-4">
+                      <Link to="/dashboard">
+                        <Icon name="LayoutDashboard" className="size-4" />
+                        Dashboard
+                      </Link>
+                    </Button>}
+
+                  <div className="flex items-center justify-center">
+                    <Connect />
+                  </div>
                 </div>
               </div>
             </SheetContent>

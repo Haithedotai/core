@@ -5,7 +5,6 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
-import HomePage from "./home";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import ModelPage from './home/models';
 import ChatbotPage from './home/models/chatbot';
@@ -39,7 +38,7 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: function Index() {
-    return withPageErrorBoundary(HomePage)({});
+    return withPageErrorBoundary(Landing)({});
   },
 })
 
@@ -201,7 +200,6 @@ const routeTree = rootRoute.addChildren([
   organizationRoute,
   helpRoute,
   createItemRoute,
-  landingRoute,
   testRoute
 ])
 
