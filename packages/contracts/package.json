@@ -2,7 +2,8 @@
   "name": "contracts",
   "private": true,
   "scripts": {
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "migrate": "bun run scripts/deploy.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition": "^0.15.0",
@@ -24,7 +25,7 @@
     "viem": "^2.7.6"
   },
   "peerDependencies": {
-    "typescript": "~5.0.4"
+    "typescript": "~5.8.3"
   },
   "dependencies": {
     "@noble/secp256k1": "^2.3.0",

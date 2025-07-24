@@ -26,7 +26,7 @@ CREATE TABLE
         owner TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name),
-        UNIQUE (organization_uid)
+        UNIQUE (organization_uid),
         UNIQUE (address)
     );
 
@@ -48,7 +48,6 @@ CREATE TABLE
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name, org_id),
         UNIQUE (project_uid)
-
     );
 
 CREATE TABLE

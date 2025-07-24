@@ -16,6 +16,9 @@ contract HaitheOrchestrator {
     mapping(address => bool) public isProduct;
     address[] public products;
 
+    mapping(address => bool) public isOrganization;
+    address[] public organizations;
+
     constructor(address usdc_) {
         server = msg.sender;
         usdc = IERC20(usdc_);
@@ -69,7 +72,27 @@ contract HaitheOrchestrator {
             creators[msg.sender] != 0,
             "Only registered creators can create organizations"
         );
+
         HaitheOrganization org = new HaitheOrganization(name_, msg.sender);
+
+        isOrganization[address(org)] = true;
+        organizations.push(address(org));
         org.transferOwnership(msg.sender);
+    }
+
+    function organizationsCount() external view returns (uint256) {
+        return organizations.length;
+    }
+
+    function getOrganizationIndex(
+        address orgAddress
+    ) external view returns (uint256) {
+        require(isOrganization[orgAddress], "Not a registered organization");
+        for (uint256 i = 0; i < products.length; i++) {
+            if (products[i] == orgAddress) {
+                return i;
+            }
+        }
+        revert("Organization not found");
     }
 }
