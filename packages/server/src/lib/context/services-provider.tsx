@@ -15,7 +15,9 @@ export function ServicesProvider({ children }: { children: React.ReactNode }) {
             walletClient: walletClient,
             baseUrl: process.env.BUN_PUBLIC_RUST_SERVER_URL!,
             debug: true,
-        });
+        })
+
+        client.persistentStorage = localStorage;
     }
 
     return (

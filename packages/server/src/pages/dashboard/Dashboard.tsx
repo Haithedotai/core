@@ -2,13 +2,11 @@ import { useState } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/lib/components/ui/tabs";
-import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { formatDate } from "@/src/lib/utils";
 import { useStore } from "@/src/lib/hooks/use-store";
-import Connect from "@/src/lib/components/app/Connect";
 
 interface StatsCardProps {
   title: string;
@@ -186,61 +184,13 @@ export default function DashboardPage() {
   // Get store data - must be called before any conditional returns
   const { selectedOrganizationId } = useStore();
 
-  // Show loading while profile is loading
-  if (isLoggedIn() && profileQuery.isPending) {
-    return (
-      <div className="min-h-full bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Skeleton className="h-16 w-16 mx-auto" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-3/4 mx-auto" />
-            <Skeleton className="h-6 w-1/2 mx-auto" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isLoggedIn()) {
-    return (
-      <div className="min-h-full bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Icon name="Users" className="size-16 text-muted-foreground mx-auto" />
-          <div className="space-y-2">
-            <h3 className="text-xl font-medium">Authentication Required</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Please connect your wallet and complete authentication to access the dashboard.
-            </p>
-            <div className="flex mt-4 justify-center">
-              <Connect />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show onboarding if not logged in or no profile
-  if (!profileQuery.data) {
-    return (
-      <div className="min-h-full bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Icon name="Users" className="size-16 text-muted-foreground mx-auto" />
-          <div className="space-y-2">
-            <h3 className="text-xl font-medium">Complete Setup</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Complete your onboarding to access the dashboard.
-            </p>
-          </div>
-          <Button asChild>
-            <Link to="/onboarding">Complete Setup</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  // All protection is now handled by ProtectedRoute wrapper
+  // Just get the profile data (guaranteed to exist due to ProtectedRoute)
   const profile = profileQuery.data;
+  
+  if (!profile) {
+    return null; // This should never happen with ProtectedRoute, but satisfies TypeScript
+  }
 
   return (
     <div className="min-h-full bg-background">

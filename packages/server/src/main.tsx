@@ -25,7 +25,7 @@ const app = (
             <WagmiProvider>
               <ServicesProvider>
                 <RouterProvider router={router} />
-                <Toaster position="bottom-right" />
+                <Toaster position="bottom-right" theme="dark" />
               </ServicesProvider>
             </WagmiProvider>
           </PrivyProvider>

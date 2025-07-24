@@ -5,6 +5,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
+import { withProtectedRoute } from "@/src/lib/components/app/ProtectedRoute";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import ModelPage from './home/models';
 import ChatbotPage from './home/models/chatbot';
@@ -65,7 +66,12 @@ const onboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/onboarding',
   component: function OnboardingRoute() {
-    return withPageErrorBoundary(Onboarding)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Onboarding, {
+        walletConnected: true,
+        signedInToHaithe: true,
+      })
+    )({});
   },
 })
 
@@ -74,7 +80,14 @@ const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
   component: function DashboardRoute() {
-    return withPageErrorBoundary(Dashboard)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Dashboard, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true,
+        hasProfile: true
+      })
+    )({});
   },
 })
 
@@ -83,7 +96,13 @@ const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
   component: function ProfileRoute() {
-    return withPageErrorBoundary(Profile)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Profile, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -92,7 +111,13 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: function SettingsRoute() {
-    return withPageErrorBoundary(Settings)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Settings, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -101,7 +126,13 @@ const agentsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/agents',
   component: function AgentsRoute() {
-    return withPageErrorBoundary(Agents)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Agents, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -110,7 +141,13 @@ const workflowsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/workflows',
   component: function WorkflowsRoute() {
-    return withPageErrorBoundary(Workflows)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Workflows, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -128,7 +165,13 @@ const analyticsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/analytics',
   component: function AnalyticsRoute() {
-    return withPageErrorBoundary(Analytics)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Analytics, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -137,7 +180,13 @@ const purchasesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/purchases',
   component: function PurchasesRoute() {
-    return withPageErrorBoundary(Purchases)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Purchases, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -146,7 +195,13 @@ const organizationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/organization',
   component: function OrganizationRoute() {
-    return withPageErrorBoundary(Organization)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Organization, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -155,7 +210,13 @@ const helpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/help',
   component: function HelpRoute() {
-    return withPageErrorBoundary(Help)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Help, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
@@ -164,15 +225,13 @@ const createItemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/create',
   component: function CreateRoute() {
-    return withPageErrorBoundary(Create)({});
-  },
-})
-
-const landingRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/landing',
-  component: function LandingRoute() {
-    return withPageErrorBoundary(Landing)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(Create, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 
