@@ -13,9 +13,9 @@ export default function Sidebar() {
     const isActive = (path: string) => pathname === path || pathname.startsWith(path);
 
     // Check if user is fully authenticated (wallet + Haithe)
-    const isHaitheLoggedIn = api.isLoggedIn();
+    const isHaitheLoggedIn = api.isLoggedIn;
 
-    if (!authenticated || !isHaitheLoggedIn) {
+    if (!authenticated || !isHaitheLoggedIn()) {
         return (
             <div className="fixed top-[var(--navbar-height)] h-[calc(100dvh-var(--navbar-height))] w-[var(--sidebar-width)] left-0 z-40 border-r bg-background hidden lg:flex">
             <div className="flex flex-col w-full gap-3 px-4 py-6">

@@ -31,13 +31,7 @@ export default function Connect() {
     };
 
     const handleHaitheLogin = async () => {
-        await loginMutation.mutateAsync();
-
-        if (userOrganizations && userOrganizations.length === 0) {
-            await api.createOrganization.mutateAsync("Default");
-        }
-
-        navigate({ to: "/dashboard" });
+        loginMutation.mutate();
     };
 
     const handleDisconnect = async () => {
@@ -86,24 +80,24 @@ export default function Connect() {
                     className="py-2 px-4 rounded-md"
                 >
                     {loginMutation.isPending ? (
-                        <>
+                        <div className="flex items-center">
                             <Icon name="Loader" className="size-4 mr-2 animate-spin" />
                             Logging in...
-                        </>
+                        </div>
                     ) : (
-                        <>
+                        <div className="flex items-center">
                             <Icon name="Shield" className="size-4 mr-2" />
                             Sign in to Haithe
-                        </>
+                        </div>
                     )}
                 </Button>
                 <Button
                     onClick={handleDisconnect}
                     variant="outline"
-                    size="sm"
+                    className="py-2 px-4 rounded-md"
                     disabled={logoutMutation.isPending}
                 >
-                    <Icon name="X" className="size-4" />
+                    Disconnect
                 </Button>
             </div>
         );
@@ -151,15 +145,15 @@ export default function Connect() {
             className="py-2 px-4 rounded-md"
         >
             {logoutMutation.isPending ? (
-                <>
+                <div className="flex items-center">
                     <Icon name="Loader" className="size-4 mr-2 animate-spin" />
                     Disconnecting...
-                </>
+                </div>
             ) : (
-                <>
+                <div className="flex items-center">
                     <Icon name="LogOut" className="size-4 mr-2" />
                     Disconnect
-                </>
+                </div>
             )}
         </Button>
     );
