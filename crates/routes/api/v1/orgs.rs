@@ -55,31 +55,36 @@ async fn post_index_handler(
         .call()
         .await?;
 
+    let mut synced_count: u32 = 0;
+
     // iterate from highest_orchestrator_idx + 1 to onchain_length
     for idx in (highest_orchestrator_idx + 1)..=onchain_length.as_u64() as i64 {
         let organization_uid = Uuid::new_v4().to_string().replace("-", "");
+
+        // Convert to 0-based index for Solidity array access
+        let solidity_idx = ethers::types::U256::from((idx - 1) as u64);
         let organization_address: ethers::types::Address =
             contracts::get_contract("HaitheOrchestrator", None)?
-                .method::<_, ethers::types::Address>("organizations", idx)?
+                .method::<_, ethers::types::Address>("organizations", solidity_idx)?
                 .call()
                 .await?;
         let organization_name: String = contracts::get_contract(
             "HaitheOrganization",
-            Some(&organization_address.to_string()),
+            Some(&format!("{:#x}", organization_address)),
         )?
         .method::<_, String>("name", ())?
         .call()
         .await?;
         let organization_owner: ethers::types::Address = contracts::get_contract(
             "HaitheOrganization",
-            Some(&organization_address.to_string()),
+            Some(&format!("{:#x}", organization_address)),
         )?
         .method::<_, ethers::types::Address>("owner", ())?
         .call()
         .await?;
 
         sqlx::query("INSERT OR IGNORE INTO accounts (wallet_address) VALUES (?);")
-            .bind(&organization_owner.to_string())
+            .bind(&format!("{:#x}", organization_owner))
             .execute(&state.db)
             .await?;
 
@@ -87,15 +92,19 @@ async fn post_index_handler(
             "INSERT INTO organizations (name, owner, organization_uid, orchestrator_idx, address) VALUES (?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(&organization_name)
-        .bind(&organization_owner.to_string())
+        .bind(&format!("{:#x}", organization_owner))
         .bind(&organization_uid)
         .bind(idx)
-        .bind(&organization_address.to_string())
+        .bind(&format!("{:#x}", organization_address))
         .fetch_one(&state.db)
         .await?;
+        synced_count += 1;
     }
 
-    Ok(respond::ok("Organizations Synced", ()))
+    Ok(respond::ok(
+        "Organizations synced successfully",
+        serde_json::json!({ "count": synced_count }),
+    ))
 }
 
 #[get("/{id}")]

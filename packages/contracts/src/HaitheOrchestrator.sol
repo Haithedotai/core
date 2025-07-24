@@ -68,16 +68,10 @@ contract HaitheOrchestrator {
     }
 
     function createOrganization(string memory name_) external {
-        require(
-            creators[msg.sender] != 0,
-            "Only registered creators can create organizations"
-        );
-
         HaitheOrganization org = new HaitheOrganization(name_, msg.sender);
 
         isOrganization[address(org)] = true;
         organizations.push(address(org));
-        org.transferOwnership(msg.sender);
     }
 
     function organizationsCount() external view returns (uint256) {

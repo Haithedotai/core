@@ -6,7 +6,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 // Hardhat private keys for testing
 const pvtKey1 =
-  "0x59c6995e998f97a5a0044976f1ebf041b8d6bc7d7db05d4e31c7d68cbe9b9d05";
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const pvtKey2 =
   "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
 

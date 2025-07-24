@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "compile": "hardhat compile",
-    "migrate": "bun run scripts/deploy.ts"
+    "migrate": "hardhat compile; bun run scripts/deploy.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition": "^0.15.0",
