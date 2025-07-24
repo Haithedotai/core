@@ -17,7 +17,7 @@ export default function Navbar() {
       <div className="flex items-center gap-6">
         <Link to="/" className="flex gap-2 items-center">
           <img
-            src="/static/haitheLogo.png"
+            src="/static/haitheLogo.webp"
             alt="Logo"
             className="h-9 w-9 overflow-hidden rounded-full 
           object-cover"
