@@ -19,9 +19,9 @@ import Analytics from './dashboard/analytics';
 import Purchases from './dashboard/purchases';
 import Organization from './dashboard/organization';
 import Help from './dashboard/help';
-import Create from './dashboard/create';
 import Landing from './landing';
 import Test from './test/test';
+import Marketplace from './marketplace';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -94,13 +94,14 @@ const dashboardRoute = createRoute({
 // profile route
 const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/profile',
+  path: '/dashboard/profile',
   component: function ProfileRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Profile, {
         walletConnected: true,
         signedInToHaithe: true,
-        hasOrg: true
+        hasOrg: true,
+        hasProfile: true
       })
     )({});
   },
@@ -109,7 +110,7 @@ const profileRoute = createRoute({
 // settings route
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/settings',
+  path: '/dashboard/settings',
   component: function SettingsRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Settings, {
@@ -121,10 +122,10 @@ const settingsRoute = createRoute({
   },
 })
 
-// agents route (renamed from projects)
+// agents route
 const agentsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/agents',
+  path: '/dashboard/agents',
   component: function AgentsRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Agents, {
@@ -136,10 +137,10 @@ const agentsRoute = createRoute({
   },
 })
 
-// workflows route (new)
+// workflows route
 const workflowsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/workflows',
+  path: '/dashboard/workflows',
   component: function WorkflowsRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Workflows, {
@@ -151,19 +152,10 @@ const workflowsRoute = createRoute({
   },
 })
 
-// models route (existing models page)
-const modelsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/models',
-  component: function ModelsRoute() {
-    return withPageErrorBoundary(ModelPage)({});
-  },
-})
-
 // analytics route
 const analyticsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/analytics',
+  path: '/dashboard/analytics',
   component: function AnalyticsRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Analytics, {
@@ -178,7 +170,7 @@ const analyticsRoute = createRoute({
 // purchases route
 const purchasesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/purchases',
+  path: '/dashboard/purchases',
   component: function PurchasesRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Purchases, {
@@ -193,7 +185,7 @@ const purchasesRoute = createRoute({
 // organization route
 const organizationRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/organization',
+  path: '/dashboard/organization',
   component: function OrganizationRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Organization, {
@@ -208,25 +200,10 @@ const organizationRoute = createRoute({
 // help route
 const helpRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/help',
+  path: '/dashboard/help',
   component: function HelpRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(Help, {
-        walletConnected: true,
-        signedInToHaithe: true,
-        hasOrg: true
-      })
-    )({});
-  },
-})
-
-// create route
-const createItemRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/create',
-  component: function CreateRoute() {
-    return withPageErrorBoundary(
-      withProtectedRoute(Create, {
         walletConnected: true,
         signedInToHaithe: true,
         hasOrg: true
@@ -243,6 +220,15 @@ const testRoute = createRoute({
   },
 })
 
+// marketplace route
+const marketplaceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/marketplace',
+  component: function MarketplaceRoute() {
+    return withPageErrorBoundary(Marketplace)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   modelRoute,
@@ -253,13 +239,12 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
   agentsRoute,
   workflowsRoute,
-  modelsRoute,
   analyticsRoute,
   purchasesRoute,
   organizationRoute,
   helpRoute,
-  createItemRoute,
-  testRoute
+  testRoute,
+  marketplaceRoute
 ])
 
 const router = createRouter({

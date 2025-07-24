@@ -4,10 +4,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { Button } from "@/src/lib/components/ui/button";
-import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import Connect from "@/src/lib/components/app/Connect";
+import Loader from "./Loader";
 
 export interface ProtectionRequirements {
   walletConnected?: boolean;
@@ -35,18 +35,33 @@ export function ProtectedRoute({
   const { data: userOrganizations, isLoading: isUserOrganizationsLoading } = api.getUserOrganizations();
   const profileQuery = api.profile();
   const isHaitheLoggedIn = api.isLoggedIn();
+  const isClientInitialized = api.isClientInitialized();
 
   useEffect(() => {
-    if (!ready) return; // Wait for Privy to be ready
+    // console.log('ProtectedRoute useEffect:', {
+    //   ready,
+    //   isClientInitialized,
+    //   authenticated,
+    //   isHaitheLoggedIn,
+    //   requirements,
+    //   userOrganizations: userOrganizations?.length,
+    //   isUserOrganizationsLoading,
+    //   profileData: !!profileQuery.data,
+    //   profilePending: profileQuery.isPending
+    // });
+
+    if (!ready || !isClientInitialized) return; // Wait for both Privy and client to be ready
 
     // Check wallet connection requirement
     if (requirements.walletConnected && !authenticated) {
+      console.log('Redirecting: wallet not connected');
       navigate({ to: redirectTo });
       return;
     }
 
     // Check Haithe authentication requirement
     if (requirements.signedInToHaithe && (!authenticated || !isHaitheLoggedIn)) {
+      console.log('Redirecting: not signed in to Haithe', { authenticated, isHaitheLoggedIn });
       navigate({ to: redirectTo });
       return;
     }
@@ -55,6 +70,7 @@ export function ProtectedRoute({
     if (requirements.hasOrg && authenticated && isHaitheLoggedIn && !isUserOrganizationsLoading) {
       const hasOrganizations = userOrganizations && userOrganizations.length > 0;
       if (!hasOrganizations) {
+        console.log('Redirecting: no organizations');
         navigate({ to: "/onboarding" });
         return;
       }
@@ -63,12 +79,16 @@ export function ProtectedRoute({
     // Check profile requirement
     if (requirements.hasProfile && authenticated && isHaitheLoggedIn && !profileQuery.isPending) {
       if (!profileQuery.data) {
+        console.log('Redirecting: no profile data');
         navigate({ to: "/onboarding" });
         return;
       }
     }
+
+    console.log('ProtectedRoute: All checks passed, staying on current route');
   }, [
     ready,
+    isClientInitialized,
     authenticated,
     isHaitheLoggedIn,
     userOrganizations,
@@ -83,29 +103,12 @@ export function ProtectedRoute({
   // Show loading while checking requirements
   const isLoading =
     !ready ||
+    !isClientInitialized ||
     (requirements.signedInToHaithe && isUserOrganizationsLoading) ||
     (requirements.hasProfile && profileQuery.isPending);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen w-screen bg-background flex items-center justify-center">
-        <div className="text-center w-screen space-y-4 mx-10">
-          <div className="flex justify-center relative">
-            <video
-              src="/static/haitheAI.mp4"
-              autoPlay
-              loop
-              muted
-              className="size-24 overflow-hidden rounded-sm object-cover"
-            />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-3/4 mx-auto" />
-            <Skeleton className="h-6 w-1/2 mx-auto" />
-          </div>
-        </div>
-      </div>
-    );
+    return (<Loader />);
   }
 
   // Show wallet connection required

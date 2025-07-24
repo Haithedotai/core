@@ -140,12 +140,6 @@ export default function HomePage() {
                     Go to Dashboard
                   </Link>
                 </Button>
-                <Button variant="outline" asChild>
-                  <Link to="/create">
-                    <Icon name="Plus" className="size-4 mr-2" />
-                    Create New
-                  </Link>
-                </Button>
               </div>
             ) : (
               <div className="text-center space-y-4">

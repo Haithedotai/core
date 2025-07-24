@@ -8,11 +8,9 @@ import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
-import { useHaitheClient } from "@/src/lib/context/services-provider";
 
 export default function WorkflowsPage() {
   const api = useHaitheApi();
-  const client = useHaitheClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -76,15 +74,6 @@ export default function WorkflowsPage() {
                 Design and orchestrate complex AI workflows with multiple agents
               </p>
             </div>
-            
-            <div className="flex gap-3">
-              <Button asChild>
-                <Link to="/create">
-                  <Icon name="Plus" className="size-4 mr-2" />
-                  Create Workflow
-                </Link>
-              </Button>
-            </div>
           </div>
         </div>
       </div>
@@ -123,12 +112,6 @@ export default function WorkflowsPage() {
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Create your first AI workflow to orchestrate multiple agents and automate complex processes.
             </p>
-            <Button asChild>
-              <Link to="/create">
-                <Icon name="Plus" className="size-4 mr-2" />
-                Create Your First Workflow
-              </Link>
-            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -147,12 +147,12 @@ export function Navbar() {
                     </SheetClose>
                   )
                 ))}
-                <div className="flex flex-col gap-4 w-full max-w-xs mt-8">
+                <div className="flex flex-col gap-4 w-full max-w-xs mt-8 px-4">
                   {ready && authenticated && isHaitheLoggedIn() &&
                     <Button asChild variant="outline" size="lg" className="rounded-sm">
                       <Link to="/dashboard">
                         <Icon name="LayoutDashboard" className="size-4" />
-                        Dashboard
+                        <p className="hidden sm:block">Dashboard</p>
                       </Link>
                     </Button>}
 

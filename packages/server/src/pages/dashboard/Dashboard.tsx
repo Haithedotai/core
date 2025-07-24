@@ -26,11 +26,10 @@ function StatsCard({
   icon,
   trend,
   description,
-  gradient = "from-primary/20 to-primary/5"
 }: StatsCardProps) {
   return (
     <Card className="relative overflow-hidden">
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-50`} />
+      <div className={`absolute inset-0 bg-gradient-to-br bg-secondary opacity-50`} />
       <CardHeader className="relative pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -79,24 +78,11 @@ function QuickActionsSection() {
           Get started with common tasks
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Button variant="outline" className="justify-start h-auto p-4" asChild>
-            <Link to="/create">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Icon name="Plus" className="size-4 text-primary" />
-                </div>
-                <div className="text-left">
-                  <div className="font-medium">New Tool</div>
-                  <div className="text-xs text-muted-foreground">Create a new tool</div>
-                </div>
-              </div>
-            </Link>
-          </Button>
+      <CardContent className="space-y-4 @container">
+        <div className="grid grid-cols-1 @2xl:grid-cols-3 gap-3">
 
           <Button variant="outline" className="justify-start h-auto p-4" asChild>
-            <Link to="/agents">
+            <Link to="/dashboard/agents">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Icon name="Bot" className="size-4 text-blue-600 dark:text-blue-400" />
@@ -110,7 +96,7 @@ function QuickActionsSection() {
           </Button>
 
           <Button variant="outline" className="justify-start h-auto p-4" asChild>
-            <Link to="/workflows">
+            <Link to="/dashboard/workflows">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                   <Icon name="GitBranch" className="size-4 text-purple-600 dark:text-purple-400" />
@@ -124,7 +110,7 @@ function QuickActionsSection() {
           </Button>
 
           <Button variant="outline" className="justify-start h-auto p-4" asChild>
-            <Link to="/organization">
+            <Link to="/dashboard/organization">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                   <Icon name="Building" className="size-4 text-green-600 dark:text-green-400" />
@@ -214,7 +200,7 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <div className="flex items-center justify-center">
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
+            <TabsList className="grid w-full max-w-2xl grid-cols-3">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <Icon name="LayoutDashboard" className="size-4" />
                 Overview
@@ -227,44 +213,24 @@ export default function DashboardPage() {
                 <Icon name="GitBranch" className="size-4" />
                 Workflows
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <Icon name="TrendingUp" className="size-4" />
-                Analytics
-              </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <StatsCard
-                title="Total Projects"
-                value="0"
-                icon="FolderOpen"
-                description="Active projects"
-                gradient="from-blue-500 to-blue-500/20"
-              />
-              <StatsCard
-                title="Active Agents"
+                title="Agents"
                 value="0"
                 icon="Bot"
                 description="Running agents"
-                gradient="from-green-500 to-green-500/20"
               />
               <StatsCard
                 title="Workflows"
                 value="0"
                 icon="GitBranch"
                 description="Automated flows"
-                gradient="from-purple-500 to-purple-500/20"
-              />
-              <StatsCard
-                title="Auth Status"
-                value={authToken ? "Active" : "Inactive"}
-                icon="Shield"
-                description="Authentication token"
-                gradient="from-orange-500 to-orange-500/20"
               />
             </div>
 
@@ -286,7 +252,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <Button asChild>
-                <Link to="/agents">
+                <Link to="/dashboard/agents">
                   <Icon name="Plus" className="size-4 mr-2" />
                   Create First Agent
                 </Link>
@@ -305,7 +271,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <Button asChild>
-                <Link to="/workflows">
+                <Link to="/dashboard/workflows">
                   <Icon name="Plus" className="size-4 mr-2" />
                   Create First Workflow
                 </Link>
@@ -324,7 +290,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <Button asChild>
-                <Link to="/analytics">
+                <Link to="/dashboard/analytics">
                   <Icon name="TrendingUp" className="size-4 mr-2" />
                   View Analytics
                 </Link>

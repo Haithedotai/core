@@ -1,4 +1,4 @@
-import Layout from "@/src/pages/layout";
+import Layout from "@/src/pages/dashboard/layout";
 import WorkflowsPage from "./Workflows";
 
 export default function Workflows() {

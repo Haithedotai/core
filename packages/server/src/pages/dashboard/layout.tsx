@@ -1,5 +1,5 @@
-import Navbar from "@/src/lib/components/app/Navbar";
-import Sidebar from "@/src/lib/components/app/Sidebar";
+import Navbar from "@/src/pages/dashboard/Navbar";
+import Sidebar from "@/src/pages/dashboard/SidebarDesktop";
 import ThemeSwitch from "@/src/lib/components/custom/ThemeSwitch";
 // import { useMouseGlow } from "../lib/utils";
 

@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useHaitheClient } from "../context/services-provider";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useHaitheContext } from "@/src/lib/context/services-provider";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -8,7 +8,7 @@ export type OrganizationRole = 'admin' | 'member';
 export type ProjectRole = 'admin' | 'developer' | 'viewer';
 
 export function useHaitheApi() {
-    const client = useHaitheClient();
+    const { client, isInitialized } = useHaitheContext();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
@@ -16,12 +16,17 @@ export function useHaitheApi() {
     const getAuthToken = () => client?.getAuthToken() || null;
     const isWeb3Ready = () => client?.isWeb3Ready() || false;
     const isLoggedIn = () => client?.auth.isLoggedIn() || false;
+    const isClientInitialized = () => isInitialized;
 
     return {
         // Utility functions
         isLoggedIn,
         getAuthToken,
         isWeb3Ready,
+        isClientInitialized,
+        
+        // Direct client access (for testing)
+        client,
 
         // Auth mutations
         login: useMutation({

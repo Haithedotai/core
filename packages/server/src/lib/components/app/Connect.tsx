@@ -15,7 +15,7 @@ export default function Connect() {
     // Get authentication state
     const isWalletConnected = ready && authenticated && user?.wallet?.address;
     const isHaitheLoggedIn = api.isLoggedIn();
-    
+
     // Check if on correct network
     const isOnCorrectNetwork = currentChainId === hardhat.id;
 
@@ -214,11 +214,10 @@ export default function Connect() {
                 </div>
             ) : (
                 <div className="flex items-center">
-                    <Icon name="LogOut" className="size-4 mr-2" />
-                    Disconnect
-                    <span className="ml-2 text-xs opacity-70">
-                        (Chain: {currentChainId})
-                    </span>
+                    <Icon name="LogOut" className="size-4" />
+                    <div className="hidden sm:block ml-2">
+                        Disconnect
+                    </div>
                 </div>
             )}
         </Button>
