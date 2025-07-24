@@ -1,5 +1,5 @@
 import { BaseClient } from "../shared/baseClient";
-import { Organization, OrganizationMember } from "../shared/types";
+import type { Organization, OrganizationMember } from "../shared/types";
 import { HaitheAuthClient } from "./auth";
 
 export class HaitheOrgsClient extends BaseClient {
@@ -8,6 +8,10 @@ export class HaitheOrgsClient extends BaseClient {
   constructor(authClient: HaitheAuthClient, options?: { debug?: boolean }) {
     super(authClient["baseUrl"], options?.debug);
     this.authClient = authClient;
+  }
+
+  getUserOrganizations(): Promise<Organization[]> {
+    return this.fetch(`/v1/me/orgs`, this.authClient.getAuthToken());
   }
 
   createOrganization(name: string): Promise<Organization> {

@@ -17,6 +17,7 @@ contract HaitheOrchestrator {
     address[] public products;
 
     mapping(address => bool) public isOrganization;
+    address[] public organizations;
 
     constructor(address usdc_) {
         server = msg.sender;
@@ -71,14 +72,16 @@ contract HaitheOrchestrator {
             creators[msg.sender] != 0,
             "Only registered creators can create organizations"
         );
-        require(
-            !isOrganization[msg.sender],
-            "Already registered as organization"
-        );
 
-        isOrganization[msg.sender] = true;
         HaitheOrganization org = new HaitheOrganization(name_, msg.sender);
+
+        isOrganization[address(org)] = true;
+        organizations.push(address(org));
         org.transferOwnership(msg.sender);
+    }
+
+    function organizationsCount() external view returns (uint256) {
+        return organizations.length;
     }
 
     function getOrganizationIndex(

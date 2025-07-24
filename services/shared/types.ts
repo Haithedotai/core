@@ -35,5 +35,5 @@ export interface ProjectMember {
 
 export interface UserProfile {
   address: string;
-  registered: number;
+  registered: Date;
 }

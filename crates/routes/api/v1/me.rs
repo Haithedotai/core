@@ -8,7 +8,9 @@ use uuid::Uuid;
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Organization {
     pub id: i64,
+    pub organization_uid: String,
     pub name: String,
+    pub owner: String,
     pub created_at: String,
 }
 
@@ -37,11 +39,11 @@ async fn get_orgs_handler(
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let orgs = sqlx::query_as::<_, Organization>(
-        "SELECT * FROM organizations WHERE id IN (
-            SELECT org_id FROM org_owners WHERE wallet_address = ? 
-            UNION 
-            SELECT org_id FROM org_admins WHERE wallet_address = ?
-        )",
+        "SELECT * FROM organizations WHERE owner = ? 
+         UNION 
+         SELECT organizations.* FROM organizations 
+         INNER JOIN org_members ON organizations.id = org_members.org_id 
+         WHERE org_members.wallet_address = ?",
     )
     .bind(&user.wallet_address)
     .bind(&user.wallet_address)

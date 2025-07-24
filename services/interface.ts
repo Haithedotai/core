@@ -3,12 +3,12 @@ import {
   HaitheAuthClient,
   HaitheOrgsClient,
   HaitheProjectsClient,
-  MinimalPersistentStorage,
-  Organization,
-  OrganizationMember,
-  Project,
-  ProjectMember,
-  UserProfile
+  type MinimalPersistentStorage,
+  type Organization,
+  type OrganizationMember,
+  type Project,
+  type ProjectMember,
+  type UserProfile
 } from "./clients";
 
 export class HaitheClient {
@@ -76,6 +76,10 @@ export class HaitheClient {
   // Backward compatibility - delegate to orgs client
   createOrganization(name: string): Promise<Organization> {
     return this.orgs.createOrganization(name);
+  }
+
+  getUserOrganizations(): Promise<Organization[]> {
+    return this.orgs.getUserOrganizations();
   }
 
   getOrganization(id: number): Promise<Organization> {

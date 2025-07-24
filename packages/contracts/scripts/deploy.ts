@@ -1,8 +1,10 @@
 import * as viem from "viem";
+import { hardhat } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
 import tusdt from "../artifacts/src/tUSDT.sol/tusdt.json";
 import HaitheOrchestrator from "../artifacts/src/HaitheOrchestrator.sol/HaitheOrchestrator.json";
+import HaitheOrganization from "../artifacts/src/HaitheOrganization.sol/HaitheOrganization.json";
 
 const hyperion: viem.Chain = {
   id: 133717,
@@ -20,7 +22,7 @@ const hyperion: viem.Chain = {
 };
 
 const networkArg = Bun.argv[2];
-console.log("Network argument:", networkArg);
+const isHyperion = networkArg === "hyperion";
 
 const privateKey = Bun.env.METIS_PRIVATE_KEY_1;
 if (!privateKey || !viem.isHex(privateKey)) {
@@ -28,9 +30,15 @@ if (!privateKey || !viem.isHex(privateKey)) {
 }
 const client = viem
   .createWalletClient({
-    chain: hyperion,
-    account: privateKeyToAccount(privateKey),
-    transport: viem.http(hyperion.rpcUrls.default.http[0]),
+    chain: isHyperion ? hyperion : hardhat,
+    account: isHyperion
+      ? privateKeyToAccount(privateKey)
+      : privateKeyToAccount(
+          "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" // Hardhat default private key
+        ),
+    transport: viem.http(
+      (isHyperion ? hyperion : hardhat).rpcUrls.default.http[0]
+    ),
   })
   .extend(viem.publicActions);
 
@@ -39,7 +47,7 @@ const definitions: Record<
   string,
   {
     abi: any;
-    address: viem.Address;
+    address?: viem.Address;
   }
 > = {};
 
@@ -93,6 +101,9 @@ async function main() {
   definitions["HaitheOrchestrator"] = {
     abi: HaitheOrchestrator.abi,
     address: orchestrator.address,
+  };
+  definitions["HaitheOrganization"] = {
+    abi: HaitheOrganization.abi,
   };
 }
 

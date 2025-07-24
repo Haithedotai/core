@@ -7,20 +7,21 @@ import {
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import HomePage from "./home";
 import { useAnalytics } from '../lib/hooks/use-analytics';
-import CreatorPage from './creator';
-import ModelPage from './models';
-import ChatbotPage from './chatbot';
+import ModelPage from './home/models';
+import ChatbotPage from './home/models/chatbot';
 import Onboarding from './onboarding';
 import Dashboard from './dashboard';
-import Profile from './profile';
-import Settings from './settings';
-import Projects from './projects';
-import Analytics from './analytics';
-import Purchases from './purchases';
-import Organization from './organization';
-import Help from './help';
-import Create from './create';
+import Profile from './dashboard/profile';
+import Settings from './dashboard/settings';
+import Agents from './dashboard/agents';
+import Workflows from './dashboard/workflows';
+import Analytics from './dashboard/analytics';
+import Purchases from './dashboard/purchases';
+import Organization from './dashboard/organization';
+import Help from './dashboard/help';
+import Create from './dashboard/create';
 import Landing from './landing';
+import Test from './test/test';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -39,14 +40,6 @@ const indexRoute = createRoute({
   path: '/',
   component: function Index() {
     return withPageErrorBoundary(HomePage)({});
-  },
-})
-
-const creatorRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/creator',
-  component: function Dynamic() {
-    return withPageErrorBoundary(CreatorPage)({});
   },
 })
 
@@ -104,12 +97,30 @@ const settingsRoute = createRoute({
   },
 })
 
-// projects route
-const projectsRoute = createRoute({
+// agents route (renamed from projects)
+const agentsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/projects',
-  component: function ProjectsRoute() {
-    return withPageErrorBoundary(Projects)({});
+  path: '/agents',
+  component: function AgentsRoute() {
+    return withPageErrorBoundary(Agents)({});
+  },
+})
+
+// workflows route (new)
+const workflowsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workflows',
+  component: function WorkflowsRoute() {
+    return withPageErrorBoundary(Workflows)({});
+  },
+})
+
+// models route (existing models page)
+const modelsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/models',
+  component: function ModelsRoute() {
+    return withPageErrorBoundary(ModelPage)({});
   },
 })
 
@@ -166,22 +177,32 @@ const landingRoute = createRoute({
   },
 })
 
+const testRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/test',
+  component: function TestRoute() {
+    return withPageErrorBoundary(Test)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  creatorRoute,
   modelRoute,
   chatbotRoute,
   onboardingRoute,
   dashboardRoute,
   profileRoute,
   settingsRoute,
-  projectsRoute,
+  agentsRoute,
+  workflowsRoute,
+  modelsRoute,
   analyticsRoute,
   purchasesRoute,
   organizationRoute,
   helpRoute,
   createItemRoute,
-  landingRoute
+  landingRoute,
+  testRoute
 ])
 
 const router = createRouter({

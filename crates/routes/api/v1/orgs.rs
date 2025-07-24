@@ -1,5 +1,5 @@
 use crate::lib::extractors::AuthUser;
-use crate::lib::{error::ApiError, respond, state::AppState};
+use crate::lib::{contracts, error::ApiError, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -9,6 +9,8 @@ use uuid::Uuid;
 pub struct Organization {
     pub id: i64,
     pub organization_uid: String,
+    pub address: String,
+    pub orchestrator_idx: i64,
     pub name: String,
     pub owner: String,
     pub created_at: String,
@@ -39,31 +41,57 @@ struct DeleteMemberQuery {
     wallet_address: String,
 }
 
-#[derive(Deserialize)]
-struct PostOrgQuery {
-    name: String,
-}
-
 #[post("")]
 async fn post_index_handler(
-    user: AuthUser,
-    query: web::Query<PostOrgQuery>,
+    _: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let org_name = query.name.clone();
+    let highest_orchestrator_idx: i64 =
+        sqlx::query_scalar("SELECT COALESCE(MAX(orchestrator_idx), 0) FROM organizations")
+            .fetch_one(&state.db)
+            .await?;
+    let onchain_length: ethers::types::U256 = contracts::get_contract("haithe_orchestrator", None)
+        .method::<_, ethers::types::U256>("organizationsCount", ())?
+        .call()
+        .await?;
 
-    let organization_uid = Uuid::new_v4().to_string().replace("-", "");
+    // iterate from highest_orchestrator_idx + 1 to onchain_length
+    for idx in (highest_orchestrator_idx + 1)..=onchain_length.parse::<i64>()? {
+        let organization_uid = Uuid::new_v4().to_string().replace("-", "");
+        let organization_address: ethers::types::Address =
+            contracts::get_contract("haithe_orchestrator", None)
+                .method::<_, ethers::types::Address>("organizations", idx)?
+                .call()
+                .await?;
+        let organization_name: String =
+            contracts::get_contract("haithe_organization", organization_address)
+                .method::<_, String>("name", ())?
+                .call()
+                .await?;
+        let organization_owner: ethers::types::Address =
+            contracts::get_contract("haithe_organization", organization_address)
+                .method::<_, ethers::types::Address>("owner", ())?
+                .call()
+                .await?;
 
-    let org = sqlx::query_as::<_, Organization>(
-        "INSERT INTO organizations (name, owner, organization_uid) VALUES (?, ?, ?) RETURNING *",
-    )
-    .bind(&org_name)
-    .bind(&user.wallet_address)
-    .bind(&organization_uid)
-    .fetch_one(&state.db)
-    .await?;
+        sqlx::query("INSERT OR IGNORE INTO accounts (name) VALUES (?);")
+            .bind(&organization_owner.to_string())
+            .execute(&state.db)
+            .await?;
 
-    Ok(respond::ok("Organization created", org))
+        let org = sqlx::query_as::<_, Organization>(
+            "INSERT INTO organizations (name, owner, organization_uid, orchestrator_idx, address) VALUES (?, ?, ?, ?, ?) RETURNING *",
+        )
+        .bind(&organization_name)
+        .bind(&organization_owner)
+        .bind(&organization_uid)
+        .bind(idx)
+        .bind(&organization_address)
+        .fetch_one(&state.db)
+        .await?;
+    }
+
+    Ok(respond::ok("Organizations Synced", ()))
 }
 
 #[get("/{id}")]

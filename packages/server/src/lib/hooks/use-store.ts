@@ -1,27 +1,11 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand'
 
-interface Store {
-  bears: number;
-  setBears: (bears: number) => void;
+type Store = {
+  selectedOrganizationId: number
+  setSelectedOrganizationId: (organizationId: number) => void
 }
 
-interface StorePersist {
-  bears: number;
-  setBears: (bears: number) => void;
-}
-
-export const useStore = create<Store>((set) => ({
-  bears: 0,
-  setBears: (bears: number) => set({ bears }),
-}));
-
-export const useStorePersist = create<StorePersist>()(
-  persist(
-    (set) => ({
-      bears: 0,
-      setBears: (bears: number) => set({ bears }),
-    }),
-    { name: "zustand" }
-  )
-);
+export const useStore = create<Store>()((set) => ({
+  selectedOrganizationId: 0,
+  setSelectedOrganizationId: (organizationId: number) => set({ selectedOrganizationId: organizationId }),
+}))
