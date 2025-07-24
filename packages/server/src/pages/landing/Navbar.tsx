@@ -1,54 +1,153 @@
 import { Button } from "@/src/lib/components/ui/button";
 import { Link } from "@tanstack/react-router";
-
+import { Menu } from "lucide-react";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetClose,
+} from "@/src/lib/components/ui/sheet";
+import { useState } from "react";
 
 export function Navbar() {
+  const navLinks = [
+    ["Problem", "#problem"],
+    ["Solution", "#solution"],
+    ["How It Works", "#how-it-works"],
+    ["Features", "#features"],
+    ["Community", "#community"],
+    ["Challenges", "/challenges"],
+  ];
+  const [open, setOpen] = useState(false);
+
+  // Custom handler for anchor links in Sheet
+  function handleSheetAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    e.preventDefault();
+    setOpen(false);
+    setTimeout(() => {
+      const el = document.getElementById(href.replace('#', ''));
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.hash = href;
+      }
+    }, 300); // Wait for Sheet to close
+  }
+
   return (
     <nav className="border-b border-white/10 bg-black/90 backdrop-blur-xl sticky top-0 z-50">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
+        {/* Logo */}
         <div className="flex items-center space-x-3">
           <img
             src="/static/haitheLogo.png"
             alt="Logo"
-            className="h-9 w-9 overflow-hidden rounded-full object-cover"
+            className="h-8 w-8 lg:h-9 lg:w-9 overflow-hidden rounded-full object-cover"
           />
-          <span className="font-bold text-2xl text-white tracking-tight">
+          <span className="font-bold text-xl lg:text-2xl text-white tracking-tight">
             Haithe
           </span>
         </div>
-        <div className="hidden md:flex items-center space-x-8">
-          {[
-            ["Problem", "#problem"],
-            ["Solution", "#solution"],
-            ["How It Works", "#how-it-works"],
-            ["Features", "#features"],
-            ["Community", "#community"],
-            ["Challenges", "/challenges"],
-          ].map(([label, href]) => (
-            <Link
-              key={label}
-              to={href}
-              className="text-sm font-medium text-white/60 hover:text-white transition-all duration-300 hover:scale-105 relative group"
-            >
-              {label}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-            </Link>
+        {/* Desktop Nav Links */}
+        <div className="hidden lg:flex items-center space-x-6 lg:space-x-8">
+          {navLinks.map(([label, href]) => (
+            href.startsWith("#") ? (
+              <a
+                key={label}
+                href={href}
+                className="text-sm font-medium text-white/60 hover:text-white transition-all duration-300 hover:scale-105 relative group"
+              >
+                {label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            ) : (
+              <Link
+                key={label}
+                to={href}
+                className="text-sm font-medium text-white/60 hover:text-white transition-all duration-300 hover:scale-105 relative group"
+              >
+                {label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            )
           ))}
         </div>
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white/60 hover:text-white hover:bg-white/5 border-0 transition-all duration-300 hover:scale-105"
-          >
-            Sign In
-          </Button>
+        {/* Desktop Actions */}
+        <div className="hidden lg:flex items-center space-x-3 lg:space-x-4">
           <Button
             size="sm"
-            className="bg-white text-black hover:bg-white/90 border-0 font-semibold transition-all duration-300 hover:scale-105"
+            className="bg-white text-black hover:bg-white/90 border-0 font-semibold transition-all duration-300 hover:scale-105 text-sm lg:text-base px-4 lg:px-6"
           >
             Get Started
           </Button>
+        </div>
+        {/* Hamburger for md and below using Sheet */}
+        <div className="lg:hidden">
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <button
+                className="flex items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-all duration-200 focus:outline-none"
+                aria-label="Open menu"
+              >
+                <Menu className="h-7 w-7 text-white" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-black/95 p-0 w-3/4 max-w-xs flex flex-col">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                <div className="flex items-center space-x-3">
+                  <img
+                    src="/static/haitheLogo.png"
+                    alt="Logo"
+                    className="h-8 w-8 overflow-hidden rounded-full object-cover"
+                  />
+                  <span className="font-bold text-xl text-white tracking-tight">
+                    Haithe
+                  </span>
+                </div>
+                <SheetClose asChild>
+                  <button
+                    className="p-2 rounded-lg hover:bg-white/10 transition-all duration-200 focus:outline-none"
+                    aria-label="Close menu"
+                  >
+                    <span className="sr-only">Close</span>
+                  </button>
+                </SheetClose>
+              </div>
+              <div className="flex-1 flex flex-col justify-center items-center gap-8 py-8">
+                {navLinks.map(([label, href]) => (
+                  href.startsWith("#") ? (
+                    <a
+                      key={label}
+                      href={href}
+                      className="text-2xl font-semibold text-white/90 hover:text-white transition-all duration-200"
+                      onClick={e => handleSheetAnchorClick(e, href)}
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <SheetClose asChild key={label}>
+                      <Link
+                        to={href}
+                        className="text-2xl font-semibold text-white/90 hover:text-white transition-all duration-200"
+                      >
+                        {label}
+                      </Link>
+                    </SheetClose>
+                  )
+                ))}
+                <div className="flex flex-col gap-4 w-full max-w-xs mt-8">
+                  <SheetClose asChild>
+                    <Button
+                      size="lg"
+                      className="mx-4 bg-white text-black hover:bg-white/90 border-0 font-semibold transition-all duration-300 text-lg"
+                    >
+                      Get Started
+                    </Button>
+                  </SheetClose>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </nav>

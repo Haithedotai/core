@@ -48,7 +48,7 @@ export default function Landing() {
     <div className="min-h-screen bg-black text-white overflow-hidden relative w-full">
       <Navbar />
       {/* Hero Section */}
-      <section className="relative py-32 lg:py-40">
+      <section className="relative py-20 lg:py-32">
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <video
             className="absolute top-0 left-0 w-full h-full object-cover opacity-30"
@@ -63,32 +63,32 @@ export default function Landing() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
         </div>
 
-        <div className="container relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="mx-auto max-w-6xl text-center">
-            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm mb-12 backdrop-blur-sm hover:bg-white/8 transition-all duration-300">
+            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm mb-8 lg:mb-12 backdrop-blur-sm hover:bg-white/8 transition-all duration-300">
               <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse" />
               <span className="text-white/80 font-medium">
                 Decentralized Protocol for Verifiable AI
               </span>
             </div>
 
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tighter mb-8 leading-none">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl xl:text-8xl font-black tracking-tighter mb-6 lg:mb-8 leading-none">
               Building Trust in AI, <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">
                 One Verified Claim at a Time
               </span>
             </h1>
 
-            <p className="text-xl lg:text-2xl text-white/60 mb-16 max-w-4xl mx-auto leading-relaxed font-light">
+            <p className="text-lg sm:text-xl lg:text-2xl text-white/60 mb-12 lg:mb-16 max-w-4xl mx-auto leading-relaxed font-light px-4">
               Haithe creates a transparent, verifiable ecosystem for AI that
               moves beyond simple integrity checks to substantive verification
               through expert auditors.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center px-4">
               <Button
                 size="lg"
-                className="text-lg bg-white text-black hover:bg-white/90 border-0 px-10 py-6 h-auto font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20"
+                className="text-base lg:text-lg bg-white text-black hover:bg-white/90 border-0 px-8 lg:px-10 py-4 lg:py-6 h-auto font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20 w-full sm:w-auto"
               >
                 Explore the Ecosystem
                 <ArrowRight className="ml-3 h-5 w-5" />
@@ -96,7 +96,7 @@ export default function Landing() {
               <Button
                 variant="outline"
                 size="lg"
-                className="text-lg bg-black border-white/20 text-white/80 hover:bg-white/5 hover:text-white px-10 py-6 h-auto rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30"
+                className="text-base lg:text-lg bg-black border-white/20 text-white/80 hover:bg-white/5 hover:text-white px-8 lg:px-10 py-4 lg:py-6 h-auto rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30 w-full sm:w-auto"
               >
                 <Play className="mr-3 h-5 w-5" />
                 Watch Demo
@@ -107,9 +107,9 @@ export default function Landing() {
       </section>
 
       {/* Hero Images Section */}
-      <section className="py-16 scroll-animate opacity-0 translate-y-8 transition-all duration-1000">
-        <div className="container">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <section className="py-16 lg:py-20 scroll-animate opacity-0 translate-y-8 transition-all duration-1000">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
             <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm hover:border-white/20 transition-all duration-500 hover:scale-105">
               <div className="aspect-video bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center">
                 <img
@@ -168,16 +168,16 @@ export default function Landing() {
       {/* Problem Section */}
       <section
         id="problem"
-        className="py-32 relative scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
+        className="py-20 lg:py-24 relative scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
-        <div className="container relative z-20">
-          <div className="mx-auto max-w-7xl">
-            <div className="text-center mb-24">
-              <h2 className="text-5xl lg:text-6xl font-black mb-8 text-white tracking-tight">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-16 lg:mb-20">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 lg:mb-8 text-white tracking-tight">
                 The Trust Vacuum in Web3 AI
               </h2>
-              <p className="text-2xl text-white/60 max-w-4xl mx-auto font-light">
+              <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
                 The core challenge for AI in Web3 isn't just proving that data
                 hasn't been tampered with
               </p>
@@ -185,14 +185,14 @@ export default function Landing() {
 
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-white/8 via-white/12 to-white/8 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500" />
-              <Card className="relative p-12 lg:p-16 bg-black/50 border border-white/10 backdrop-blur-sm rounded-3xl hover:border-white/20 transition-all duration-500 hover:scale-[1.02]">
+              <Card className="relative p-8 lg:p-12 xl:p-16 bg-black/50 border border-white/10 backdrop-blur-sm rounded-3xl hover:border-white/20 transition-all duration-500 hover:scale-[1.02]">
                 <CardContent className="p-0">
-                  <div className="grid lg:grid-cols-2 gap-16 items-center">
-                    <div className="space-y-8">
-                      <h3 className="text-4xl font-bold text-white tracking-tight">
+                  <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    <div className="space-y-6 lg:space-y-8">
+                      <h3 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
                         The Semantic Gap
                       </h3>
-                      <div className="space-y-6 text-white/70 text-lg leading-relaxed">
+                      <div className="space-y-4 lg:space-y-6 text-white/70 text-base lg:text-lg leading-relaxed">
                         <p>
                           A cryptographic hash can guarantee a dataset's
                           integrity, but it cannot verify its origin, quality,
@@ -210,11 +210,11 @@ export default function Landing() {
                     </div>
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-red-500/5 rounded-2xl blur-xl" />
-                      <div className="relative bg-red-500/5 rounded-2xl p-8 border border-red-500/20 backdrop-blur-sm hover:border-red-500/30 transition-all duration-300">
-                        <h4 className="font-bold text-red-400 mb-6 text-xl">
+                      <div className="relative bg-red-500/5 rounded-2xl p-6 lg:p-8 border border-red-500/20 backdrop-blur-sm hover:border-red-500/30 transition-all duration-300">
+                        <h4 className="font-bold text-red-400 mb-4 lg:mb-6 text-lg lg:text-xl">
                           Current Issues:
                         </h4>
-                        <ul className="space-y-4 text-white/70">
+                        <ul className="space-y-3 lg:space-y-4 text-white/70 text-sm lg:text-base">
                           {[
                             "No verification of data origin",
                             "Quality claims cannot be validated",
@@ -225,7 +225,7 @@ export default function Landing() {
                               key={index}
                               className="flex items-start hover:text-white/90 transition-colors duration-300"
                             >
-                              <div className="w-2 h-2 bg-red-400 rounded-full mr-4 mt-2 flex-shrink-0" />
+                              <div className="w-2 h-2 bg-red-400 rounded-full mr-3 lg:mr-4 mt-2 flex-shrink-0" />
                               {issue}
                             </li>
                           ))}
@@ -243,20 +243,20 @@ export default function Landing() {
       {/* Solution Section */}
       <section
         id="solution"
-        className="py-32 scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
+        className="py-20 lg:py-24 scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
       >
-        <div className="container relative z-20">
-          <div className="mx-auto max-w-7xl text-center mb-24">
-            <h2 className="text-5xl lg:text-6xl font-black mb-8 text-white tracking-tight">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 lg:mb-8 text-white tracking-tight">
               Haithe: The Solution
             </h2>
-            <p className="text-2xl text-white/60 max-w-4xl mx-auto font-light">
+            <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
               A trust protocol that enables substantive verification through
               expert auditors
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-24">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-16 lg:mb-20">
             {[
               {
                 icon: Code,
@@ -291,15 +291,15 @@ export default function Landing() {
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${item.gradient} rounded-2xl blur-xl transition-all duration-500 group-hover:blur-2xl opacity-0 group-hover:opacity-100`}
                   />
-                  <Card className="relative text-center bg-black/50 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-500 rounded-2xl p-8 group-hover:transform group-hover:scale-105 overflow-hidden">
+                  <Card className="relative text-center bg-black/50 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-500 rounded-2xl p-6 lg:p-8 group-hover:transform group-hover:scale-105 overflow-hidden h-full">
                     <CardHeader className="pb-4">
-                      <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                        <item.icon className="h-8 w-8 text-white" />
+                      <div className="mx-auto mb-4 h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                        <item.icon className="h-7 w-7 lg:h-8 lg:w-8 text-white" />
                       </div>
-                      <CardTitle className="text-2xl text-white font-bold">
+                      <CardTitle className="text-xl lg:text-2xl text-white font-bold">
                         {item.title}
                       </CardTitle>
-                      <CardDescription className="text-white/60 mt-4 text-base leading-relaxed">
+                      <CardDescription className="text-white/60 mt-3 lg:mt-4 text-sm lg:text-base leading-relaxed">
                         {item.description}
                       </CardDescription>
                     </CardHeader>
@@ -312,33 +312,33 @@ export default function Landing() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-32 relative">
+      <section id="how-it-works" className="py-20 lg:py-24 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
-        <div className="container relative z-10">
-          <div className="mx-auto max-w-7xl">
-            <div className="text-center mb-24">
-              <h2 className="text-5xl lg:text-6xl font-black mb-8 text-white tracking-tight">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-16 lg:mb-20">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 lg:mb-8 text-white tracking-tight">
                 How Haithe Works
               </h2>
-              <p className="text-2xl text-white/60 max-w-4xl mx-auto font-light">
+              <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
                 A three-part ecosystem with checks and balances between all
                 participants
               </p>
             </div>
 
-            <div className="space-y-32">
+            <div className="space-y-20 lg:space-y-24">
               {/* Step 1 */}
-              <div className="grid lg:grid-cols-2 gap-16 items-center">
-                <div className="space-y-8">
-                  <div className="flex items-center space-x-6">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 text-white flex items-center justify-center text-2xl font-black backdrop-blur-sm">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div className="space-y-6 lg:space-y-8">
+                  <div className="flex items-center space-x-4 lg:space-x-6">
+                    <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 text-white flex items-center justify-center text-xl lg:text-2xl font-black backdrop-blur-sm">
                       1
                     </div>
-                    <h3 className="text-4xl font-bold text-white tracking-tight">
+                    <h3 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
                       The Creator: Defining the Claims
                     </h3>
                   </div>
-                  <div className="space-y-6 text-white/70 text-lg leading-relaxed pl-22">
+                  <div className="space-y-4 lg:space-y-6 text-white/70 text-base lg:text-lg leading-relaxed pl-18 lg:pl-22">
                     <p>
                       <strong className="text-white font-semibold">
                         Build & Register:
@@ -358,11 +358,11 @@ export default function Landing() {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl blur-xl" />
-                  <Card className="relative p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl">
-                    <h4 className="font-bold mb-6 text-white text-xl">
+                  <Card className="relative p-6 lg:p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl">
+                    <h4 className="font-bold mb-4 lg:mb-6 text-white text-lg lg:text-xl">
                       Example Claims:
                     </h4>
-                    <ul className="space-y-4 text-white/70">
+                    <ul className="space-y-3 lg:space-y-4 text-white/70 text-sm lg:text-base">
                       {[
                         {
                           label: "Source:",
@@ -391,14 +391,14 @@ export default function Landing() {
               </div>
 
               {/* Step 2 */}
-              <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 <div className="relative order-2 lg:order-1">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl blur-xl" />
-                  <Card className="relative p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl">
-                    <h4 className="font-bold mb-6 text-white text-xl">
+                  <Card className="relative p-6 lg:p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl">
+                    <h4 className="font-bold mb-4 lg:mb-6 text-white text-lg lg:text-xl">
                       Audit Process:
                     </h4>
-                    <ol className="space-y-4 text-white/70">
+                    <ol className="space-y-3 lg:space-y-4 text-white/70 text-sm lg:text-base">
                       {[
                         "Stake tokens to become eligible",
                         "Accept audit request",
@@ -416,16 +416,16 @@ export default function Landing() {
                     </ol>
                   </Card>
                 </div>
-                <div className="order-1 lg:order-2 space-y-8">
-                  <div className="flex items-center space-x-6">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 text-white flex items-center justify-center text-2xl font-black backdrop-blur-sm">
+                <div className="order-1 lg:order-2 space-y-6 lg:space-y-8">
+                  <div className="flex items-center space-x-4 lg:space-x-6">
+                    <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 text-white flex items-center justify-center text-xl lg:text-2xl font-black backdrop-blur-sm">
                       2
                     </div>
-                    <h3 className="text-4xl font-bold text-white tracking-tight">
+                    <h3 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
                       The Auditor: Investigating the Substance
                     </h3>
                   </div>
-                  <div className="space-y-6 text-white/70 text-lg leading-relaxed pl-22">
+                  <div className="space-y-4 lg:space-y-6 text-white/70 text-base lg:text-lg leading-relaxed pl-18 lg:pl-22">
                     <p>
                       <strong className="text-white font-semibold">
                         Expert Investigation:
@@ -445,17 +445,17 @@ export default function Landing() {
               </div>
 
               {/* Step 3 */}
-              <div className="grid lg:grid-cols-2 gap-16 items-center">
-                <div className="space-y-8">
-                  <div className="flex items-center space-x-6">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 text-white flex items-center justify-center text-2xl font-black backdrop-blur-sm">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div className="space-y-6 lg:space-y-8">
+                  <div className="flex items-center space-x-4 lg:space-x-6">
+                    <div className="h-14 w-14 lg:h-16 lg:w-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 text-white flex items-center justify-center text-xl lg:text-2xl font-black backdrop-blur-sm">
                       3
                     </div>
-                    <h3 className="text-4xl font-bold text-white tracking-tight">
+                    <h3 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
                       The Consumer: Making Informed Decisions
                     </h3>
                   </div>
-                  <div className="space-y-6 text-white/70 text-lg leading-relaxed pl-22">
+                  <div className="space-y-4 lg:space-y-6 text-white/70 text-base lg:text-lg leading-relaxed pl-18 lg:pl-22">
                     <p>
                       <strong className="text-white font-semibold">
                         Discover & Filter:
@@ -474,11 +474,11 @@ export default function Landing() {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl blur-xl" />
-                  <Card className="relative p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl">
-                    <h4 className="font-bold mb-6 text-white text-xl">
+                  <Card className="relative p-6 lg:p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl">
+                    <h4 className="font-bold mb-4 lg:mb-6 text-white text-lg lg:text-xl">
                       Consumer Benefits:
                     </h4>
-                    <ul className="space-y-4 text-white/70">
+                    <ul className="space-y-3 lg:space-y-4 text-white/70 text-sm lg:text-base">
                       {[
                         "Expert-verified agent characteristics",
                         "Detailed audit reports for each claim",
@@ -502,19 +502,19 @@ export default function Landing() {
       {/* Features Section */}
       <section
         id="features"
-        className="py-32 scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
+        className="py-20 lg:py-24 scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
       >
-        <div className="container relative z-20">
-          <div className="mx-auto max-w-7xl text-center mb-24">
-            <h2 className="text-5xl lg:text-6xl font-black mb-8 text-white tracking-tight">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 lg:mb-8 text-white tracking-tight">
               Key Features of Haithe
             </h2>
-            <p className="text-2xl text-white/60 max-w-4xl mx-auto font-light">
+            <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
               Built for performance, security, and trust
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {[
               {
                 icon: CheckCircle,
@@ -562,17 +562,17 @@ export default function Landing() {
               <div key={index} className="group">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/12 to-white/6 rounded-2xl blur-xl transition-all duration-500 group-hover:blur-2xl opacity-0 group-hover:opacity-100" />
-                  <Card className="relative bg-black/30 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-500 rounded-2xl p-8 group-hover:transform group-hover:scale-105">
-                    <CardHeader>
+                  <Card className="relative bg-black/30 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-500 rounded-2xl p-6 lg:p-8 group-hover:transform group-hover:scale-105 h-full">
+                    <CardHeader className="p-0 pb-4">
                       <feature.icon
-                        className={`h-10 w-10 ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
+                        className={`h-8 w-8 lg:h-10 lg:w-10 ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
                       />
-                      <CardTitle className="text-xl text-white font-bold">
+                      <CardTitle className="text-lg lg:text-xl text-white font-bold">
                         {feature.title}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-white/60 leading-relaxed group-hover:text-white/80 transition-colors duration-300">
+                    <CardContent className="p-0">
+                      <p className="text-white/60 text-sm lg:text-base leading-relaxed group-hover:text-white/80 transition-colors duration-300">
                         {feature.description}
                       </p>
                     </CardContent>
@@ -587,20 +587,20 @@ export default function Landing() {
       {/* Community Section */}
       <section
         id="community"
-        className="py-32 scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
+        className="py-20 lg:py-24 scroll-animate opacity-0 translate-y-8 transition-all duration-1000"
       >
-        <div className="container relative z-20">
-          <div className="mx-auto max-w-7xl text-center mb-24">
-            <h2 className="text-5xl lg:text-6xl font-black mb-8 text-white tracking-tight">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 lg:mb-8 text-white tracking-tight">
               Join the Haithe Community
             </h2>
-            <p className="text-2xl text-white/60 max-w-4xl mx-auto font-light">
+            <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
               Participate in our testnet and help build the foundation of trust
               for AI
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-12 lg:mb-16">
             {[
               {
                 icon: Code,
@@ -627,19 +627,19 @@ export default function Landing() {
               <div key={index} className="group">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/12 to-white/6 rounded-2xl blur-xl transition-all duration-500 group-hover:blur-2xl opacity-0 group-hover:opacity-100" />
-                  <Card className="relative p-8 text-center bg-black/30 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-500 rounded-2xl group-hover:transform group-hover:scale-105">
-                    <div className="h-16 w-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                      <community.icon className="h-8 w-8 text-white" />
+                  <Card className="relative p-6 lg:p-8 text-center bg-black/30 border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-500 rounded-2xl group-hover:transform group-hover:scale-105 h-full">
+                    <div className="h-14 w-14 lg:h-16 lg:w-16 mx-auto mb-4 lg:mb-6 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                      <community.icon className="h-7 w-7 lg:h-8 lg:w-8 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-4 text-white">
+                    <h3 className="text-xl lg:text-2xl font-bold mb-3 lg:mb-4 text-white">
                       {community.title}
                     </h3>
-                    <p className="text-white/60 mb-6 text-base leading-relaxed group-hover:text-white/80 transition-colors duration-300">
+                    <p className="text-white/60 mb-4 lg:mb-6 text-sm lg:text-base leading-relaxed group-hover:text-white/80 transition-colors duration-300">
                       {community.description}
                     </p>
                     <Button
                       variant="outline"
-                      className="border-white/20 text-white/80 hover:bg-white/5 hover:text-white rounded-full transition-all duration-300 hover:scale-105 hover:border-white/30"
+                      className="border-white/20 text-white/80 hover:bg-white/5 hover:text-white rounded-full transition-all duration-300 hover:scale-105 hover:border-white/30 text-sm lg:text-base"
                     >
                       {community.buttonText}
                     </Button>
@@ -652,7 +652,7 @@ export default function Landing() {
           <div className="text-center">
             <Button
               size="lg"
-              className="text-lg bg-white text-black hover:bg-white/90 border-0 px-12 py-6 h-auto font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20"
+              className="text-base lg:text-lg bg-white text-black hover:bg-white/90 border-0 px-10 lg:px-12 py-4 lg:py-6 h-auto font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-white/20"
             >
               Join Our Testnet
               <ArrowRight className="ml-3 h-5 w-5" />
