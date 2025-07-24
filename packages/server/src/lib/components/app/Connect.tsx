@@ -20,17 +20,17 @@ export default function Connect() {
     const isOnCorrectNetwork = currentChainId === hardhat.id;
 
     // Debug logging
-    console.log('Debug Connect component:', {
-        ready,
-        authenticated,
-        walletAddress: user?.wallet?.address,
-        currentChainId,
-        hardhatId: hardhat.id,
-        mainnetId: mainnet.id,
-        isOnCorrectNetwork,
-        isWalletConnected,
-        isHaitheLoggedIn
-    });
+    // console.log('Debug Connect component:', {
+    //     ready,
+    //     authenticated,
+    //     walletAddress: user?.wallet?.address,
+    //     currentChainId,
+    //     hardhatId: hardhat.id,
+    //     mainnetId: mainnet.id,
+    //     isOnCorrectNetwork,
+    //     isWalletConnected,
+    //     isHaitheLoggedIn
+    // });
 
     // Get profile data when logged in
     const profileQuery = api.profile();
