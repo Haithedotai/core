@@ -12,16 +12,15 @@ import ChatbotPage from './home/models/chatbot';
 import Onboarding from './onboarding';
 import Dashboard from './dashboard';
 import Profile from './dashboard/profile';
-import Settings from './dashboard/settings';
 import Agents from './dashboard/agents';
 import Workflows from './dashboard/workflows';
 import Analytics from './dashboard/analytics';
 import Purchases from './dashboard/purchases';
-import Organization from './dashboard/organization';
 import Help from './dashboard/help';
 import Landing from './landing';
 import Test from './test/test';
 import Marketplace from './marketplace';
+import Settings from './dashboard/settings';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -107,21 +106,6 @@ const profileRoute = createRoute({
   },
 })
 
-// settings route
-const settingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/dashboard/settings',
-  component: function SettingsRoute() {
-    return withPageErrorBoundary(
-      withProtectedRoute(Settings, {
-        walletConnected: true,
-        signedInToHaithe: true,
-        hasOrg: true
-      })
-    )({});
-  },
-})
-
 // agents route
 const agentsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -183,12 +167,12 @@ const purchasesRoute = createRoute({
 })
 
 // organization route
-const organizationRoute = createRoute({
+const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard/organization',
-  component: function OrganizationRoute() {
+  path: '/dashboard/settings',
+  component: function SettingsRoute() {
     return withPageErrorBoundary(
-      withProtectedRoute(Organization, {
+      withProtectedRoute(Settings, {
         walletConnected: true,
         signedInToHaithe: true,
         hasOrg: true
@@ -236,12 +220,11 @@ const routeTree = rootRoute.addChildren([
   onboardingRoute,
   dashboardRoute,
   profileRoute,
-  settingsRoute,
   agentsRoute,
   workflowsRoute,
   analyticsRoute,
   purchasesRoute,
-  organizationRoute,
+  settingsRoute,
   helpRoute,
   testRoute,
   marketplaceRoute

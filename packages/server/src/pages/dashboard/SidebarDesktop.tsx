@@ -124,15 +124,9 @@ export default function Sidebar() {
                             Profile
                         </Link>
                     </Button>
-                    <Button variant={isActive("/dashboard/organization") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
-                        <Link to="/dashboard/organization">
-                            <Icon name="Building" className="size-4 mr-3" />
-                            Organization
-                        </Link>
-                    </Button>
                     <Button variant={isActive("/dashboard/settings") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
                         <Link to="/dashboard/settings">
-                            <Icon name="Settings" className="size-4 mr-3" />
+                            <Icon name="Building" className="size-4 mr-3" />
                             Settings
                         </Link>
                     </Button>
