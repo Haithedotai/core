@@ -5,6 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import tusdt from "../artifacts/src/tUSDT.sol/tusdt.json";
 import HaitheOrchestrator from "../artifacts/src/HaitheOrchestrator.sol/HaitheOrchestrator.json";
 import HaitheOrganization from "../artifacts/src/HaitheOrganization.sol/HaitheOrganization.json";
+import HaitheCreatorIdentity from "../artifacts/src/HaitheCreatorIdentity.sol/HaitheCreatorIdentity.json";
 
 const hyperion: viem.Chain = {
   id: 133717,
@@ -94,6 +95,15 @@ async function main() {
     client,
   });
 
+  const creatorIdentityAddress = await client.readContract({
+    address: orchestrator.address,
+    abi: HaitheOrchestrator.abi,
+    functionName: "creatorIdentity",
+  });
+
+  if (typeof creatorIdentityAddress!="string" || !viem.isAddress(creatorIdentityAddress))
+    throw new Error("HaitheCreatorIdentity address is invalid");
+
   definitions["tUSDT"] = {
     abi: tusdt.abi,
     address: usdt.address,
@@ -104,6 +114,10 @@ async function main() {
   };
   definitions["HaitheOrganization"] = {
     abi: HaitheOrganization.abi,
+  };
+  definitions["HaitheCreatorIdentity"] = {
+    abi: HaitheCreatorIdentity.abi,
+    address: creatorIdentityAddress ,
   };
 }
 
