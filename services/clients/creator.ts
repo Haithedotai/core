@@ -39,7 +39,7 @@ export class HaitheCreatorClient extends BaseClient {
 
     const pubKey = encryptionWallet.account.publicKey;
 
-    return await this.fetch("/api/v1/creator", this.authClient.getAuthToken(), {
+    return await this.fetch("/v1/creator", this.authClient.getAuthToken(), {
       method: "POST",
       body: JSON.stringify({
         uri,

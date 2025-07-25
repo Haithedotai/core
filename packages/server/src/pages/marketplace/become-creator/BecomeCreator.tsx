@@ -25,7 +25,7 @@ function CreatorFormStep({ name, setName, desc, setDesc, photo, setPhoto, onNext
     const isValid = name.trim() && desc.trim() && photo;
 
     return (
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md mx-auto ">
             <CardHeader>
                 <CardTitle>Become a Creator</CardTitle>
             </CardHeader>
@@ -77,9 +77,8 @@ function ReviewStep({ name, desc, photo, onBack, onSubmit }: { name: string; des
     }, [photo]);
 
     return (
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02]">
             <CardHeader>
-                <CardTitle>Review & Submit</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col items-center gap-4">
@@ -87,10 +86,10 @@ function ReviewStep({ name, desc, photo, onBack, onSubmit }: { name: string; des
                         {preview ? <AvatarImage src={preview} alt="Profile preview" /> : <AvatarFallback>?</AvatarFallback>}
                     </Avatar>
                     <div className="w-full">
-                        <Label>Name</Label>
-                        <div className="font-medium mt-1 mb-2">{name}</div>
-                        <Label>Description</Label>
-                        <div className="text-muted-foreground mt-1 whitespace-pre-line">{desc}</div>
+                        <Label className="text-muted-foreground">Name</Label>
+                        <div className="font-medium text-xl mt-1 mb-2">{name}</div>
+                        <Label className="text-muted-foreground">Description</Label>
+                        <div className="text-sm mt-1 whitespace-pre-line">{desc}</div>
                     </div>
                 </div>
             </CardContent>
