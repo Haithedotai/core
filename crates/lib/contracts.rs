@@ -40,7 +40,6 @@ pub fn get_contract(
     let file_content = fs::read_to_string("./definitions.json")?;
     let contracts: Contracts = serde_json::from_str(&file_content)?;
 
-    // Get RPC URL from environment variable
     let rpc_url = std::env::var("BLOCKCHAIN_PROVIDER_URL")
         .unwrap_or_else(|_| "https://hyperion-testnet.metisdevops.link".to_string());
     let provider = Provider::<Http>::try_from(rpc_url.as_str())?;
@@ -70,25 +69,20 @@ pub async fn get_contract_with_wallet(
     let file_content = fs::read_to_string("./definitions.json")?;
     let contracts: Contracts = serde_json::from_str(&file_content)?;
 
-    // Get RPC URL from environment variable
     let rpc_url = std::env::var("BLOCKCHAIN_PROVIDER_URL")
         .unwrap_or_else(|_| "https://hyperion-testnet.metisdevops.link".to_string());
     let provider = Provider::<Http>::try_from(rpc_url.as_str())?;
 
-    // Get private key from environment variable
     let private_key = std::env::var("SERVER_PVT_KEY")
         .map_err(|_| "PRIVATE_KEY environment variable not found")?;
 
-    // Create wallet from private key
     let wallet: LocalWallet = private_key
         .parse()
         .map_err(|_| "Invalid private key format")?;
 
-    // Get chain ID from provider
     let chain_id = provider.get_chainid().await?;
     let wallet = wallet.with_chain_id(chain_id.as_u64());
 
-    // Create signer middleware
     let signer_middleware = SignerMiddleware::new(provider, wallet);
     let signer_middleware = Arc::new(signer_middleware);
 
@@ -122,7 +116,7 @@ pub async fn get_contract_auto(
     name: &str,
     address: Option<&str>,
 ) -> Result<ContractType, Box<dyn std::error::Error>> {
-    match std::env::var("PRIVATE_KEY") {
+    match std::env::var("SERVER_PVT_KEY") {
         Ok(_) => {
             let contract = get_contract_with_wallet(name, address).await?;
             Ok(ContractType::WithWallet(contract))

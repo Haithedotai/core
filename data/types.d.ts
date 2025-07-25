@@ -4,6 +4,7 @@
 export interface Account {
   wallet_address: string;
   created_at: string; // ISO timestamp
+  api_key_last_issued_at?: string; // ISO timestamp, optional
 }
 
 export interface Session {
@@ -16,24 +17,27 @@ export interface Session {
 
 export interface Organization {
   id: number;
+  organization_uid: string;
+  address: string;
+  orchestrator_idx: number;
   name: string;
+  owner: string; // wallet_address
   created_at: string; // ISO timestamp
 }
 
-export interface OrgOwner {
-  org_id: number;
-  wallet_address: string;
-  created_at: string; // ISO timestamp
-}
+export type OrgRole = "admin" | "member";
 
-export interface OrgAdmin {
+export interface OrgMember {
   org_id: number;
   wallet_address: string;
+  role: OrgRole;
+  created_at: string; // ISO timestamp
 }
 
 export interface Project {
-  id: string;
-  org_id: string;
+  id: number;
+  project_uid: string;
+  org_id: number;
   name: string;
   created_at: string; // ISO timestamp
 }
@@ -41,14 +45,29 @@ export interface Project {
 export type ProjectRole = "admin" | "developer" | "viewer";
 
 export interface ProjectMember {
-  project_id: string;
+  project_id: number;
   wallet_address: string;
   role: ProjectRole;
 }
 
+export interface OrgModelEnrollment {
+  id: string; // UUID
+  org_id: number;
+  model_id: number;
+  enabled_at: string; // ISO timestamp
+}
+
+export interface Creator {
+  wallet_address: string;
+  uri: string;
+  pvt_key_seed: string;
+  pub_key: string;
+  created_at: string; // ISO timestamp
+}
+
 export interface Product {
   id: string;
-  project_id: string;
+  project_id: number;
   name: string;
   config: Record<string, any>; // JSON object
   created_at: string; // ISO timestamp
@@ -56,7 +75,7 @@ export interface Product {
 
 export interface ApiKey {
   id: string;
-  project_id: string;
+  project_id: number;
   created_by: string;
   name: string;
   hashed_key: string;
@@ -79,25 +98,34 @@ export interface CreateSessionRequest {
 }
 
 export interface CreateOrganizationRequest {
+  organization_uid: string;
+  address: string;
+  orchestrator_idx: number;
   name: string;
+  owner: string; // wallet_address
 }
 
 export interface UpdateOrganizationRequest {
+  organization_uid?: string;
+  address?: string;
+  orchestrator_idx?: number;
   name?: string;
-  metadata?: Record<string, any>;
+  owner?: string; // wallet_address
 }
 
 export interface CreateProjectRequest {
+  project_uid: string;
+  org_id: number;
   name: string;
 }
 
 export interface UpdateProjectRequest {
+  project_uid?: string;
   name?: string;
-  metadata?: Record<string, any>;
 }
 
 export interface CreateProductRequest {
-  project_id: string;
+  project_id: number;
   name: string;
   config?: Record<string, any>;
 }
@@ -110,11 +138,11 @@ export interface CreateApiKeyRequest {
 
 export interface AddOrgMemberRequest {
   wallet_address: string;
-  role: "owner" | "admin";
+  role: OrgRole;
 }
 
 export interface UpdateOrgMemberRequest {
-  role: "owner" | "admin";
+  role: OrgRole;
 }
 
 export interface AddProjectMemberRequest {
@@ -126,10 +154,21 @@ export interface UpdateProjectMemberRequest {
   role: ProjectRole;
 }
 
+export interface CreateCreatorRequest {
+  wallet_address: string;
+  uri: string;
+  pvt_key_seed: string;
+  pub_key: string;
+}
+
+export interface CreateOrgModelEnrollmentRequest {
+  org_id: number;
+  model_id: number;
+}
+
 // Response types with relations
-export interface OrganizationWithOwners extends Organization {
-  owners: Account[];
-  admins: Account[];
+export interface OrganizationWithMembers extends Organization {
+  members: (OrgMember & { account: Account })[];
 }
 
 export interface ProjectWithMembers extends Project {
@@ -144,6 +183,14 @@ export interface ProductWithProject extends Product {
 export interface ApiKeyWithProject extends ApiKey {
   project: Project;
   creator: Account;
+}
+
+export interface CreatorWithAccount extends Creator {
+  account: Account;
+}
+
+export interface OrgModelEnrollmentWithOrg extends OrgModelEnrollment {
+  organization: Organization;
 }
 
 // API Response wrapper
@@ -175,20 +222,23 @@ export interface PaginatedResponse<T> {
 
 // Query filters
 export interface OrganizationFilters {
+  organization_uid?: string;
   name?: string;
+  owner?: string;
   created_after?: string;
   created_before?: string;
 }
 
 export interface ProjectFilters {
-  org_id?: string;
+  org_id?: number;
+  project_uid?: string;
   name?: string;
   created_after?: string;
   created_before?: string;
 }
 
 export interface ApiKeyFilters {
-  project_id?: string;
+  project_id?: number;
   created_by?: string;
   active_only?: boolean;
   expires_after?: string;

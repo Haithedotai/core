@@ -18,6 +18,7 @@ contract HaitheCreatorIdentity is ERC721URIStorage {
 
     constructor(address owner_) ERC721("Haithe Creator Identity", "HaitheCID") {
         _owner = owner_;
+        _orchestrator = msg.sender;
     }
 
     function mint(
