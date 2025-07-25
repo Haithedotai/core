@@ -1,7 +1,10 @@
+import MarketplaceLayout from "./components/MarketplaceLayout";
 import MarketplacePage from "./Marketplace";
 
 export default function Marketplace() {
     return (
-        <MarketplacePage />
-    )
+        <MarketplaceLayout>
+            <MarketplacePage />
+        </MarketplaceLayout>
+    );
 }
