@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { 
@@ -8,9 +9,12 @@ import {
   SelectValue 
 } from "@/src/lib/components/ui/select";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
+import { Separator } from "@/src/lib/components/ui/separator";
 import Icon from "@/src/lib/components/custom/Icon";
+import CreateOrganizationDialog from "./CreateOrganizationDialog";
 
 export default function OrganizationSelector() {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const api = useHaitheApi();
   const { selectedOrganizationId, setSelectedOrganizationId } = useStore();
   const { data: userOrganizations, isLoading: isUserOrganizationsLoading } = api.getUserOrganizations();
@@ -43,32 +47,56 @@ export default function OrganizationSelector() {
     setSelectedOrganizationId(userOrganizations[0].id);
   }
 
+  const handleValueChange = (value: string) => {
+    if (value === "create-new") {
+      setIsCreateDialogOpen(true);
+    } else {
+      setSelectedOrganizationId(parseInt(value));
+    }
+  };
+
   return (
-    <Select
-      value={selectedOrganizationId.toString()}
-      onValueChange={(value) => setSelectedOrganizationId(parseInt(value))}
-    >
-      <SelectTrigger className="w-auto rounded-md border bg-background/50 hover:bg-accent/30 hover:text-accent-foreground">
-        <div className="flex items-center gap-2">
-          <Icon name="Building" className="size-4" />
-          <SelectValue placeholder="Select organization">
-            {currentOrganization?.name || "Select organization"}
-          </SelectValue>
-        </div>
-      </SelectTrigger>
-      <SelectContent className="">
-        {userOrganizations.map((organization) => (
-          <SelectItem 
-            key={organization.id} 
-            value={organization.id.toString()}
-          >
-            <div className="flex items-center gap-2">
-              <Icon name="ChevronRight" className="size-4" />
-              {organization.name}
+    <>
+      <Select
+        value={selectedOrganizationId.toString()}
+        onValueChange={handleValueChange}
+      >
+        <SelectTrigger className="w-auto rounded-md border bg-background/50 hover:bg-accent/30 hover:text-accent-foreground">
+          <div className="flex items-center gap-2">
+            <Icon name="Building" className="size-4" />
+            <SelectValue placeholder="Select organization">
+              {currentOrganization?.name || "Select organization"}
+            </SelectValue>
+          </div>
+        </SelectTrigger>
+        <SelectContent className="">
+          {userOrganizations.map((organization) => (
+            <SelectItem 
+              key={organization.id} 
+              value={organization.id.toString()}
+            >
+              <div className="flex items-center gap-2">
+                <Icon name="ChevronRight" className="size-4" />
+                {organization.name}
+              </div>
+            </SelectItem>
+          ))}
+          
+          <Separator className="my-1" />
+          
+          <SelectItem value="create-new">
+            <div className="flex items-center gap-2 text-primary">
+              <Icon name="Plus" className="size-4" />
+              Create New Organization
             </div>
           </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+        </SelectContent>
+      </Select>
+
+      <CreateOrganizationDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+      />
+    </>
   );
 } 
