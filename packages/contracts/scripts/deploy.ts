@@ -35,7 +35,7 @@ const client = viem
     account: isHyperion
       ? privateKeyToAccount(privateKey)
       : privateKeyToAccount(
-          "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" // Hardhat default private key
+          "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e" // Hardhat default private key
         ),
     transport: viem.http(
       (isHyperion ? hyperion : hardhat).rpcUrls.default.http[0]
@@ -101,7 +101,10 @@ async function main() {
     functionName: "creatorIdentity",
   });
 
-  if (typeof creatorIdentityAddress!="string" || !viem.isAddress(creatorIdentityAddress))
+  if (
+    typeof creatorIdentityAddress != "string" ||
+    !viem.isAddress(creatorIdentityAddress)
+  )
     throw new Error("HaitheCreatorIdentity address is invalid");
 
   definitions["tUSDT"] = {
@@ -117,7 +120,7 @@ async function main() {
   };
   definitions["HaitheCreatorIdentity"] = {
     abi: HaitheCreatorIdentity.abi,
-    address: creatorIdentityAddress ,
+    address: creatorIdentityAddress,
   };
 }
 
