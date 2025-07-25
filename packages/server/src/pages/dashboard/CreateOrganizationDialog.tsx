@@ -86,7 +86,7 @@ export default function CreateOrganizationDialog({
                   handleCreate();
                 }
               }}
-              className="text-base"
+              className="text-base mt-2"
               autoFocus
             />
           </div>

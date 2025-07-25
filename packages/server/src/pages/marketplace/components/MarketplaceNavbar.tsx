@@ -18,7 +18,7 @@ export default function MarketplaceNavbar({ onSearch, searchQuery }: Marketplace
       {/* Left side - Mobile menu + Logo */}
       <div className="flex items-center gap-4">
         <MarketplaceMobileSidebar />
-        <Link to="/" className="flex gap-2 items-center">
+        <Link to="/dashboard" className="flex gap-2 items-center">
           <img
             src="/static/haitheLogo.webp"
             alt="Logo"

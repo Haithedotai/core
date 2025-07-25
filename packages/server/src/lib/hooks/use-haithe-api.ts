@@ -401,5 +401,14 @@ export function useHaitheApi() {
                 toast.error('Could not register as creator. Please try again.');
             }
         }),
+
+        getProjects: (orgId: number) => useQuery({
+            queryKey: ['projects', orgId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProjects(orgId);
+            },
+            enabled: !!orgId && !!client,
+        }),
     };
 } 

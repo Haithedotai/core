@@ -10,6 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "../../../lib/components/ui/
 import { useApi } from "@/src/lib/hooks/use-api";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
 // Step 1: Form (Name, Description, Profile Photo)
 function CreatorFormStep({ name, setName, desc, setDesc, photo, setPhoto, onNext }: {
@@ -168,7 +169,7 @@ export default function BecomeCreatorPage() {
                     onSubmit={handleSubmit}
                 />
             )}
-            <div className="mt-4 text-muted-foreground text-sm">Step {step + 1} of 2</div>
+            <Link to="/marketplace" className="mt-6 underline underline-offset-2 text-muted-foreground text-sm">Go Back</Link>
         </div>
     );
 }

@@ -190,7 +190,7 @@ export default function DashboardPage() {
   if (!profile) {
     return null; // This should never happen with ProtectedRoute, but satisfies TypeScript
   }
-  
+
 
   return (
     <div className="min-h-full bg-background">

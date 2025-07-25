@@ -187,6 +187,10 @@ export class HaitheClient {
     return this.projects.removeProjectMember(projectId, walletAddress);
   }
 
+  getProjects(orgId: number): Promise<Project[]> {
+    return this.projects.getProjects(orgId);
+  }
+
 }
 
 export * from "./clients";

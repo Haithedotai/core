@@ -133,7 +133,7 @@ export default function MarketplaceMobileSidebar() {
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
           <ShoppingCart className="size-4 mr-3" />
           Cart
-          <Badge variant="secondary" className="ml-auto text-xs">0</Badge>
+          <Badge variant="secondary" className="ml-auto text-xs">1</Badge>
         </Button>
       </div>
     </div>
@@ -149,7 +149,7 @@ export default function MarketplaceMobileSidebar() {
         >
           {/* Use a Lucide icon for menu */}
           <span className="sr-only">Toggle marketplace navigation</span>
-          <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu size-5"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+          <Icon name="Menu" className="size-5" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="">

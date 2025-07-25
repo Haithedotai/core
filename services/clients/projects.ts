@@ -85,4 +85,11 @@ export class HaitheProjectsClient extends BaseClient {
       { method: "DELETE" }
     );
   }
+
+  getProjects(orgId: number): Promise<Project[]> {
+    return this.fetch(
+      `/v1/orgs/${orgId}/projects`,
+      this.authClient.getAuthToken()
+    );
+  }
 }

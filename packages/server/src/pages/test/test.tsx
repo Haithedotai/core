@@ -178,6 +178,15 @@ export default function Test() {
     }
   }
 
+  const getProjects = async () => {
+    try {
+      const projects = await client?.getProjects(1); // placeholder orgId
+      setResult('getProjects', JSON.stringify(projects, null, 2));
+    } catch (error) {
+      setResult('getProjects', error?.toString());
+    }
+  }
+
   const updateProject = async () => {
     try {
       const project = await client?.updateProject(1, 'Updated Project'); // placeholder id/name
@@ -343,6 +352,7 @@ export default function Test() {
           <TestSection title="Project Management">
             <TestItem label="Create Project" onClick={createProject} result={results.createProject} />
             <TestItem label="Get Project" onClick={getProject} result={results.getProject} />
+            <TestItem label="Get Projects" onClick={getProjects} result={results.getProjects} />
             <TestItem label="Update Project" onClick={updateProject} result={results.updateProject} />
             <TestItem label="Delete Project" onClick={deleteProject} result={results.deleteProject} variant="destructive" />
           </TestSection>
