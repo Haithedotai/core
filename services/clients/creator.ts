@@ -39,14 +39,6 @@ export class HaitheCreatorClient extends BaseClient {
 
     const pubKey = encryptionWallet.account.publicKey;
 
-    const hash = await this.authClient.walletClient.writeContract({
-      ...definitions.HaitheOrchestrator,
-      functionName: "registerAsCreator",
-      args: [this.authClient.walletClient.account.address, uri, seed, pubKey],
-    });
-
-    await this.authClient.publicClient.waitForTransactionReceipt({ hash });
-
     return await this.fetch("/api/v1/creator", this.authClient.getAuthToken(), {
       method: "POST",
       body: JSON.stringify({
