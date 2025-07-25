@@ -5,7 +5,7 @@ import "./HaitheOrchestrator.sol";
 
 contract HaitheProduct {
     string public name;
-    string public cid;
+    string public uri;
     string public iv;
     string public encryptedKeyForTEE;
     uint256 public pricePerCall;
@@ -15,7 +15,7 @@ contract HaitheProduct {
 
     constructor(
         string memory name_,
-        string memory cid_,
+        string memory uri_,
         string memory iv_,
         string memory encryptedKeyForTEE_,
         address creator_,
@@ -26,7 +26,7 @@ contract HaitheProduct {
         name = name_;
         require(bytes(name).length > 0, "Product name cannot be empty");
 
-        cid = cid_;
+        uri = uri_;
         iv = iv_;
         encryptedKeyForTEE = encryptedKeyForTEE_;
         creator = creator_;

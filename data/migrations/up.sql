@@ -76,3 +76,16 @@ CREATE TABLE
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (wallet_address) REFERENCES accounts (wallet_address)
     );
+
+CREATE TABLE
+    IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        orchestrator_idx INTEGER NOT NULL,
+        creator TEXT NOT NULL REFERENCES creators (wallet_address) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        uri TEXT NOT NULL,
+        encrypted_key TEXT NOT NULL,
+        price_per_call INTEGER NOT NULL CHECK (price_per_call >= 0),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (name, creator)
+    );

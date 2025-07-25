@@ -20,7 +20,8 @@
   },
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node-rsa": "^1.1.4"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -31,7 +32,9 @@
   "module": "index.ts",
   "type": "module",
   "dependencies": {
+    "alith": "^0.10.4",
     "minimatch": "^10.0.3",
+    "node-rsa": "^1.1.1",
     "viem": "^2.33.0"
   }
 }
