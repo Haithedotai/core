@@ -88,7 +88,9 @@ export class HaitheCreatorClient extends BaseClient {
   }
 
   async uploadToMarketplaceAndGetReward(
+    name: string,
     file: File,
+    pricePerCall: bigint,
     upload_fn: (data: Blob) => Promise<string>
   ) {
     if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
@@ -151,6 +153,18 @@ export class HaitheCreatorClient extends BaseClient {
     }
 
     //  Request DAT reward
-    return lazaiClient.requestReward(fileId);
+    await lazaiClient.requestReward(fileId);
+
+    this.authClient.walletClient.writeContract({
+      ...definitions.HaitheOrchestrator,
+      functionName: "addProduct",
+      args: [
+        name,
+        url,
+        crypto.getRandomValues(new Uint8Array(16)).toString(),
+        encryptedKey,
+        pricePerCall,
+      ],
+    });
   }
 }

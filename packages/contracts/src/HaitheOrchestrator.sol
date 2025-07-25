@@ -44,7 +44,7 @@ contract HaitheOrchestrator {
 
     function addProduct(
         string memory name_,
-        string memory cid_,
+        string memory uri_,
         string memory iv_,
         string memory encryptedKeyForTEE_,
         uint256 pricePerCall_
@@ -56,7 +56,7 @@ contract HaitheOrchestrator {
         address product = address(
             new HaitheProduct(
                 name_,
-                cid_,
+                uri_,
                 iv_,
                 encryptedKeyForTEE_,
                 msg.sender,
