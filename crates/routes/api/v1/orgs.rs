@@ -42,6 +42,15 @@ struct DeleteMemberQuery {
     wallet_address: String,
 }
 
+#[derive(Debug, Clone, FromRow, Serialize)]
+pub struct Project {
+    pub id: i64,
+    pub org_id: i64,
+    pub project_uid: String,
+    pub name: String,
+    pub created_at: String,
+}
+
 #[post("")]
 async fn post_index_handler(
     _: AuthUser,
@@ -135,7 +144,7 @@ async fn get_org_projects_handler(
 ) -> Result<impl Responder, ApiError> {
     let id = path.into_inner();
 
-    let projects = sqlx::query_as::<_, models::Project>(
+    let projects = sqlx::query_as::<_, Project>(
         "SELECT p.* FROM projects p
          JOIN org_members om ON p.org_id = om.org_id
          WHERE om.org_id = ? AND om.wallet_address = ?",
