@@ -83,12 +83,10 @@ export class HaitheClient {
     return this.auth.logout();
   }
 
-
   // Creator methods
   registerAsCreator(uri: string): Promise<Creator> {
     return this.creator.becomeCreator(uri);
   }
-
 
   // Organization methods
   createOrganization(name: string): Promise<Organization> {

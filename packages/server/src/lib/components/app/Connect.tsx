@@ -5,6 +5,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
+import { Link } from "@tanstack/react-router";
 
 export default function Connect() {
     const { ready, authenticated, user, login: privyLogin, logout: privyLogout } = usePrivy();
@@ -18,19 +19,6 @@ export default function Connect() {
 
     // Check if on correct network
     const isOnCorrectNetwork = currentChainId === hardhat.id;
-
-    // Debug logging
-    // console.log('Debug Connect component:', {
-    //     ready,
-    //     authenticated,
-    //     walletAddress: user?.wallet?.address,
-    //     currentChainId,
-    //     hardhatId: hardhat.id,
-    //     mainnetId: mainnet.id,
-    //     isOnCorrectNetwork,
-    //     isWalletConnected,
-    //     isHaitheLoggedIn
-    // });
 
     // Get profile data when logged in
     const profileQuery = api.profile();
@@ -188,10 +176,13 @@ export default function Connect() {
                     Retry
                 </Button>
                 <Button
-                    onClick={handleDisconnect}
+                    onClick={() => {
+                        handleDisconnect();
+                    }}
                     variant="outline"
                     size="sm"
                     disabled={logoutMutation.isPending}
+                    className="py-2 px-4 rounded-md"
                 >
                     <Icon name="X" className="size-4" />
                 </Button>
@@ -201,25 +192,27 @@ export default function Connect() {
 
     // Stage 6: Fully authenticated and on correct network - show disconnect button
     return (
-        <Button
-            onClick={handleDisconnect}
-            variant="outline"
-            disabled={logoutMutation.isPending}
-            className="py-2 px-4 rounded-md"
-        >
-            {logoutMutation.isPending ? (
-                <div className="flex items-center">
-                    <Icon name="Loader" className="size-4 mr-2 animate-spin" />
-                    Disconnecting...
-                </div>
-            ) : (
-                <div className="flex items-center">
-                    <Icon name="LogOut" className="size-4" />
-                    <div className="hidden sm:block ml-2">
-                        Disconnect
+        <div>
+            <Button
+                onClick={handleDisconnect}
+                variant="outline"
+                disabled={logoutMutation.isPending}
+                className="py-2 px-4 rounded-md"
+            >
+                {logoutMutation.isPending ? (
+                    <div className="flex items-center">
+                        <Icon name="Loader" className="size-4 mr-2 animate-spin" />
+                        Disconnecting...
                     </div>
-                </div>
-            )}
-        </Button>
+                ) : (
+                    <div className="flex items-center">
+                        <Icon name="LogOut" className="size-4" />
+                        <div className="hidden sm:block ml-2">
+                            Disconnect
+                        </div>
+                    </div>
+                )}
+            </Button>
+        </div>
     );
 }

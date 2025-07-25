@@ -82,6 +82,8 @@ export function useHaitheApi() {
             onError: (error) => {
                 console.error(error?.toString?.() || error);
                 toast.error('Logout failed. Please try again.');
+                localStorage.clear();
+                window.location.reload();
             }
         }),
 

@@ -17,6 +17,7 @@ export function Navbar() {
   const api = useHaitheApi();
   const isHaitheLoggedIn = api.isLoggedIn;
   const { ready, authenticated, user } = usePrivy();
+  const profileQuery = api.profile();
 
   const navLinks = [
     ["Problem", "#problem"],
@@ -82,7 +83,7 @@ export function Navbar() {
         </div>
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center space-x-3 lg:space-x-4">
-          {ready && authenticated && user?.wallet?.address && isHaitheLoggedIn() &&
+          {ready && authenticated && user?.wallet?.address && isHaitheLoggedIn() && profileQuery.isSuccess &&
             <Button asChild variant="outline" size="lg" className="rounded-sm mx-4">
               <Link to="/dashboard">
                 <Icon name="LayoutDashboard" className="size-4" />
@@ -148,7 +149,7 @@ export function Navbar() {
                   )
                 ))}
                 <div className="flex flex-col gap-4 w-full max-w-xs mt-8 px-4">
-                  {ready && authenticated && isHaitheLoggedIn() &&
+                  {ready && authenticated && isHaitheLoggedIn() && profileQuery.isSuccess &&
                     <Button asChild variant="outline" size="lg" className="rounded-sm">
                       <Link to="/dashboard">
                         <Icon name="LayoutDashboard" className="size-4" />
