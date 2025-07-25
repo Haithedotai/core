@@ -14,7 +14,7 @@ export class HaitheCreatorClient extends BaseClient {
     this.authClient = authClient;
   }
 
-  async becomeCreator(uri: string, contractAddress: string): Promise<Creator> {
+  async becomeCreator(uri: string): Promise<Creator> {
     if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
       throw new Error("Wallet client is not ready");
     }

@@ -5,6 +5,7 @@ import { Input } from "../../../lib/components/ui/input";
 import Connect from "../../../lib/components/app/Connect";
 import OrganizationSelector from "../../dashboard/OrganizationSelector";
 import MarketplaceMobileSidebar from "./MarketplaceMobileSidebar";
+import CreatorSheet from '@/src/lib/components/app/CreatorSheet';
 
 interface MarketplaceNavbarProps {
   onSearch?: (query: string) => void;
@@ -35,17 +36,7 @@ export default function MarketplaceNavbar({ onSearch, searchQuery }: Marketplace
 
       {/* Right side - Actions and user */}
       <div className="flex items-center gap-3 md:gap-4">
-        <Button variant="ghost" className="relative">
-          <ShoppingCart className="size-4" />
-          <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full size-4 flex items-center justify-center">
-            0
-          </span>
-        </Button>
-        
-        <div className="hidden @sm:block">
-          <OrganizationSelector />
-        </div>
-        
+        <CreatorSheet />
         <Connect />
       </div>
     </nav>

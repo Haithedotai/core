@@ -25,9 +25,9 @@ export default function CreatorSheet() {
       return;
     }
 
-    // User is authenticated, navigate to onboarding
+    // User is authenticated, navigate to become a creator
     setOpen(false);
-    navigate({ to: "/onboarding" });
+    navigate({ to: "/marketplace/become-a-creator" });
   };
 
   return (
@@ -35,7 +35,7 @@ export default function CreatorSheet() {
       <SheetTrigger asChild>
         <Button variant="outline" className="rounded-sm">
           <Icon name="Zap" className="h-4 w-4 text-orange-400" />
-          <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Get Started</span>
+          <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Become a Creator</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="px-0 w-full sm:w-[480px]">
@@ -47,11 +47,11 @@ export default function CreatorSheet() {
                 <div>
                   <SheetTitle className="text-2xl font-bold">
                     <span className="bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent font-semibold">
-                      Get Started
+                      Become a Creator
                     </span>
                   </SheetTitle>
                   <SheetDescription className="text-base text-muted-foreground">
-                    Build, share, and monetize AI models with context.
+                    Sell your AI agents and earn revenue.
                   </SheetDescription>
                 </div>
               </div>
@@ -133,11 +133,11 @@ export default function CreatorSheet() {
               className="w-full h-12 text-base font-semibold"
               onClick={handleStartCreating}
             >
-              Start Creating
+              Get Started
               <Icon name="ArrowRight" className="ml-2 h-4 w-4" />
             </Button>
             <p className="text-xs text-center text-muted-foreground mt-3">
-              Free to join • No setup fees
+              No registration fees
             </p>
           </div>
         </div>
