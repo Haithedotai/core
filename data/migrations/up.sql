@@ -59,23 +59,10 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY,
-        project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
-        name TEXT NOT NULL,
-        config JSON DEFAULT '{}',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-CREATE TABLE
-    IF NOT EXISTS api_keys (
-        id INTEGER PRIMARY KEY,
-        project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
-        created_by TEXT NOT NULL REFERENCES accounts (wallet_address),
-        name TEXT NOT NULL,
-        hashed_key TEXT NOT NULL,
-        scopes TEXT DEFAULT '[]',
-        expires_at TIMESTAMP,
-        revoked_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    IF NOT EXISTS org_model_enrollments (
+        id UUID PRIMARY KEY,
+        org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+        model_id INTEGER NOT NULL,
+        enabled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (org_id, model_id)
     );
