@@ -143,16 +143,33 @@ async fn get_org_projects_handler(
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let id = path.into_inner();
+    let is_owner: bool =
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM organizations WHERE id = ? AND owner = ?)")
+            .bind(id)
+            .bind(&user.wallet_address)
+            .fetch_one(&state.db)
+            .await?;
 
-    let projects = sqlx::query_as::<_, Project>(
-        "SELECT p.* FROM projects p
-         JOIN org_members om ON p.org_id = om.org_id
-         WHERE om.org_id = ? AND om.wallet_address = ?",
-    )
-    .bind(id)
-    .bind(&user.wallet_address)
-    .fetch_all(&state.db)
-    .await?;
+    let is_member: bool = if !is_owner {
+        sqlx::query_scalar(
+            "SELECT EXISTS(SELECT 1 FROM org_members WHERE org_id = ? AND wallet_address = ?)",
+        )
+        .bind(id)
+        .bind(&user.wallet_address)
+        .fetch_one(&state.db)
+        .await?
+    } else {
+        false
+    };
+
+    if !is_owner && !is_member {
+        return Err(ApiError::Unauthorized);
+    }
+
+    let projects = sqlx::query_as::<_, Project>("SELECT * FROM projects WHERE org_id = ?")
+        .bind(id)
+        .fetch_all(&state.db)
+        .await?;
 
     Ok(respond::ok("Organization projects retrieved", projects))
 }
