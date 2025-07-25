@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { Grid, List } from 'lucide-react';
 import { Button } from '../../lib/components/ui/button';
 import type { MarketplaceFilters as MarketplaceFiltersType, MarketplaceItem } from './types';
@@ -6,15 +7,13 @@ import { mockMarketplaceData } from './mockData';
 import MarketplaceNavbar from './components/MarketplaceNavbar';
 import MinimalFilters from './components/MinimalFilters';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
-import ItemDetailModal from './components/ItemDetailModal';
 import MarketplaceSidebar from './components/MarketplaceSidebar';
 
 export default function MarketplacePage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<MarketplaceFiltersType>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   // Filter and search logic
@@ -95,8 +94,7 @@ export default function MarketplacePage() {
   }, [filters, searchQuery]);
 
   const handleItemClick = (item: MarketplaceItem) => {
-    setSelectedItem(item);
-    setIsDetailModalOpen(true);
+    navigate({ to: '/marketplace/item/$id', params: { id: item.id } });
   };
 
   const handleFavorite = (itemId: string) => {
@@ -184,19 +182,6 @@ export default function MarketplacePage() {
           )}
         </div>
       </div>
-
-      {/* Item Detail Modal */}
-      <ItemDetailModal
-        item={selectedItem}
-        isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedItem(null);
-        }}
-        onPurchase={handlePurchase}
-        onFavorite={handleFavorite}
-        isFavorited={selectedItem ? favorites.has(selectedItem.id) : false}
-      />
     </div>
   );
 }

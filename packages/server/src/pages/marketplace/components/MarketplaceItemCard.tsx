@@ -11,16 +11,16 @@ interface MarketplaceItemCardProps {
   isFavorited?: boolean;
 }
 
-const getTypeImage = (type: string) => {
+export const getTypeImage = (type: string) => {
   switch (type) {
     case 'knowledgeBase':
-      return 'https://images.pexels.com/photos/7135037/pexels-photo-7135037.jpeg';
+      return 'https://framerusercontent.com/images/sdxq06qxPf3oNmBefnesFfv5vlY.png';
     case 'lambda':
-      return 'https://images.pexels.com/photos/1906228/pexels-photo-1906228.jpeg';
+      return 'https://framerusercontent.com/images/BCHiz0CCz66eQC5lZuYqZVlfH6Y.png';
     case 'instructionSet':
-      return 'https://images.unsplash.com/photo-1637055159652-2b8837731f00?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      return 'https://framerusercontent.com/images/nr3SJiAakfef2UkH4zI9nNUWPOo.png';
     case 'promptSet':
-      return 'https://images.pexels.com/photos/1906228/pexels-photo-1906228.jpeg';
+      return 'https://framerusercontent.com/images/ycGCNCmizXXrFz7EISDCHTuftd8.png';
     default:
       return 'https://images.pexels.com/photos/1906228/pexels-photo-1906228.jpeg';
   }
@@ -57,12 +57,12 @@ export default function MarketplaceItemCard({
         <img 
           src={mainImage} 
           alt={item.name}
-          className="w-full h-40 @md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-40 @md:h-48 object-cover transition-transform duration-100"
         />
         
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary">
             View Details
           </Button>
         </div>
