@@ -459,6 +459,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(get_org_handler)
         .service(patch_org_handler)
         .service(delete_org_handler)
+        .service(get_org_projects_handler)
         .service(get_org_members_handler)
         .service(post_org_members_handler)
         .service(patch_org_members_handler)
