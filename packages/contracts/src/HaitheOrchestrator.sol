@@ -78,6 +78,10 @@ contract HaitheOrchestrator {
         return organizations.length;
     }
 
+    function productsCount() external view returns (uint256) {
+        return products.length;
+    }
+
     function getOrganizationIndex(
         address orgAddress
     ) external view returns (uint256) {
