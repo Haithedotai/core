@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "../dashboard/layout";
 import HomePage from "./Home";
 
 export default function Home() {

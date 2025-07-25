@@ -104,17 +104,6 @@ export default function OnboardingPage() {
             isCreating={isCreating}
           />
         )}
-
-        {/* Skip Option */}
-        <div className="text-center">
-          <Button
-            variant="ghost"
-            onClick={skipOnboarding}
-            className="text-muted-foreground"
-          >
-            Skip for now and continue to dashboard
-          </Button>
-        </div>
       </div>
     </div>
   );

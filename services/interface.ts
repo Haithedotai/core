@@ -3,18 +3,21 @@ import {
   HaitheAuthClient,
   HaitheOrgsClient,
   HaitheProjectsClient,
+  HaitheCreatorClient,
   type MinimalPersistentStorage,
   type Organization,
   type OrganizationMember,
   type Project,
   type ProjectMember,
   type UserProfile,
+  type Creator,
 } from "./clients";
 
 export class HaitheClient {
   public auth: HaitheAuthClient;
   public orgs: HaitheOrgsClient;
   public projects: HaitheProjectsClient;
+  public creator: HaitheCreatorClient;
 
   constructor(options: {
     walletClient: viem.WalletClient;
@@ -26,9 +29,10 @@ export class HaitheClient {
     this.projects = new HaitheProjectsClient(this.auth, {
       debug: options.debug,
     });
+    this.creator = new HaitheCreatorClient(this.auth, { debug: options.debug });
   }
 
-  // Backward compatibility methods - delegate to auth client
+
   static ensureWeb3Ready(
     walletClient: viem.WalletClient
   ): walletClient is viem.WalletClient<
@@ -79,7 +83,14 @@ export class HaitheClient {
     return this.auth.logout();
   }
 
-  // Backward compatibility - delegate to orgs client
+
+  // Creator methods
+  registerAsCreator(uri: string, contractAddress: string): Promise<Creator> {
+    return this.creator.becomeCreator(uri, contractAddress);
+  }
+
+
+  // Organization methods
   createOrganization(name: string): Promise<Organization> {
     return this.orgs.createOrganization(name);
   }
@@ -127,7 +138,8 @@ export class HaitheClient {
     return this.orgs.removeOrganizationMember(orgId, walletAddress);
   }
 
-  // New project methods - delegate to projects client
+
+  // Project methods
   createProject(orgId: number, name: string): Promise<Project> {
     return this.projects.createProject(orgId, name);
   }
@@ -174,6 +186,7 @@ export class HaitheClient {
   ): Promise<ProjectMember> {
     return this.projects.removeProjectMember(projectId, walletAddress);
   }
+
 }
 
 export * from "./clients";

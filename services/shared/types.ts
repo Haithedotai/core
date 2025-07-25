@@ -37,3 +37,10 @@ export interface UserProfile {
   address: string;
   registered: Date;
 }
+
+export interface Creator {
+    wallet_address: string;
+    uri: string;
+    pub_key: string;
+    created_at: string;
+}

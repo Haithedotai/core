@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
-import { useHaitheClient } from "@/src/lib/context/services-provider";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 
 interface Message {
     id: string;
@@ -21,14 +21,15 @@ export default function ChatbotPage() {
         from: '/model/$id/chat'
     });
     
-    const client = useHaitheClient();
+    const api = useHaitheApi();
+    const isLoggedIn = api.isLoggedIn();
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Show wallet connection prompt if no client
-    if (!client) {
+    if (!isLoggedIn) {
         return (
             <div className="min-h-full bg-background flex items-center justify-center">
                 <div className="text-center space-y-4">

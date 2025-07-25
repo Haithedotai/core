@@ -11,10 +11,12 @@ import { useState } from "react";
 import Connect from "@/src/lib/components/app/Connect";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import Icon from "@/src/lib/components/custom/Icon";
+import { usePrivy } from "@privy-io/react-auth";
 
 export function Navbar() {
   const api = useHaitheApi();
   const isHaitheLoggedIn = api.isLoggedIn;
+  const { ready, authenticated, user } = usePrivy();
 
   const navLinks = [
     ["Problem", "#problem"],
@@ -80,7 +82,7 @@ export function Navbar() {
         </div>
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center space-x-3 lg:space-x-4">
-          {isHaitheLoggedIn() &&
+          {ready && authenticated && user?.wallet?.address && isHaitheLoggedIn() &&
             <Button asChild variant="outline" size="lg" className="rounded-sm mx-4">
               <Link to="/dashboard">
                 <Icon name="LayoutDashboard" className="size-4" />
@@ -145,18 +147,16 @@ export function Navbar() {
                     </SheetClose>
                   )
                 ))}
-                <div className="flex flex-col gap-4 w-full max-w-xs mt-8">
-                  {isHaitheLoggedIn() &&
-                    <Button asChild variant="outline" size="lg" className="rounded-sm mx-4">
+                <div className="flex flex-col gap-4 w-full max-w-xs mt-8 px-4">
+                  {ready && authenticated && isHaitheLoggedIn() &&
+                    <Button asChild variant="outline" size="lg" className="rounded-sm">
                       <Link to="/dashboard">
                         <Icon name="LayoutDashboard" className="size-4" />
-                        Dashboard
+                        <p className="hidden sm:block">Dashboard</p>
                       </Link>
                     </Button>}
 
-                  <div className="flex items-center justify-center">
                     <Connect />
-                  </div>
                 </div>
               </div>
             </SheetContent>

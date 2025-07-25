@@ -66,3 +66,13 @@ CREATE TABLE
         enabled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (org_id, model_id)
     );
+
+CREATE TABLE
+    IF NOT EXISTS creators (
+        wallet_address TEXT PRIMARY KEY,
+        uri TEXT NOT NULL,
+        pvt_key_seed TEXT NOT NULL,
+        pub_key TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (wallet_address) REFERENCES accounts (wallet_address)
+    );

@@ -1,9 +1,10 @@
 import { Button } from "@/src/lib/components/ui/button";
-import { useHaitheClient } from "@/src/lib/context/services-provider";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import React, { useState } from "react";
 
 export default function Test() {
-  const client = useHaitheClient();
+  const api = useHaitheApi();
+  const client = api.client;
   const isLoggedIn = client?.auth.isLoggedIn() || false;
 
   console.log(isLoggedIn);

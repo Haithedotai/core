@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useHaitheClient } from "../context/services-provider";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useHaitheContext } from "@/src/lib/context/services-provider";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -8,7 +8,7 @@ export type OrganizationRole = 'admin' | 'member';
 export type ProjectRole = 'admin' | 'developer' | 'viewer';
 
 export function useHaitheApi() {
-    const client = useHaitheClient();
+    const { client, isInitialized } = useHaitheContext();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
@@ -16,12 +16,17 @@ export function useHaitheApi() {
     const getAuthToken = () => client?.getAuthToken() || null;
     const isWeb3Ready = () => client?.isWeb3Ready() || false;
     const isLoggedIn = () => client?.auth.isLoggedIn() || false;
+    const isClientInitialized = () => isInitialized;
 
     return {
         // Utility functions
         isLoggedIn,
         getAuthToken,
         isWeb3Ready,
+        isClientInitialized,
+        
+        // Direct client access (for testing)
+        client,
 
         // Auth mutations
         login: useMutation({
@@ -58,7 +63,8 @@ export function useHaitheApi() {
                 }, 100);
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Login failed');
+                console.error(error?.toString?.() || error);
+                toast.error('Login failed. Please try again.');
             }
         }),
 
@@ -74,7 +80,8 @@ export function useHaitheApi() {
                 queryClient.clear(); // Clear all cache on logout
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Logout failed');
+                console.error(error?.toString?.() || error);
+                toast.error('Logout failed. Please try again.');
             }
         }),
 
@@ -100,7 +107,8 @@ export function useHaitheApi() {
                 toast.success('API key generated successfully');
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to generate API key');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not generate API key. Please try again.');
             }
         }),
 
@@ -114,7 +122,8 @@ export function useHaitheApi() {
                 toast.success('API key disabled successfully');
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to disable API key');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not disable API key. Please try again.');
             }
         }),
 
@@ -130,7 +139,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['organizations'] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to create organization');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not create organization. Please try again.');
             }
         }),
 
@@ -164,7 +174,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['organizations'] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to update organization');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update organization. Please try again.');
             }
         }),
 
@@ -180,7 +191,8 @@ export function useHaitheApi() {
                 queryClient.removeQueries({ queryKey: ['organization', id] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to delete organization');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not delete organization. Please try again.');
             }
         }),
 
@@ -209,7 +221,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['organizationMembers', orgId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to add organization member');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not add organization member. Please try again.');
             }
         }),
 
@@ -228,7 +241,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['organizationMembers', orgId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to update organization member role');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update organization member role. Please try again.');
             }
         }),
 
@@ -243,7 +257,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['organizationMembers', orgId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to remove organization member');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not remove organization member. Please try again.');
             }
         }),
 
@@ -259,7 +274,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['projects', orgId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to create project');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not create project. Please try again.');
             }
         }),
 
@@ -283,7 +299,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['project', id] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to update project');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update project. Please try again.');
             }
         }),
 
@@ -299,7 +316,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['projects'] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to delete project');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not delete project. Please try again.');
             }
         }),
 
@@ -328,7 +346,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to add project member');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not add project member. Please try again.');
             }
         }),
 
@@ -347,7 +366,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to update project member role');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update project member role. Please try again.');
             }
         }),
 
@@ -362,7 +382,8 @@ export function useHaitheApi() {
                 queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
             },
             onError: (error) => {
-                toast.error(error?.toString() || 'Failed to remove project member');
+                console.error(error?.toString?.() || error);
+                toast.error('Could not remove project member. Please try again.');
             }
         }),
     };

@@ -1,5 +1,6 @@
 import { PrivyProvider as PrivyProviderBase } from '@privy-io/react-auth';
 import { useTheme } from './theme-provider';
+import { hardhat, mainnet } from 'viem/chains';
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
     const { theme } = useTheme();
@@ -8,6 +9,8 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         <PrivyProviderBase
             appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
             config={{
+                defaultChain: hardhat,
+                supportedChains: [hardhat, mainnet],
                 loginMethods: ["wallet"],
                 appearance: {
                     theme: theme === "dark" ? "dark" : "light",

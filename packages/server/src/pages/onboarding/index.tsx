@@ -1,4 +1,4 @@
-import Layout from "../layout";
+import Layout from "../dashboard/layout";
 import OnboardingPage from "./Onboarding";
 
 export default function Onboarding() {

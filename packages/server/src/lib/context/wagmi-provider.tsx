@@ -1,5 +1,5 @@
 import { http } from "wagmi";
-import { metisSepolia } from "viem/chains";
+import { hardhat, mainnet } from "viem/chains";
 
 import {
   createConfig,
@@ -13,9 +13,10 @@ declare module "wagmi" {
 }
 
 export const config = createConfig({
-  chains: [metisSepolia],
+  chains: [hardhat, mainnet],
   transports: {
-    [metisSepolia.id]: http(),
+    [hardhat.id]: http(),
+    [mainnet.id]: http(),
   },
 });
 

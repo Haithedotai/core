@@ -1,14 +1,14 @@
-import { useHaitheApi } from "../../hooks/use-haithe-api";
-import { useStore } from "../../hooks/use-store";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
+import { useStore } from "@/src/lib/hooks/use-store";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from "../ui/select";
-import { Skeleton } from "../ui/skeleton";
-import Icon from "../custom/Icon";
+} from "@/src/lib/components/ui/select";
+import { Skeleton } from "@/src/lib/components/ui/skeleton";
+import Icon from "@/src/lib/components/custom/Icon";
 
 export default function OrganizationSelector() {
   const api = useHaitheApi();

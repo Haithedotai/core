@@ -52,11 +52,10 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative w-full">
       <Navbar />
-      {/* Hero Section */}
       <section className="relative pt-36 lg:pt-50">
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <video
-            className="absolute top-0 left-0 w-full h-full object-cover opacity-30"
+            className="absolute top-0 left-0 w-full h-full opacity-30"
             autoPlay
             muted
             loop
@@ -68,7 +67,7 @@ export default function Landing() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-16">
           <div className="mx-auto max-w-6xl text-center">
             <div className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm mb-8 lg:mb-12 backdrop-blur-sm hover:bg-white/8 transition-all duration-300">
               <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse" />
@@ -114,7 +113,7 @@ export default function Landing() {
       {/* Hero Images Section - Simplified */}
       <section
         ref={(el) => addToRefs(el, 0)}
-        className="pt-16 lg:pt-20 opacity-0 translate-y-8 transition-all duration-700"
+        className="pt-16 lg:pt-20 opacity-0 translate-y-8 transition-all duration-700 my-16"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
@@ -158,7 +157,7 @@ export default function Landing() {
       <section
         id="problem"
         ref={(el) => addToRefs(el, 1)}
-        className="pt-20 lg:pt-24 relative opacity-0 translate-y-8 transition-all duration-700"
+        className="pt-20 lg:pt-24 relative opacity-0 translate-y-8 transition-all duration-700 my-16"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
@@ -225,7 +224,7 @@ export default function Landing() {
       <section
         id="how-it-works"
         ref={(el) => addToRefs(el, 3)}
-        className="pt-20 lg:pt-24 relative opacity-0 translate-y-8 transition-all duration-700"
+        className="pt-20 lg:pt-24 relative opacity-0 translate-y-8 transition-all duration-700 my-16"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -281,7 +280,7 @@ export default function Landing() {
       <section
         id="features"
         ref={(el) => addToRefs(el, 4)}
-        className="pt-20 lg:pt-24 opacity-0 translate-y-8 transition-all duration-700"
+        className="pt-20 lg:pt-24 opacity-0 translate-y-8 transition-all duration-700 my-16"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
@@ -348,7 +347,7 @@ export default function Landing() {
       <section
         id="community"
         ref={(el) => addToRefs(el, 5)}
-        className="pt-20 lg:pt-24 opacity-0 translate-y-8 transition-all duration-700"
+        className="pt-20 lg:pt-24 opacity-0 translate-y-8 transition-all duration-700 my-16"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
@@ -401,27 +400,8 @@ export default function Landing() {
               </Card>
             ))}
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center px-4">
-            <Button
-              size="lg"
-              className="text-base lg:text-lg bg-white text-black hover:bg-white/90 border-0 px-8 lg:px-10 py-4 h-auto font-semibold transition-all duration-300 w-full sm:w-auto"
-            >
-              Explore the Ecosystem
-              <ArrowRight className="ml-1 h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="text-base lg:text-lg bg-black border-white/20 text-white/80 hover:bg-white/5 hover:text-white px-8 lg:px-10 py-4 h-auto backdrop-blur-sm transition-all w-full sm:w-auto"
-            >
-              <Play className="mr-1 h-5 w-5" />
-              Watch Demo
-            </Button>
-          </div>
         </div>
       </section>
-
       <section className="mt-20">
         <Footer />
       </section>
