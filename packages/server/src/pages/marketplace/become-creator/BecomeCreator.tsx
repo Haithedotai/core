@@ -11,6 +11,7 @@ import { useApi } from "@/src/lib/hooks/use-api";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
+import { CheckCircle } from "lucide-react";
 
 // Step 1: Form (Name, Description, Profile Photo)
 function CreatorFormStep({ name, setName, desc, setDesc, photo, setPhoto, onNext }: {
@@ -101,18 +102,51 @@ function ReviewStep({ name, desc, photo, onBack, onSubmit }: { name: string; des
     );
 }
 
+// Step 3: Success
+function SuccessStep({ name }: { name: string }) {
+    return (
+        <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02]">
+            <CardHeader>
+                <CardTitle className="flex justify-center">
+                    <CheckCircle className="h-12 w-12 text-primary" />
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-6">
+                <div>
+                    <p className="text-center text-2xl font-bold">Welcome, {name}!</p>
+                    <p className="text-center text-muted-foreground">
+                        Congratulations! You're now a creator.
+                    </p>
+                </div>
+                <div className="flex flex-col space-y-2 w-full">
+                    <Link to="/marketplace/create" className="w-full">
+                        <Button className="w-full">Start Creating</Button>
+                    </Link>
+                    <Link to="/marketplace" className="w-full">
+                        <Button variant="outline" className="w-full">
+                            Explore Marketplace
+                        </Button>
+                    </Link>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function BecomeCreatorPage() {
     const [step, setStep] = useState(0);
     const [name, setName] = useState("");
     const [desc, setDesc] = useState("");
     const [photo, setPhoto] = useState<File | null>(null);
+    const [isSuccess, setIsSuccess] = useState(false);
     const { uploadFile } = useApi();
-    const { registerAsCreator } = useHaitheApi();
+    const { registerAsCreator, profile } = useHaitheApi();
+
+    const profileQuery = profile();
+    console.log("Profile Query", profileQuery.data);
 
     async function handleSubmit() {
         try {
-            console.log("Submitting creator profile", { name, desc, photo });
-            // filename
             const filename = `${name}-${Date.now()}.json`;
 
             let imageURL: string | null = null;
@@ -120,7 +154,6 @@ export default function BecomeCreatorPage() {
                 const file = new File([photo], filename, { type: photo.type });
                 const { cid } = await uploadFile.mutateAsync(file);
                 imageURL = `https://${process.env.BUN_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${cid}`;
-                console.log("Image URL", imageURL);
             }
 
             const profile = {
@@ -138,8 +171,11 @@ export default function BecomeCreatorPage() {
             const profileFile = new File([JSON.stringify(profile)], filename, { type: "application/json" });
             const { cid } = await uploadFile.mutateAsync(profileFile);
             const profileURL = `https://${process.env.BUN_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${cid}`;
-            console.log("Profile URL", profileURL);
             await registerAsCreator.mutateAsync({ uri: profileURL });
+
+            // Show success message and move to success step
+            toast.success('Successfully registered as creator!');
+            setIsSuccess(true);
         } catch (error) {
             console.error(error);
             toast.error('Failed to submit creator profile');
@@ -148,7 +184,7 @@ export default function BecomeCreatorPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4">
-            {step === 0 && (
+            {step === 0 && !isSuccess && (
                 <CreatorFormStep
                     name={name}
                     setName={setName}
@@ -159,7 +195,7 @@ export default function BecomeCreatorPage() {
                     onNext={() => setStep(1)}
                 />
             )}
-            {step === 1 && (
+            {step === 1 && !isSuccess && (
                 <ReviewStep
                     name={name}
                     desc={desc}
@@ -168,7 +204,12 @@ export default function BecomeCreatorPage() {
                     onSubmit={handleSubmit}
                 />
             )}
-            <Link to="/marketplace" className="mt-6 underline underline-offset-2 text-muted-foreground text-sm">Go Back</Link>
+            {isSuccess && (
+                <SuccessStep name={name} />
+            )}
+            {!isSuccess && (
+                <Link to="/marketplace" className="mt-6 underline underline-offset-2 text-muted-foreground text-sm">Go Back</Link>
+            )}
         </div>
     );
 }

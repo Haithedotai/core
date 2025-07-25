@@ -108,11 +108,10 @@ export function useApi() {
                 return parsed.data;
             },
             onSuccess: (res) => {
-                toast.success(`Successfully uploaded file!`);
+                console.log("Successfully uploaded file!", res);
             },
             onError: (err) => {
                 console.error(err);
-                toast.error("Failed to upload file");
             }
         }),
     }

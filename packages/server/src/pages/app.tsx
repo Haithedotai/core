@@ -20,6 +20,7 @@ import Test from './test/test';
 import Marketplace from './marketplace';
 import Settings from './dashboard/settings';
 import BecomeCreator from './marketplace/become-creator';
+import Create from './marketplace/create';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -202,6 +203,14 @@ const becomeCreatorRoute = createRoute({
   },
 })
 
+const createItemsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/marketplace/create',
+  component: function CreateRoute() {
+    return withPageErrorBoundary(Create)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   onboardingRoute,
@@ -215,7 +224,8 @@ const routeTree = rootRoute.addChildren([
   helpRoute,
   testRoute,
   marketplaceRoute,
-  becomeCreatorRoute
+  becomeCreatorRoute,
+  createItemsRoute
 ])
 
 const router = createRouter({
