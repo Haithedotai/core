@@ -17,6 +17,8 @@ pub enum ApiError {
     Internal(String),
     #[error("Database error: {0}")]
     Sqlx(#[from] sqlx::Error),
+    #[error("Task error: {0}")]
+    Task(#[from] alith::TaskError),
 }
 
 impl ResponseError for ApiError {
@@ -33,6 +35,7 @@ impl ResponseError for ApiError {
             BadRequest(m) => (m.as_str(), 400),
             Internal(m) => (m.as_str(), 500),
             Sqlx(_) => ("Database error", 500),
+            Task(_) => ("Task execution error", 500),
         };
         respond::err(msg, status)
     }
