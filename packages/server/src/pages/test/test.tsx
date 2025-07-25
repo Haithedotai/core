@@ -187,6 +187,15 @@ export default function Test() {
     }
   }
 
+  const becomeCreator = async () => {
+    try {
+      const creator = await client?.creator.becomeCreator("https://white-random-buzzard-691.mypinata.cloud/ipfs/bafkreiei4wdgmfreaejojxtn26p52li6q4ivinguv5kj3ruhlo5ptsdgy4");
+      setResult('becomeCreator', JSON.stringify(creator, null, 2));
+    } catch (error) {
+      setResult('becomeCreator', error?.toString());
+    }
+  }
+
   const updateProject = async () => {
     try {
       const project = await client?.updateProject(1, 'Updated Project'); // placeholder id/name
@@ -363,6 +372,11 @@ export default function Test() {
             <TestItem label="Add Member" onClick={addProjectMember} result={results.addProjectMember} />
             <TestItem label="Update Member Role" onClick={updateProjectMemberRole} result={results.updateProjectMemberRole} />
             <TestItem label="Remove Member" onClick={removeProjectMember} result={results.removeProjectMember} variant="destructive" />
+          </TestSection>
+
+          {/* Creator */}
+          <TestSection title="Creator">
+            <TestItem label="Become Creator" onClick={becomeCreator} result={results.becomeCreator} />
           </TestSection>
 
         </div>
