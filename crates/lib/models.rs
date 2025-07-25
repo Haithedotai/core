@@ -127,7 +127,7 @@ pub fn resolve_model(name: &str) -> LLM {
 
     let api_key = std::env::var(env_var).unwrap_or_else(|_| panic!("{} not set", env_var));
 
-    LLM::openai_compatible_model(base_url, &api_key, &model.name).unwrap_or_else(|_| {
+    LLM::openai_compatible_model(&api_key, base_url, &model.name).unwrap_or_else(|_| {
         panic!("Failed to initialize model {}", name);
     })
 }

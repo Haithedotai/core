@@ -1,6 +1,5 @@
-use crate::lib::extractors::AuthUser;
-use crate::lib::{error::ApiError, respond, state::AppState};
-use actix_web::{post, web, Responder};
+use crate::lib::{contracts, error::ApiError, extractors::AuthUser, respond, state::AppState};
+use actix_web::{Responder, post, web};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -16,9 +15,23 @@ async fn become_creator(
     state: web::Data<AppState>,
     body: web::Json<PostBecomeCreatorRequest>,
 ) -> Result<impl Responder, ApiError> {
+    contracts::get_contract_with_wallet("HaitheOrchestrator", None)
+        .await?
+        .method::<_, ethers::types::U256>(
+            "registerAsCreator",
+            (
+                user.wallet_address.clone(),
+                body.uri.clone(),
+                body.pvt_key_seed.clone(),
+                body.pub_key.clone(),
+            ),
+        )?
+        .send()
+        .await?;
+
     sqlx::query(
         "INSERT OR REPLACE INTO creators (wallet_address, uri, pvt_key_seed, pub_key, created_at) 
-         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"
+         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
     )
     .bind(&user.wallet_address)
     .bind(&body.uri)
