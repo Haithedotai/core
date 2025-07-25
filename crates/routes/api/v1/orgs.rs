@@ -1,8 +1,7 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::state;
-use crate::lib::{contracts, error::ApiError, respond, state::AppState};
+use crate::lib::{contracts, error::ApiError, models::get_models, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, web};
-use ethers::contract::multicall_contract::Result;
 use serde::{Deserialize, Serialize, de};
 use sqlx::{FromRow, query};
 use uuid::Uuid;
@@ -345,8 +344,11 @@ async fn delete_org_members_handler(
 #[get("/{id}/models")]
 async fn get_org_models_handler(
     _: AuthUser,
+    path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
+    let org_id = path.into_inner();
+
     let models = get_models();
 
     let enabled_models = sqlx::query_scalar::<_, String>(
@@ -356,9 +358,14 @@ async fn get_org_models_handler(
     .fetch_all(&state.db)
     .await?;
 
+    let enabled_model_ids: Vec<u64> = enabled_models
+        .iter()
+        .filter_map(|id_str| id_str.parse().ok())
+        .collect();
+
     let enabled_models = models
         .into_iter()
-        .filter(|model| enabled_models.contains(&model.id) && model.is_active)
+        .filter(|model| enabled_model_ids.contains(&model.id) && model.is_active)
         .collect::<Vec<_>>();
 
     Ok(respond::ok(
@@ -369,15 +376,17 @@ async fn get_org_models_handler(
 
 #[derive(Deserialize)]
 struct PostOrgModelsQuery {
-    model_id: i64,
+    model_id: u64,
 }
 
 #[post("/{id}/models")]
 async fn post_org_models_handler(
     _: AuthUser,
     query: web::Query<PostOrgModelsQuery>,
+    path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
+    let org_id = path.into_inner();
     let models = get_models();
 
     let model_id = query.model_id;
@@ -389,7 +398,7 @@ async fn post_org_models_handler(
 
     sqlx::query("INSERT INTO org_model_enrollments (org_id, model_id) VALUES (?, ?)")
         .bind(org_id)
-        .bind(model_id)
+        .bind(model_id.to_string())
         .execute(&state.db)
         .await?;
 
@@ -411,7 +420,7 @@ async fn delete_org_models_handler(
 
     Ok(respond::ok(
         "Models unregistered",
-        serde_json::json!({id : org_id}),
+        serde_json::json!({"id" : org_id}),
     ))
 }
 

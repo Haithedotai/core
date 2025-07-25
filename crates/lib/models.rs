@@ -1,18 +1,13 @@
 use alith::{LLM, models};
+use serde::{Deserialize, Serialize};
 
-struct Model {
-    id: u64,
-    name: String,
-    display_name: String,
-    provider: String,
-    is_active: bool,
-}
-struct Model {
-    id: u64,
-    name: String,
-    display_name: String,
-    provider: String,
-    is_active: bool,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Model {
+    pub id: u64,
+    pub name: String,
+    pub display_name: String,
+    pub provider: String,
+    pub is_active: bool,
 }
 
 pub fn get_models() -> Vec<Model> {

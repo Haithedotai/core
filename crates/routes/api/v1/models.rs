@@ -1,5 +1,5 @@
 use crate::lib::extractors::AuthUser;
-use crate::lib::{error::ApiError, respond, state::AppState};
+use crate::lib::{error::ApiError, models::get_models, respond, state::AppState};
 use actix_web::{Responder, get, post, web};
 use serde::Serialize;
 use sqlx::FromRow;
@@ -14,5 +14,5 @@ async fn get_index_handler() -> Result<impl Responder, ApiError> {
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(get_index_handler)
+    cfg.service(get_index_handler);
 }
