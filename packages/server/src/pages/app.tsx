@@ -7,8 +7,6 @@ import {
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import { withProtectedRoute } from "@/src/lib/components/app/ProtectedRoute";
 import { useAnalytics } from '../lib/hooks/use-analytics';
-import ModelPage from './home/models';
-import ChatbotPage from './home/models/chatbot';
 import Onboarding from './onboarding';
 import Dashboard from './dashboard';
 import Profile from './dashboard/profile';
@@ -21,6 +19,7 @@ import Landing from './landing';
 import Test from './test/test';
 import Marketplace from './marketplace';
 import Settings from './dashboard/settings';
+import BecomeCreator from './marketplace/become-creator';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -39,24 +38,6 @@ const indexRoute = createRoute({
   path: '/',
   component: function Index() {
     return withPageErrorBoundary(Landing)({});
-  },
-})
-
-// dynamic route for models
-const modelRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/model/$id',
-  component: function Model() {
-    return withPageErrorBoundary(ModelPage)({});
-  },
-})
-
-// dynamic route for chatbot
-const chatbotRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/model/$id/chat',
-  component: function Chat() {
-    return withPageErrorBoundary(ChatbotPage)({});
   },
 })
 
@@ -213,10 +194,16 @@ const marketplaceRoute = createRoute({
   },
 })
 
+const becomeCreatorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/marketplace/become-a-creator',
+  component: function BecomeCreatorRoute() {
+    return withPageErrorBoundary(BecomeCreator)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  modelRoute,
-  chatbotRoute,
   onboardingRoute,
   dashboardRoute,
   profileRoute,
@@ -227,7 +214,8 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
   helpRoute,
   testRoute,
-  marketplaceRoute
+  marketplaceRoute,
+  becomeCreatorRoute
 ])
 
 const router = createRouter({

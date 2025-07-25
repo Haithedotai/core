@@ -85,8 +85,8 @@ export class HaitheClient {
 
 
   // Creator methods
-  registerAsCreator(uri: string, contractAddress: string): Promise<Creator> {
-    return this.creator.becomeCreator(uri, contractAddress);
+  registerAsCreator(uri: string): Promise<Creator> {
+    return this.creator.becomeCreator(uri);
   }
 
 

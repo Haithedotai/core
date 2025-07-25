@@ -31,6 +31,7 @@
   "module": "index.ts",
   "type": "module",
   "dependencies": {
+    "minimatch": "^10.0.3",
     "viem": "^2.33.0"
   }
 }

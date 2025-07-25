@@ -10,6 +10,7 @@ import {
 import { Button } from "../ui/button";
 import Icon from "./Icon";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { Input } from "../ui/input";
 
 type AspectRatio =
   | "square"
@@ -218,7 +219,7 @@ export default function Crop({
         <DialogHeader className="pt-6">
           <DialogTitle>Crop Image</DialogTitle>
         </DialogHeader>
-        <div className="relative h-[500px] w-full bg-black">
+        <div className="relative h-[460px] w-full bg-black">
           <Cropper
             image={imageUrl}
             crop={crop}

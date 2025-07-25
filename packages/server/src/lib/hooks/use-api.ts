@@ -91,6 +91,29 @@ export function useApi() {
                 console.error('Stream error:', err);
                 toast.error("Failed to generate stream");
             }
-        })
+        }),
+
+        uploadFile: useMutation({
+            mutationFn: async (file: File) => {
+                const result = await client.upload.index.$post({
+                    form: { file },
+                })
+
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+            onSuccess: (res) => {
+                toast.success(`Successfully uploaded file!`);
+            },
+            onError: (err) => {
+                console.error(err);
+                toast.error("Failed to upload file");
+            }
+        }),
     }
 }

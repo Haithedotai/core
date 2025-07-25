@@ -386,5 +386,20 @@ export function useHaitheApi() {
                 toast.error('Could not remove project member. Please try again.');
             }
         }),
+
+        registerAsCreator: useMutation({
+            mutationKey: ['registerAsCreator'],
+            mutationFn: ({ uri }: { uri: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.registerAsCreator(uri);
+            },
+            onSuccess: () => {
+                toast.success('Registered as creator successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not register as creator. Please try again.');
+            }
+        }),
     };
 } 
