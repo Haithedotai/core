@@ -127,6 +127,27 @@ async fn get_org_handler(
     Ok(respond::ok("Organization retrieved", org))
 }
 
+#[get("/{id}/projects")]
+async fn get_org_projects_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
+
+    let projects = sqlx::query_as::<_, models::Project>(
+        "SELECT p.* FROM projects p
+         JOIN org_members om ON p.org_id = om.org_id
+         WHERE om.org_id = ? AND om.wallet_address = ?",
+    )
+    .bind(id)
+    .bind(&user.wallet_address)
+    .fetch_all(&state.db)
+    .await?;
+
+    Ok(respond::ok("Organization projects retrieved", projects))
+}
+
 #[derive(Deserialize)]
 struct PatchOrgQuery {
     name: String,
