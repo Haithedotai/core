@@ -1,15 +1,12 @@
 use actix_web::{HttpResponse, Responder, get, web};
-use alith::{
-    interface::llms::api::error::ApiError,
-    tee::marlin::{AttestationRequest, MarlinClient},
-};
+use alith::tee::marlin::{AttestationRequest, MarlinClient};
 use ethers::{
     signers::{LocalWallet, Signer},
     types::Res,
 };
 use serde::Serialize;
 
-use crate::lib::respond;
+use crate::lib::{error::ApiError, respond};
 
 #[derive(Serialize)]
 struct TeeInfo {
@@ -30,8 +27,10 @@ async fn get_attest_handler() -> Result<impl Responder, ApiError> {
     {
         Ok(att_hex) => att_hex,
         Err(err) => {
-            return HttpResponse::InternalServerError()
-                .body(format!("Failed to get attestation: {}", err));
+            return Err(ApiError::Internal(format!(
+                "Failed to get attestation: {}",
+                err
+            )));
         }
     };
 
@@ -48,7 +47,9 @@ async fn get_attest_handler() -> Result<impl Responder, ApiError> {
 async fn get_pub_key_handler() -> Result<impl Responder, ApiError> {
     let tee_pvt_key = std::env::var("MOCK_TEE_PVT_KEY").unwrap_or_default();
 
-    let wallet: LocalWallet = tee_pvt_key.parse()?;
+    let wallet: LocalWallet = tee_pvt_key
+        .parse()
+        .map_err(|e| ApiError::BadRequest(format!("Failed to parse wallet: {}", e)))?;
     let pubkey = wallet.signer().verifying_key().to_encoded_point(false);
 
     Ok(respond::ok(
@@ -60,5 +61,5 @@ async fn get_pub_key_handler() -> Result<impl Responder, ApiError> {
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(get_attest_handler);
+    cfg.service(get_attest_handler).service(get_pub_key_handler);
 }
