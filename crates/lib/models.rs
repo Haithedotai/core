@@ -1,4 +1,4 @@
-use alith::{LLM, models};
+use alith::LLM;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]

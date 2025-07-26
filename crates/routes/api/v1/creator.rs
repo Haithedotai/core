@@ -2,7 +2,7 @@ use crate::lib::{contracts, error::ApiError, extractors::AuthUser, respond, stat
 use actix_web::{Responder, post, web};
 use ethers::abi::{Token, encode};
 use ethers::providers::Middleware;
-use ethers::types::{Address, Bytes, H256};
+use ethers::types::{Address, H256};
 use ethers::utils::keccak256;
 use serde::Deserialize;
 

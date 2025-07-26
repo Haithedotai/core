@@ -1,7 +1,7 @@
 use crate::lib::extractors::ApiCaller;
 use crate::lib::state::AppState;
-use crate::lib::{contracts, error::ApiError, models, respond};
-use actix_web::{HttpResponse, Responder, get, post, web};
+use crate::lib::{contracts, error::ApiError, models};
+use actix_web::{HttpResponse, Responder, get, web};
 use alith::data::crypto::decrypt;
 use alith::{Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge};
 use chrono;
