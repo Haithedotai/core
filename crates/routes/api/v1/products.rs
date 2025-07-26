@@ -68,6 +68,12 @@ async fn post_index_handler(
                 .call()
                 .await?;
 
+        let product_category: String =
+            contracts::get_contract("HaitheProduct", Some(&format!("{:#x}", product_address)))?
+                .method::<_, String>("category", ())?
+                .call()
+                .await?;
+
         let product_price_per_call: ethers::types::U256 =
             contracts::get_contract("HaitheProduct", Some(&format!("{:#x}", product_address)))?
                 .method::<_, ethers::types::U256>("pricePerCall", ())?
@@ -81,7 +87,7 @@ async fn post_index_handler(
             .await?;
 
         let product = sqlx::query_as::<_, Product>(
-            "INSERT INTO products (orchestrator_idx, creator, name, uri, encrypted_key, price_per_call) VALUES (?, ?, ?, ?, ?, ?) RETURNING *",
+            "INSERT INTO products (orchestrator_idx, creator, name, uri, encrypted_key, price_per_call, category) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(idx)
         .bind(&format!("{:#x}", product_creator))
@@ -89,6 +95,7 @@ async fn post_index_handler(
         .bind(&product_uri)
         .bind(&product_encrypted_key)
         .bind(product_price_per_call.as_u64() as i64)
+        .bind(&product_category)
         .fetch_one(&state.db)
         .await?;
         synced_count += 1;
@@ -100,6 +107,124 @@ async fn post_index_handler(
     ))
 }
 
+#[derive(Deserialize)]
+struct PostEnableQuery {
+    project_id: i64,
+}
+
+#[post("/{id}/enable")]
+async fn post_enable_handler(
+    user: AuthUser,
+    query: web::Query<PostEnableQuery>,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = query.project_id;
+    let product_id = path.into_inner();
+
+    // check permission
+    let has_permission = sqlx::query_scalar!(
+        r#"
+        SELECT EXISTS(
+            SELECT 1
+            FROM projects p
+            JOIN organizations o ON p.org_id = o.id
+            LEFT JOIN org_members om ON om.org_id = o.id AND om.wallet_address = ?
+            LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.wallet_address = ?
+            WHERE p.id = ?
+              AND (
+                    o.owner = ?
+                 OR (om.role IN ('admin') AND om.wallet_address IS NOT NULL)
+                 OR (pm.role IN ('admin', 'developer') AND pm.wallet_address IS NOT NULL)
+              )
+        ) as "exists!"
+        "#,
+        user.wallet_address,
+        user.wallet_address,
+        project_id,
+        user.wallet_address
+    )
+    .fetch_one(&state.db)
+    .await?;
+
+    if has_permission == 0 {
+        return Err(ApiError::BadRequest(
+            "You do not have permission to enable this product for the project".to_string(),
+        ));
+    }
+
+    sqlx::query("INSERT INTO project_products_enabled (project_id, product_id) VALUES (?, ?)")
+        .bind(project_id)
+        .bind(product_id)
+        .execute(&state.db)
+        .await?;
+
+    Ok(respond::ok(
+        "Products enabled successfully",
+        serde_json::json!({}),
+    ))
+}
+
+#[derive(Deserialize)]
+struct PostDisableQuery {
+    project_id: i64,
+}
+
+#[delete("/{id}/disable")]
+async fn delete_disable_handler(
+    user: AuthUser,
+    query: web::Query<PostDisableQuery>,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = query.project_id;
+    let product_id = path.into_inner();
+
+    // check permission
+    let has_permission = sqlx::query_scalar!(
+        r#"
+        SELECT EXISTS(
+            SELECT 1
+            FROM projects p
+            JOIN organizations o ON p.org_id = o.id
+            LEFT JOIN org_members om ON om.org_id = o.id AND om.wallet_address = ?
+            LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.wallet_address = ?
+            WHERE p.id = ?
+              AND (
+                    o.owner = ?
+                 OR (om.role IN ('admin') AND om.wallet_address IS NOT NULL)
+                 OR (pm.role IN ('admin', 'developer') AND pm.wallet_address IS NOT NULL)
+              )
+        ) as "exists!"
+        "#,
+        user.wallet_address,
+        user.wallet_address,
+        project_id,
+        user.wallet_address
+    )
+    .fetch_one(&state.db)
+    .await?;
+
+    if has_permission == 0 {
+        return Err(ApiError::BadRequest(
+            "You do not have permission to disable this product for the project".to_string(),
+        ));
+    }
+
+    sqlx::query("DELETE FROM project_products_enabled WHERE project_id = ? AND product_id = ?")
+        .bind(project_id)
+        .bind(product_id)
+        .execute(&state.db)
+        .await?;
+
+    Ok(respond::ok(
+        "Product disabled successfully",
+        serde_json::json!({}),
+    ))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(post_index_handler);
+    cfg.service(post_index_handler)
+        .service(post_enable_handler)
+        .service(delete_disable_handler);
 }

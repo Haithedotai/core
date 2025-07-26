@@ -67,3 +67,21 @@ impl From<ethers::contract::AbiError> for ApiError {
         ApiError::Internal(format!("Contract RPC error: {}", err))
     }
 }
+
+impl From<std::string::FromUtf8Error> for ApiError {
+    fn from(err: std::string::FromUtf8Error) -> Self {
+        ApiError::BadRequest(format!("Invalid UTF-8 data: {}", err))
+    }
+}
+
+impl From<reqwest::Error> for ApiError {
+    fn from(err: reqwest::Error) -> Self {
+        ApiError::Internal(format!("HTTP request error: {}", err))
+    }
+}
+
+impl From<std::env::VarError> for ApiError {
+    fn from(err: std::env::VarError) -> Self {
+        ApiError::Internal(format!("Environment variable error: {}", err))
+    }
+}

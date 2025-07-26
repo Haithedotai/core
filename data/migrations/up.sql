@@ -85,7 +85,17 @@ CREATE TABLE
         name TEXT NOT NULL,
         uri TEXT NOT NULL,
         encrypted_key TEXT NOT NULL,
+        category TEXT NOT NULL,
         price_per_call INTEGER NOT NULL CHECK (price_per_call >= 0),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name, creator)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS project_products_enabled (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+        product_id INTEGER NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+        enabled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (project_id, product_id)
     );

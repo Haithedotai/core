@@ -47,6 +47,7 @@ contract HaitheOrchestrator {
         string memory uri_,
         string memory iv_,
         string memory encryptedKeyForTEE_,
+        string memory category_,
         uint256 pricePerCall_
     ) external {
         require(
@@ -60,6 +61,7 @@ contract HaitheOrchestrator {
                 iv_,
                 encryptedKeyForTEE_,
                 msg.sender,
+                category_,
                 pricePerCall_
             )
         );

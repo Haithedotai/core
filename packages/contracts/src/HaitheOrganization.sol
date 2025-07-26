@@ -28,6 +28,10 @@ contract HaitheOrganization {
         enabledProducts.add(product);
     }
 
+    function getEnabledProducts() external view returns (address[] memory) {
+        return enabledProducts.getAll();
+    }
+
     function disableProduct(address product) external {
         require(msg.sender == owner, "Only owner can disable products");
         require(enabledProducts.contains(product), "Product is not enabled");

@@ -2,6 +2,7 @@ import { BaseClient } from "../shared/baseClient";
 import type { Organization, OrganizationMember } from "../shared/types";
 import { HaitheAuthClient } from "./auth";
 import definitions from "../../definitions";
+import type { Address } from "viem";
 
 export class HaitheOrgsClient extends BaseClient {
   private authClient: HaitheAuthClient;
@@ -96,5 +97,64 @@ export class HaitheOrgsClient extends BaseClient {
       this.authClient.getAuthToken(),
       { method: "DELETE" }
     );
+  }
+
+  getAvailableModels(): Promise<
+    {
+      id: number;
+      name: string;
+      display_name: string;
+      provider: string;
+      is_active: boolean;
+      price_per_call: number;
+    }[]
+  > {
+    return this.fetch(`/v1/models`, this.authClient.getAuthToken());
+  }
+
+  async enableProduct(
+    product_address: Address,
+    org_address: Address
+  ): Promise<void> {
+    if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    await this.authClient.walletClient.writeContract({
+      ...definitions.HaitheOrganization,
+      address: org_address,
+      functionName: "enableProduct",
+      args: [product_address],
+    });
+  }
+
+  async disableProduct(
+    product_address: Address,
+    org_address: Address
+  ): Promise<void> {
+    if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    await this.authClient.walletClient.writeContract({
+      ...definitions.HaitheOrganization,
+      address: org_address,
+      functionName: "disableProduct",
+      args: [product_address],
+    });
+  }
+
+  async getEnabledProducts(org_address: Address): Promise<Address[]> {
+    if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    const products = await this.authClient.publicClient.readContract({
+      ...definitions.HaitheOrganization,
+      address: org_address,
+      functionName: "getEnabledProducts",
+    });
+
+    return products as Address[];
   }
 }
