@@ -85,3 +85,21 @@ impl From<std::env::VarError> for ApiError {
         ApiError::Internal(format!("Environment variable error: {}", err))
     }
 }
+
+impl From<alith::lazai::ClientError> for ApiError {
+    fn from(err: alith::lazai::ClientError) -> Self {
+        ApiError::Internal(format!("Alith client error: {}", err))
+    }
+}
+
+impl From<pkcs1::Error> for ApiError {
+    fn from(err: pkcs1::Error) -> Self {
+        ApiError::Internal(format!("PKCS1 error: {}", err))
+    }
+}
+
+impl From<rsa::Error> for ApiError {
+    fn from(err: rsa::Error) -> Self {
+        ApiError::Internal(format!("RSA error: {}", err))
+    }
+}

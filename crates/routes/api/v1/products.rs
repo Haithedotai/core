@@ -126,16 +126,17 @@ async fn post_index_handler(
         let node_url = node_info.url;
         let pub_key = node_info.publicKey;
         let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
-        let mut rng = rand_08::thread_rng();
+        let mut rng = rand::thread_rng();
         let encryption_key = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
         let encryption_key = hex::encode(encryption_key);
+        let encryption_seed = "default_seed"; // You may want to generate this dynamically
         let response = reqwest::Client::new()
             .post(format!("{node_url}/proof"))
             .json(
                 &ProofRequest::builder()
                     .job_id(job_id.to())
                     .file_id(file_id.to())
-                    .file_url(url)
+                    .file_url(product_uri.clone())
                     .encryption_key(encryption_key)
                     .encryption_seed(encryption_seed.to_string())
                     .build(),
