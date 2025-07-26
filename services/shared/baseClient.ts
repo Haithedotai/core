@@ -18,7 +18,9 @@ export abstract class BaseClient {
     if (!uri.startsWith("/")) {
       uri = `/${uri}`;
     }
-    const base = this.baseUrl.endsWith("/") ? this.baseUrl.slice(0, -1) : this.baseUrl;
+    const base = this.baseUrl.endsWith("/")
+      ? this.baseUrl.slice(0, -1)
+      : this.baseUrl;
     const url = base + uri;
 
     return new Promise((resolve, reject) => {
@@ -39,18 +41,27 @@ export abstract class BaseClient {
           return response.json();
         })
         .then((response) => {
+          if (
+            !response ||
+            typeof response !== "object" ||
+            !("success" in response) ||
+            !("message" in response) ||
+            !("data" in response)
+          ) {
+            throw new Error("Invalid API response");
+          }
+
           if (!response.success)
             throw new Error(
               "Api call was not successful : " + response.message
             );
 
-          if (this.debug)
-            console.log(`Response from ${url}:`, response);
+          if (this.debug) console.log(`Response from ${url}:`, response);
 
           if (!response.data) throw new Error("Response data is missing");
 
           console.log(response.message);
-          resolve(response.data);
+          resolve(response.data as T);
         })
         .catch((error) => {
           reject(error);
