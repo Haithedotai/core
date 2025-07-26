@@ -2,6 +2,10 @@ use crate::lib::extractors::AuthUser;
 use crate::lib::state;
 use crate::lib::{contracts, error::ApiError, models::get_models, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, web};
+use alith::data::crypto::{DecodeRsaPublicKey, Pkcs1v15Encrypt, RsaPublicKey, encrypt};
+use alith::data::storage::{DataStorage, PinataIPFS, UploadOptions};
+use alith::lazai::{ProofRequest, U256};
+use reqwest;
 use serde::{Deserialize, Serialize, de};
 use sqlx::{FromRow, query};
 use uuid::Uuid;
@@ -33,6 +37,8 @@ async fn post_index_handler(
         .await?;
 
     let mut synced_count: u32 = 0;
+
+    let alithClient = alith::lazai::Client::new_default()?;
 
     // iterate from highest_orchestrator_idx + 1 to onchain_length
     for idx in (highest_orchestrator_idx + 1)..=onchain_length.as_u64() as i64 {
@@ -99,6 +105,45 @@ async fn post_index_handler(
         .fetch_one(&state.db)
         .await?;
         synced_count += 1;
+
+        let tee_secret = std::env::var("TEE_SECRET")?;
+
+        let mut file_id = alithClient.get_file_id_by_url(product_uri.as_str()).await?;
+        if file_id.is_zero() {
+            file_id = alithClient.add_file(product_uri.as_str()).await?;
+        }
+
+        alithClient.request_proof(file_id, U256::from(100)).await?;
+
+        let job_id = alithClient
+            .file_job_ids(file_id)
+            .await?
+            .last()
+            .cloned()
+            .unwrap();
+        let job = alithClient.get_job(job_id).await?;
+        let node_info = alithClient.get_node(job.nodeAddress).await?.unwrap();
+        let node_url = node_info.url;
+        let pub_key = node_info.publicKey;
+        let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
+        let mut rng = rand_08::thread_rng();
+        let encryption_key = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
+        let encryption_key = hex::encode(encryption_key);
+        let response = reqwest::Client::new()
+            .post(format!("{node_url}/proof"))
+            .json(
+                &ProofRequest::builder()
+                    .job_id(job_id.to())
+                    .file_id(file_id.to())
+                    .file_url(url)
+                    .encryption_key(encryption_key)
+                    .encryption_seed(encryption_seed.to_string())
+                    .build(),
+            )
+            .send()
+            .await?;
+
+        alithClient.request_reward(file_id, None).await?;
     }
 
     Ok(respond::ok(
