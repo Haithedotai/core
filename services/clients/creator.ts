@@ -95,13 +95,13 @@ export class HaitheCreatorClient extends BaseClient {
       | "knowledge:html"
       | "knowledge:pdf"
       | "knowledge:csv"
-      | "knowledge:html"
       | "knowledge:url"
       | "promptset"
       | "mcp"
       | "tool:rs"
       | "tool:js"
-      | "tool:py",
+      | "tool:py"
+      | "tool:rpc",
     pricePerCall: bigint,
     upload_fn: (data: Blob) => Promise<string>
   ) {
