@@ -169,7 +169,7 @@ async fn post_enable_handler(
     let product_id = path.into_inner();
 
     // check permission
-    let has_permission = sqlx::query_scalar!(
+    let has_permission = sqlx::query_scalar::<_, i64>(
         r#"
         SELECT EXISTS(
             SELECT 1
@@ -185,11 +185,11 @@ async fn post_enable_handler(
               )
         ) as "exists!"
         "#,
-        user.wallet_address,
-        user.wallet_address,
-        project_id,
-        user.wallet_address
     )
+    .bind(&user.wallet_address)
+    .bind(&user.wallet_address)
+    .bind(project_id)
+    .bind(&user.wallet_address)
     .fetch_one(&state.db)
     .await?;
 
@@ -227,7 +227,7 @@ async fn delete_disable_handler(
     let product_id = path.into_inner();
 
     // check permission
-    let has_permission = sqlx::query_scalar!(
+    let has_permission = sqlx::query_scalar::<_, i64>(
         r#"
         SELECT EXISTS(
             SELECT 1
@@ -243,11 +243,11 @@ async fn delete_disable_handler(
               )
         ) as "exists!"
         "#,
-        user.wallet_address,
-        user.wallet_address,
-        project_id,
-        user.wallet_address
     )
+    .bind(&user.wallet_address)
+    .bind(&user.wallet_address)
+    .bind(project_id)
+    .bind(&user.wallet_address)
     .fetch_one(&state.db)
     .await?;
 
