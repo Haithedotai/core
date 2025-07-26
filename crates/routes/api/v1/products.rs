@@ -147,9 +147,9 @@ async fn post_enable_handler(
     .fetch_one(&state.db)
     .await?;
 
-    if !has_permission {
-        return Err(ApiError::forbidden(
-            "You do not have permission to enable this product for the project",
+    if has_permission == 0 {
+        return Err(ApiError::BadRequest(
+            "You do not have permission to enable this product for the project".to_string(),
         ));
     }
 
@@ -205,9 +205,9 @@ async fn delete_disable_handler(
     .fetch_one(&state.db)
     .await?;
 
-    if !has_permission {
-        return Err(ApiError::forbidden(
-            "You do not have permission to disable this product for the project",
+    if has_permission == 0 {
+        return Err(ApiError::BadRequest(
+            "You do not have permission to disable this product for the project".to_string(),
         ));
     }
 

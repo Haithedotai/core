@@ -1,11 +1,15 @@
 use crate::lib::extractors::ApiCaller;
 use crate::lib::state::AppState;
-use crate::lib::{error::ApiError, models, respond};
+use crate::lib::{contracts, error::ApiError, models, respond};
 use actix_web::{HttpResponse, Responder, get, post, web};
 use alith::data::crypto::decrypt;
 use alith::{Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge};
+use chrono;
 use serde::Deserialize;
 use serde_json::json;
+use std::io::Cursor;
+use url::Url;
+use uuid;
 
 #[derive(Deserialize)]
 pub struct GetChatCompletionsBody {
@@ -34,11 +38,10 @@ async fn get_completions_handler(
     .fetch_all(&state.db)
     .await?;
 
-    let org_address: String = sqlx::query_scalar::<String>(
-        sqlx::query("SELECT address FROM organizations WHERE id = ?").bind(api_caller.org_id),
-    )
-    .fetch_one(&state.db)
-    .await?;
+    let org_address: String = sqlx::query_scalar("SELECT address FROM organizations WHERE id = ?")
+        .bind(api_caller.org_id)
+        .fetch_one(&state.db)
+        .await?;
 
     let enabled_products_for_organization: Vec<String> =
         contracts::get_contract("HaitheOrganization", Some(&org_address))?
@@ -76,14 +79,14 @@ async fn get_completions_handler(
 
     let llm = models::resolve_model(&model);
 
-    let knowledges: Vec<Box<dyn Knowledge>> = vec![Box::new(StringKnowledge::new(
+    let mut knowledges: Vec<Box<dyn Knowledge>> = vec![Box::new(StringKnowledge::new(
         "You are a helpful assistant. You answer questions by using provided knowledge, messages and prompts.",
     ))];
 
     let mut preamble = String::new();
 
     for p in enabled_products {
-        let (uri, encrypted_key, price_per_call, category): (String, String, i64, String) =
+        let (uri, _encrypted_key, _price_per_call, category): (String, String, i64, String) =
             sqlx::query_as::<_, (String, String, i64, String)>("SELECT uri, encrypted_key, price_per_call, category FROM products WHERE address = ?")
                 .bind(p)
                 .fetch_one(&state.db)
@@ -93,31 +96,39 @@ async fn get_completions_handler(
         let encrypted_data = response.bytes().await?;
         let encrypted_bytes: Vec<u8> = encrypted_data.to_vec();
 
-        let decrypted_data = decrypt(&encrypted_bytes, std::env::var("TEE_SECRET"))?;
+        let decrypted_data = decrypt(&encrypted_bytes, std::env::var("TEE_SECRET")?)?;
 
         if category.starts_with("knowledge") {
             if category == "knowledge:text" {
                 knowledges.push(Box::new(StringKnowledge::new(String::from_utf8(
                     decrypted_data,
                 )?)));
-            }
-            if category == "knowledge:html" {
+            } else if category == "knowledge:html" {
                 let html = String::from_utf8(decrypted_data)?;
-                knowledges.push(Box::new(HtmlKnowledge::new(Cursor::new(html), "", false)));
-            }
-            if category == "knowledge:pdf" {
-                knowledges.push(Box::new(PdfFileKnowledge::new(String::from_utf8(
-                    decrypted_data,
-                )?)));
-            }
-            if category == "knowledge:url" {
-                let url = String::from_utf8(decrypted_data)?;
-                let html = reqwest::get(url).await.unwrap().text().await.unwrap();
+                let default_url = Url::parse("https://haithe.ai").unwrap();
+                knowledges.push(Box::new(HtmlKnowledge::new(
+                    Cursor::new(html),
+                    default_url,
+                    false,
+                )));
+            } else if category == "knowledge:pdf" {
+                let pdf_content = String::from_utf8(decrypted_data)?;
+                knowledges.push(Box::new(PdfFileKnowledge::new(pdf_content)));
+            } else if category == "knowledge:url" {
+                let url_string = String::from_utf8(decrypted_data)?;
+                let url = Url::parse(&url_string)
+                    .map_err(|e| ApiError::BadRequest(format!("Invalid URL: {}", e)))?;
+                let html = reqwest::get(&url_string)
+                    .await
+                    .unwrap()
+                    .text()
+                    .await
+                    .unwrap();
                 knowledges.push(Box::new(HtmlKnowledge::new(Cursor::new(html), url, false)));
             }
-        }
-        if category == "promptset" {
-            let prompts: Vec<String> = serde_json::from_slice(&decrypted_data)?;
+        } else if category == "promptset" {
+            let prompts: Vec<String> = serde_json::from_slice(&decrypted_data)
+                .map_err(|e| ApiError::BadRequest(format!("Failed to parse prompts: {}", e)))?;
             for prompt in prompts {
                 preamble.push_str(&prompt);
                 preamble.push('\n');
