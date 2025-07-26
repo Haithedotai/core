@@ -315,7 +315,7 @@
         "type": "function"
       }
     ],
-    "address": "0x7ef8e99980da5bcedcf7c10f41e55f759f6a174b"
+    "address": "0x66db6d191cd163f56197b767928a507df8b47aa7"
   },
   "HaitheOrchestrator": {
     "abi": [
@@ -339,7 +339,7 @@
           },
           {
             "internalType": "string",
-            "name": "cid_",
+            "name": "uri_",
             "type": "string"
           },
           {
@@ -517,6 +517,19 @@
         "type": "function"
       },
       {
+        "inputs": [],
+        "name": "productsCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
         "inputs": [
           {
             "internalType": "address",
@@ -571,7 +584,7 @@
         "type": "function"
       }
     ],
-    "address": "0x82b769500e34362a76df81150e12c746093d954f"
+    "address": "0xbd3afef4b26918cdb922f9d80aea9b8e64524432"
   },
   "HaitheOrganization": {
     "abi": [
@@ -1254,6 +1267,6 @@
         "type": "function"
       }
     ],
-    "address": "0xBE6566b6d79dF8EA95b2619478019333aA758BE8"
+    "address": "0xA2E318F7523e60B99caD1cc2C101D1034C67f952"
   }
 }
