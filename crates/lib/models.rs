@@ -8,6 +8,7 @@ pub struct Model {
     pub display_name: String,
     pub provider: String,
     pub is_active: bool,
+    pub price_per_call: u64,
 }
 
 pub fn get_models() -> Vec<Model> {
@@ -18,6 +19,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.0 Flash".to_string(),
             provider: "Google".to_string(),
             is_active: true,
+            price_per_call: 0,
         },
         Model {
             id: 2,
@@ -25,6 +27,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.0 Flash Lite".to_string(),
             provider: "Google".to_string(),
             is_active: true,
+            price_per_call: 0,
         },
         Model {
             id: 3,
@@ -32,6 +35,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.5 Pro".to_string(),
             provider: "Google".to_string(),
             is_active: true,
+            price_per_call: 0,
         },
         Model {
             id: 4,
@@ -39,6 +43,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.5 Flash".to_string(),
             provider: "Google".to_string(),
             is_active: true,
+            price_per_call: 0,
         },
         Model {
             id: 5,
@@ -46,6 +51,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.5 Flash Lite".to_string(),
             provider: "Google".to_string(),
             is_active: true,
+            price_per_call: 0,
         },
         Model {
             id: 6,
@@ -53,6 +59,8 @@ pub fn get_models() -> Vec<Model> {
             display_name: "GPT-0.3".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
+
+            price_per_call: 0,
         },
         Model {
             id: 7,
@@ -60,6 +68,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "GPT-0.3 Mini".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
+            price_per_call: 0,
         },
         Model {
             id: 8,
@@ -67,6 +76,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "GPT-0.4 Mini".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
+            price_per_call: 0,
         },
         Model {
             id: 9,
@@ -74,6 +84,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "GPT-4.1 Nano".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
+            price_per_call: 0,
         },
         Model {
             id: 10,
@@ -81,6 +92,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "GPT-4.1 Mini".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
+            price_per_call: 0,
         },
         Model {
             id: 11,
@@ -88,6 +100,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "DeepSeek Chat".to_string(),
             provider: "DeepSeek".to_string(),
             is_active: false,
+            price_per_call: 0,
         },
         Model {
             id: 12,
@@ -95,6 +108,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "DeepSeek Reasoner".to_string(),
             provider: "DeepSeek".to_string(),
             is_active: false,
+            price_per_call: 0,
         },
         Model {
             id: 13,
@@ -102,6 +116,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Kimi K2".to_string(),
             provider: "Haithe".to_string(),
             is_active: true,
+            price_per_call: 0,
         },
     ];
 

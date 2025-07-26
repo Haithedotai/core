@@ -106,6 +106,7 @@ export class HaitheOrgsClient extends BaseClient {
       display_name: string;
       provider: string;
       is_active: boolean;
+      price_per_call: number;
     }[]
   > {
     return this.fetch(`/v1/models`, this.authClient.getAuthToken());
