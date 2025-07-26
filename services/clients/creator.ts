@@ -90,6 +90,16 @@ export class HaitheCreatorClient extends BaseClient {
   async uploadToMarketplaceAndGetReward(
     name: string,
     file: File,
+    category:
+      | "knowledge:text"
+      | "knowledge:html"
+      | "knowledge:pdf"
+      | "knowledge:csv"
+      | "knowledge:html"
+      | "mcp"
+      | "tool:rs"
+      | "tool:js"
+      | "tool:py",
     pricePerCall: bigint,
     upload_fn: (data: Blob) => Promise<string>
   ) {
@@ -132,13 +142,17 @@ export class HaitheCreatorClient extends BaseClient {
     const nodeUrl = nodeInfo.url;
     const pubKey = nodeInfo.publicKey;
     const rsa = new NodeRSA(pubKey, "pkcs1-public-pem");
-    const encryptedKey = rsa.encrypt(password, "hex");
+    const encryptionSeed = password.slice(2, 32);
+    const signedPassword = lazaiClient
+      .getWallet()
+      .sign(encryptionSeed).signature;
+    const encryptedKey = rsa.encrypt(signedPassword, "hex");
     const proofRequest = {
       job_id: Number(jobId),
       file_id: Number(fileId),
       file_url: url,
       encryption_key: encryptedKey,
-      // encryption_seed: encryptionSeed,
+      encryption_seed: encryptionSeed,
       nonce: null,
       proof_url: null,
     };
@@ -163,6 +177,7 @@ export class HaitheCreatorClient extends BaseClient {
         url,
         crypto.getRandomValues(new Uint8Array(16)).toString(),
         encryptedKey,
+        category,
         pricePerCall,
       ],
     });
