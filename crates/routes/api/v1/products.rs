@@ -68,6 +68,12 @@ async fn post_index_handler(
                 .call()
                 .await?;
 
+        let product_category: String =
+            contracts::get_contract("HaitheProduct", Some(&format!("{:#x}", product_address)))?
+                .method::<_, String>("category", ())?
+                .call()
+                .await?;
+
         let product_price_per_call: ethers::types::U256 =
             contracts::get_contract("HaitheProduct", Some(&format!("{:#x}", product_address)))?
                 .method::<_, ethers::types::U256>("pricePerCall", ())?
@@ -81,7 +87,7 @@ async fn post_index_handler(
             .await?;
 
         let product = sqlx::query_as::<_, Product>(
-            "INSERT INTO products (orchestrator_idx, creator, name, uri, encrypted_key, price_per_call) VALUES (?, ?, ?, ?, ?, ?) RETURNING *",
+            "INSERT INTO products (orchestrator_idx, creator, name, uri, encrypted_key, price_per_call, category) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(idx)
         .bind(&format!("{:#x}", product_creator))
@@ -89,6 +95,7 @@ async fn post_index_handler(
         .bind(&product_uri)
         .bind(&product_encrypted_key)
         .bind(product_price_per_call.as_u64() as i64)
+        .bind(&product_category)
         .fetch_one(&state.db)
         .await?;
         synced_count += 1;

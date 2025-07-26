@@ -96,6 +96,8 @@ export class HaitheCreatorClient extends BaseClient {
       | "knowledge:pdf"
       | "knowledge:csv"
       | "knowledge:html"
+      | "knowledge:url"
+      | "promptset"
       | "mcp"
       | "tool:rs"
       | "tool:js"
