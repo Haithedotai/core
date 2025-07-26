@@ -10,6 +10,7 @@ contract HaitheProduct {
     string public encryptedKeyForTEE;
     uint256 public pricePerCall;
     address public creator;
+    string public category;
 
     HaitheOrchestrator private _orchestrator;
 
@@ -19,11 +20,13 @@ contract HaitheProduct {
         string memory iv_,
         string memory encryptedKeyForTEE_,
         address creator_,
+        string memory category_,
         uint256 pricePerCall_
     ) {
         _orchestrator = HaitheOrchestrator(msg.sender);
 
         name = name_;
+        category = category_;
         require(bytes(name).length > 0, "Product name cannot be empty");
 
         uri = uri_;
