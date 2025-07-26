@@ -85,12 +85,19 @@ async fn get_completions_handler(
 
     let mut preamble = String::new();
 
+    let mut total_cost = models
+        .iter()
+        .find(|m| m.name == model)
+        .map_or(0, |m| m.price_per_call) as u64;
+
     for p in enabled_products {
         let (uri, _encrypted_key, _price_per_call, category): (String, String, i64, String) =
             sqlx::query_as::<_, (String, String, i64, String)>("SELECT uri, encrypted_key, price_per_call, category FROM products WHERE address = ?")
                 .bind(p)
                 .fetch_one(&state.db)
                 .await?;
+
+        total_cost += _price_per_call as u64;
 
         let response = reqwest::get(&uri).await?;
         let encrypted_data = response.bytes().await?;
@@ -166,7 +173,10 @@ async fn get_completions_handler(
         "object": "chat.completion",
         "created": chrono::Utc::now().timestamp(),
         "model": model,
-        "choices": choices
+        "choices": choices,
+        "usage": {
+            "total_cost": total_cost
+        }
     })))
 }
 
