@@ -1,5 +1,6 @@
 use crate::lib::state;
 use crate::routes::routes;
+use actix_cors::Cors;
 use actix_web::middleware;
 use actix_web::{App, HttpResponse, HttpServer, Responder, web};
 use serde_json::json;
@@ -8,7 +9,6 @@ use state::AppState;
 use std::collections::HashMap;
 use std::fs;
 use std::sync::Mutex;
-use actix_cors::Cors;
 
 mod lib;
 mod macros;
@@ -55,9 +55,12 @@ async fn main() -> std::io::Result<()> {
                 Cors::default()
                     .allowed_origin("http://localhost:3000")
                     .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "OPTIONS"])
-                    .allowed_headers(vec![actix_web::http::header::AUTHORIZATION, actix_web::http::header::CONTENT_TYPE])
+                    .allowed_headers(vec![
+                        actix_web::http::header::AUTHORIZATION,
+                        actix_web::http::header::CONTENT_TYPE,
+                    ])
                     .supports_credentials()
-                    .max_age(3600)
+                    .max_age(3600),
             )
             .app_data(global_app_state.clone())
             .route("/health", web::get().to(health))
