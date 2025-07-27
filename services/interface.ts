@@ -138,18 +138,6 @@ export class HaitheClient {
     return this.orgs.removeOrganizationMember(orgId, walletAddress);
   }
 
-<<<<<<< HEAD
-  getAvailableModels(): Promise<
-    {
-      id: number;
-      name: string;
-      display_name: string;
-      provider: string;
-      is_active: boolean;
-      price_per_call: number;
-    }[]
-  > {
-=======
   getAvailableModels(): Promise<{
     id: number;
     name: string;
@@ -158,29 +146,10 @@ export class HaitheClient {
     is_active: boolean;
     price_per_call: number;
   }[]> {
->>>>>>> 9edac4cbd2857a14eb3fb39551d88c04cb81341e
     return this.orgs.getAvailableModels();
   }
 
   enableProduct(
-<<<<<<< HEAD
-    product_address: Address,
-    org_address: Address
-  ): Promise<void> {
-    return this.orgs.enableProduct(product_address, org_address);
-  }
-
-  disableProduct(
-    product_address: Address,
-    org_address: Address
-  ): Promise<void> {
-    return this.orgs.disableProduct(product_address, org_address);
-  }
-
-  getEnabledProducts(org_address: Address): Promise<Address[]> {
-    return this.orgs.getEnabledProducts(org_address);
-  }
-=======
     productAddress: `0x${string}`,
     orgAddress: `0x${string}`
   ): Promise<void> {
@@ -198,7 +167,6 @@ export class HaitheClient {
     return this.orgs.getEnabledProducts(orgAddress);
   }
 
->>>>>>> 9edac4cbd2857a14eb3fb39551d88c04cb81341e
 
   // Project methods
   createProject(orgId: number, name: string): Promise<Project> {
