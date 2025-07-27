@@ -2,6 +2,7 @@ export { HaitheAuthClient } from "./auth";
 export { HaitheOrgsClient } from "./orgs";
 export { HaitheProjectsClient } from "./projects";
 export { HaitheCreatorClient } from "./creator";
+export { HaitheProductsClient } from "./products";
 
 export type {
   MinimalPersistentStorage,
@@ -10,5 +11,6 @@ export type {
   Project,
   ProjectMember,
   UserProfile,
-  Creator
+  Creator,
+  Product,
 } from "../shared/types";

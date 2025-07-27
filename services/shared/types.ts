@@ -44,3 +44,12 @@ export interface Creator {
     pub_key: string;
     created_at: string;
 }
+
+export interface Product {
+  id: number;
+  creator: string;
+  name: string;
+  price_per_call: number;
+  category: string;
+  created_at: string;
+}
