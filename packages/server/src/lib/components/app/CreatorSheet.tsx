@@ -39,11 +39,7 @@ export default function CreatorSheet() {
   }
 
   if (isCreatorLoading) {
-    return (
-      <Button variant="outline" className="rounded-sm">
-        <Skeleton className="h-2 w-24" />
-      </Button>
-    );
+    return null;
   }
 
   if (isCreatorData) {

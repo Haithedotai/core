@@ -487,5 +487,23 @@ export function useHaitheApi() {
             },
             enabled: isLoggedIn() && !!client && !!id,
         }),
+
+        getAllProducts: () => useQuery({
+            queryKey: ['allProducts'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getAllProducts();
+            },
+            enabled: isLoggedIn() && !!client,
+        }),
+
+            getProductById: (id: number) => useQuery({
+            queryKey: ['product', id],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProductById(id);
+            },
+            enabled: isLoggedIn() && !!client && !!id,
+        }),
     };
 } 

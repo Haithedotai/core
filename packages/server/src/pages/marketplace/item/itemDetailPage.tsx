@@ -11,16 +11,7 @@ import type { MarketplaceItem } from '../types';
 import { mockMarketplaceData } from '../mockData';
 import { getTypeImage } from '../components/MarketplaceItemCard';
 import MarketplaceLayout from '../components/MarketplaceLayout';
-
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'knowledgeBase': return '🧠';
-    case 'lambda': return '⚡';
-    case 'instructionSet': return '📋';
-    case 'promptSet': return '💬';
-    default: return '🤖';
-  }
-};
+import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 
 const getTypeLabel = (type: string) => {
   switch (type) {
@@ -181,6 +172,8 @@ export default function ItemDetailPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [item, setItem] = useState<MarketplaceItem | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const haithe = useHaitheApi();
+  const { data: itemData, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
 
   useEffect(() => {
     // Find the item by ID from mock data

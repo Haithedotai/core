@@ -138,6 +138,7 @@ export class HaitheClient {
     return this.orgs.removeOrganizationMember(orgId, walletAddress);
   }
 
+<<<<<<< HEAD
   getAvailableModels(): Promise<
     {
       id: number;
@@ -148,10 +149,21 @@ export class HaitheClient {
       price_per_call: number;
     }[]
   > {
+=======
+  getAvailableModels(): Promise<{
+    id: number;
+    name: string;
+    display_name: string;
+    provider: string;
+    is_active: boolean;
+    price_per_call: number;
+  }[]> {
+>>>>>>> 9edac4cbd2857a14eb3fb39551d88c04cb81341e
     return this.orgs.getAvailableModels();
   }
 
   enableProduct(
+<<<<<<< HEAD
     product_address: Address,
     org_address: Address
   ): Promise<void> {
@@ -168,6 +180,25 @@ export class HaitheClient {
   getEnabledProducts(org_address: Address): Promise<Address[]> {
     return this.orgs.getEnabledProducts(org_address);
   }
+=======
+    productAddress: `0x${string}`,
+    orgAddress: `0x${string}`
+  ): Promise<void> {
+    return this.orgs.enableProduct(productAddress, orgAddress);
+  }
+
+  disableProduct(
+    productAddress: `0x${string}`,
+    orgAddress: `0x${string}`
+  ): Promise<void> {
+    return this.orgs.disableProduct(productAddress, orgAddress);
+  }
+
+  getEnabledProducts(orgAddress: `0x${string}`): Promise<`0x${string}`[]> {
+    return this.orgs.getEnabledProducts(orgAddress);
+  }
+
+>>>>>>> 9edac4cbd2857a14eb3fb39551d88c04cb81341e
 
   // Project methods
   createProject(orgId: number, name: string): Promise<Project> {
@@ -177,6 +208,11 @@ export class HaitheClient {
   getProject(id: number): Promise<Project> {
     return this.projects.getProject(id);
   }
+
+  getProjects(orgId: number): Promise<Project[]> {
+    return this.projects.getProjects(orgId);
+  }
+
 
   updateProject(id: number, name: string): Promise<Project> {
     return this.projects.updateProject(id, name);
@@ -215,10 +251,6 @@ export class HaitheClient {
     walletAddress: string
   ): Promise<ProjectMember> {
     return this.projects.removeProjectMember(projectId, walletAddress);
-  }
-
-  getProjects(orgId: number): Promise<Project[]> {
-    return this.projects.getProjects(orgId);
   }
 
   // Creator methods

@@ -21,8 +21,6 @@ export default function SettingsPage() {
   const haithe = useHaitheApi();
   const { data: availableModels } = haithe.getAvailableModels();
 
-  console.log(availableModels);
-
   // Initialize enabled models based on is_active status from API
   const [enabledModels, setEnabledModels] = useState<Set<number>>(new Set());
 

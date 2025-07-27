@@ -4,14 +4,10 @@ import { Separator } from "../../../lib/components/ui/separator";
 import { Badge } from "../../../lib/components/ui/badge";
 import {
   Sparkles,
-  Crown,
-  Zap,
   Clock,
-  Tag,
   Heart,
   ShoppingCart,
 } from "lucide-react";
-import { categories } from "../mockData";
 import Icon from "@/src/lib/components/custom/Icon";
 
 export default function MarketplaceSidebar() {

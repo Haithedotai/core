@@ -7,6 +7,7 @@ import { mockMarketplaceData } from './mockData';
 import MinimalFilters from './components/MinimalFilters';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
 import MarketplaceSidebar from './components/MarketplaceSidebar';
+import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 
 export default function MarketplacePage() {
   const navigate = useNavigate();
@@ -14,6 +15,10 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const haithe = useHaitheApi();
+  const { data: products, isLoading: isLoadingProducts } = haithe.getAllProducts();
+
+  console.log({products});
 
   // Filter and search logic
   const filteredItems = useMemo(() => {
