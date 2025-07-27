@@ -1,9 +1,6 @@
-use actix_web::{HttpResponse, Responder, get, web};
+use actix_web::{Responder, get, web};
 use alith::tee::marlin::{AttestationRequest, MarlinClient};
-use ethers::{
-    signers::{LocalWallet, Signer},
-    types::Res,
-};
+use ethers::signers::LocalWallet;
 use serde::Serialize;
 
 use crate::lib::{error::ApiError, respond};

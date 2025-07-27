@@ -109,15 +109,11 @@ export class HaitheCreatorClient extends BaseClient {
       throw new Error("Wallet client is not ready");
     }
 
-    const lazaiClient = new AlithClient();
-
     const encryptionKey = await this.getEncryptionKey();
-
     const { tee_pubkey } = await this.fetch<{ tee_pubkey: string }>(
       "/v1/tee/pub-key",
       this.authClient.getAuthToken()
     );
-
     const password =
       // deriveDHKE(encryptionKey, tee_pubkey);
       "0x777254e77e62bb5be8fecfc11801f43552c0e9563a582e09e4f421acf51ccda866c0ca67766a477d0a8a97d1f0f66c692e497e778f6aa2921cbcace3ff4a78161b";
@@ -125,51 +121,15 @@ export class HaitheCreatorClient extends BaseClient {
     const arrayBuffer = await file.arrayBuffer();
     const encryptedData = await encrypt(new Uint8Array(arrayBuffer), password);
     const encryptedFile = new Blob([encryptedData], { type: file.type });
+    const encryptedKeyUint8 = await encrypt(
+      new TextEncoder().encode(tee_pubkey + encryptionKey),
+      password
+    );
+    const encryptedKey = Array.from(encryptedKeyUint8)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     const url = await upload_fn(encryptedFile);
-
-    let fileId = await lazaiClient.getFileIdByUrl(url);
-    if (fileId == BigInt(0)) {
-      fileId = await lazaiClient.addFile(url);
-    }
-
-    await lazaiClient.requestProof(fileId, BigInt(100));
-    const jobIds = await lazaiClient.fileJobIds(fileId);
-    const jobId = jobIds[jobIds.length - 1];
-    if (!jobId) {
-      throw new Error("No job found for the file");
-    }
-    const job = await lazaiClient.getJob(jobId);
-    const nodeInfo = await lazaiClient.getNode(job.nodeAddress);
-    const nodeUrl = nodeInfo.url;
-    const pubKey = nodeInfo.publicKey;
-    const rsa = new NodeRSA(pubKey, "pkcs1-public-pem");
-    const encryptionSeed = password.slice(2, 32);
-    const signedPassword = lazaiClient
-      .getWallet()
-      .sign(encryptionSeed).signature;
-    const encryptedKey = rsa.encrypt(signedPassword, "hex");
-    const proofRequest = {
-      job_id: Number(jobId),
-      file_id: Number(fileId),
-      file_url: url,
-      encryption_key: encryptedKey,
-      encryption_seed: encryptionSeed,
-      nonce: null,
-      proof_url: null,
-    };
-    const response = await axios.post(`${nodeUrl}/proof`, proofRequest, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (response.status === 200) {
-      console.log("Proof request sent successfully");
-    } else {
-      console.log("Failed to send proof request:", response.data);
-    }
-
-    //  Request DAT reward
-    await lazaiClient.requestReward(fileId);
 
     this.authClient.walletClient.writeContract({
       ...definitions.HaitheOrchestrator,

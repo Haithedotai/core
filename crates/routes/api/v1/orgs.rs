@@ -1,9 +1,8 @@
 use crate::lib::extractors::AuthUser;
-use crate::lib::state;
 use crate::lib::{contracts, error::ApiError, models::get_models, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, web};
-use serde::{Deserialize, Serialize, de};
-use sqlx::{FromRow, query};
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -98,7 +97,7 @@ async fn post_index_handler(
             .execute(&state.db)
             .await?;
 
-        let org = sqlx::query_as::<_, Organization>(
+        sqlx::query_as::<_, Organization>(
             "INSERT INTO organizations (name, owner, organization_uid, orchestrator_idx, address) VALUES (?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(&organization_name)

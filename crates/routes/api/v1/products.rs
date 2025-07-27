@@ -1,10 +1,11 @@
 use crate::lib::extractors::AuthUser;
-use crate::lib::state;
-use crate::lib::{contracts, error::ApiError, models::get_models, respond, state::AppState};
-use actix_web::{Responder, delete, get, patch, post, web};
-use serde::{Deserialize, Serialize, de};
-use sqlx::{FromRow, query};
-use uuid::Uuid;
+use crate::lib::{contracts, error::ApiError, respond, state::AppState};
+use actix_web::{Responder, delete, post, web};
+use alith::data::crypto::{DecodeRsaPublicKey, Pkcs1v15Encrypt, RsaPublicKey};
+use alith::lazai::{ProofRequest, U256};
+use reqwest;
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Product {
@@ -33,6 +34,8 @@ async fn post_index_handler(
         .await?;
 
     let mut synced_count: u32 = 0;
+
+    let alith_client = alith::lazai::Client::new_default()?;
 
     // iterate from highest_orchestrator_idx + 1 to onchain_length
     for idx in (highest_orchestrator_idx + 1)..=onchain_length.as_u64() as i64 {
@@ -86,7 +89,7 @@ async fn post_index_handler(
             .execute(&state.db)
             .await?;
 
-        let product = sqlx::query_as::<_, Product>(
+        sqlx::query_as::<_, Product>(
             "INSERT INTO products (orchestrator_idx, creator, name, uri, encrypted_key, price_per_call, category) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(idx)
@@ -99,6 +102,48 @@ async fn post_index_handler(
         .fetch_one(&state.db)
         .await?;
         synced_count += 1;
+
+        let tee_secret = std::env::var("TEE_SECRET")?;
+
+        let mut file_id = alith_client
+            .get_file_id_by_url(product_uri.as_str())
+            .await?;
+        if file_id.is_zero() {
+            file_id = alith_client.add_file(product_uri.as_str()).await?;
+        }
+
+        alith_client.request_proof(file_id, U256::from(100)).await?;
+
+        let job_id = alith_client
+            .file_job_ids(file_id)
+            .await?
+            .last()
+            .cloned()
+            .unwrap();
+        let job = alith_client.get_job(job_id).await?;
+        let node_info = alith_client.get_node(job.nodeAddress).await?.unwrap();
+        let node_url = node_info.url;
+        let pub_key = node_info.publicKey;
+        let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
+        let mut rng = rand::thread_rng();
+        let encryption_key = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
+        let encryption_key = hex::encode(encryption_key);
+        let encryption_seed = "default_seed"; // You may want to generate this dynamically
+        let _ = reqwest::Client::new()
+            .post(format!("{node_url}/proof"))
+            .json(
+                &ProofRequest::builder()
+                    .job_id(job_id.to())
+                    .file_id(file_id.to())
+                    .file_url(product_uri.clone())
+                    .encryption_key(encryption_key)
+                    .encryption_seed(encryption_seed.to_string())
+                    .build(),
+            )
+            .send()
+            .await?;
+
+        alith_client.request_reward(file_id, None).await?;
     }
 
     Ok(respond::ok(
@@ -123,7 +168,7 @@ async fn post_enable_handler(
     let product_id = path.into_inner();
 
     // check permission
-    let has_permission = sqlx::query_scalar!(
+    let has_permission = sqlx::query_scalar::<_, i64>(
         r#"
         SELECT EXISTS(
             SELECT 1
@@ -139,11 +184,11 @@ async fn post_enable_handler(
               )
         ) as "exists!"
         "#,
-        user.wallet_address,
-        user.wallet_address,
-        project_id,
-        user.wallet_address
     )
+    .bind(&user.wallet_address)
+    .bind(&user.wallet_address)
+    .bind(project_id)
+    .bind(&user.wallet_address)
     .fetch_one(&state.db)
     .await?;
 
@@ -181,7 +226,7 @@ async fn delete_disable_handler(
     let product_id = path.into_inner();
 
     // check permission
-    let has_permission = sqlx::query_scalar!(
+    let has_permission = sqlx::query_scalar::<_, i64>(
         r#"
         SELECT EXISTS(
             SELECT 1
@@ -197,11 +242,11 @@ async fn delete_disable_handler(
               )
         ) as "exists!"
         "#,
-        user.wallet_address,
-        user.wallet_address,
-        project_id,
-        user.wallet_address
     )
+    .bind(&user.wallet_address)
+    .bind(&user.wallet_address)
+    .bind(project_id)
+    .bind(&user.wallet_address)
     .fetch_one(&state.db)
     .await?;
 

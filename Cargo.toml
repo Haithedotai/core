@@ -45,3 +45,6 @@ sha3 = "0.10"
 hex = "0.4.3"
 bincode = { version = "2.0.1", features = ["serde"] }
 actix-cors = "0.7.1"
+rand = "0.8"
+rsa = "0.9"
+pkcs1 = "0.7"
