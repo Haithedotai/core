@@ -152,7 +152,7 @@ export class HaitheClient {
     productAddress: `0x${string}`,
     orgAddress: `0x${string}`
   ): Promise<void> {
-    return thsis.orgs.enableProduct(productAddress, orgAddress);
+    return this.orgs.enableProduct(productAddress, orgAddress);
   }
 
   disableProduct(
