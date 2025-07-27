@@ -315,7 +315,7 @@
         "type": "function"
       }
     ],
-    "address": "0xcd1185a97bb3c5b68525aa929be9ca92b50d45f4"
+    "address": "0x7ef8e99980da5bcedcf7c10f41e55f759f6a174b"
   },
   "HaitheOrchestrator": {
     "abi": [
@@ -589,7 +589,7 @@
         "type": "function"
       }
     ],
-    "address": "0x3db5ffdbaf393ba7754c424571a57a8e0ab1b0af"
+    "address": "0x82b769500e34362a76df81150e12c746093d954f"
   },
   "HaitheOrganization": {
     "abi": [
@@ -1285,6 +1285,6 @@
         "type": "function"
       }
     ],
-    "address": "0xf795088DD9C29217c2E6669858604F9039430075"
+    "address": "0xBE6566b6d79dF8EA95b2619478019333aA758BE8"
   }
 }
