@@ -10,12 +10,16 @@ import {
 } from "../ui/sheet";
 import Icon from "../custom/Icon";
 import { usePrivy } from "@privy-io/react-auth";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useHaitheApi } from "../../hooks/use-haithe-api";
+import { Skeleton } from "../ui/skeleton";
 
 export default function CreatorSheet() {
   const [open, setOpen] = useState(false);
   const { authenticated, login } = usePrivy();
   const navigate = useNavigate();
+  const { isCreator, isLoggedIn } = useHaitheApi();
+  const { data: isCreatorData, isFetching: isCreatorLoading } = isCreator();
 
   const handleStartCreating = () => {
     if (!authenticated) {
@@ -29,6 +33,29 @@ export default function CreatorSheet() {
     setOpen(false);
     navigate({ to: "/marketplace/become-a-creator" });
   };
+
+  if (!isLoggedIn()) {
+    return null;
+  }
+
+  if (isCreatorLoading) {
+    return (
+      <Button variant="outline" className="rounded-sm">
+        <Skeleton className="h-2 w-24" />
+      </Button>
+    );
+  }
+
+  if (isCreatorData) {
+    return (
+      <Button asChild variant="outline" className="rounded-sm">
+        <Link to="/marketplace/profile/$id" params={{ id: "1" }} className="flex items-center gap-2">
+          <Icon name="User" className="h-4 w-4 text-orange-400" />
+          <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Profile</span>
+        </Link>
+      </Button>
+    );
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

@@ -389,11 +389,20 @@ export function useHaitheApi() {
             }
         }),
 
-        registerAsCreator: useMutation({
-            mutationKey: ['registerAsCreator'],
+        getProjects: (orgId: number) => useQuery({
+            queryKey: ['projects', orgId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProjects(orgId);
+            },
+            enabled: !!orgId && !!client,
+        }),
+
+        becomeCreator: useMutation({
+            mutationKey: ['becomeCreator'],
             mutationFn: ({ uri }: { uri: string }) => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.registerAsCreator(uri);
+                return client.becomeCreator(uri);
             },
             onSuccess: () => {
                 toast.success('Registered as creator successfully');
@@ -404,13 +413,30 @@ export function useHaitheApi() {
             }
         }),
 
-        getProjects: (orgId: number) => useQuery({
-            queryKey: ['projects', orgId],
+        uploadToMarketplaceAndGetReward: useMutation({
+            mutationKey: ['uploadToMarketplaceAndGetReward'],
+            mutationFn: ({ name, file, category, pricePerCall, upload_fn }: { name: string; file: File; category: "knowledge:text" | "knowledge:html" | "knowledge:pdf" | "knowledge:csv" | "knowledge:html" | "knowledge:url" | "promptset" | "mcp" | "tool:rs" | "tool:js" | "tool:py" | "tool:rpc"; pricePerCall: bigint; upload_fn: (data: File) => Promise<string> }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.uploadToMarketplaceAndGetReward(name, file, category, pricePerCall, upload_fn);
+            },
+        }),
+
+        isCreator: () => useQuery({
+            queryKey: ['isCreator'],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.getProjects(orgId);
+                return client.isCreator();
             },
-            enabled: !!orgId && !!client,
+            enabled: isLoggedIn() && !!client,
+        }),
+
+        getCreator: (id: string) => useQuery({
+            queryKey: ['creator', id],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getCreator(id);
+            },
+            enabled: isLoggedIn() && !!client && !!id,
         }),
     };
 } 

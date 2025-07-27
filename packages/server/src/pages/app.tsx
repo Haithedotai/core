@@ -21,11 +21,19 @@ import Marketplace from './marketplace';
 import Settings from './dashboard/settings';
 import BecomeCreator from './marketplace/become-creator';
 import Create from './marketplace/create';
-import ItemDetailPage from './marketplace/item/[id]';
+import ItemDetailPage from './marketplace/item/itemDetailPage';
+import MarketplaceProfilePage from './marketplace/profile';
+import { useHaitheApi } from '../lib/hooks/use-haithe-api';
+import Loader from '../lib/components/app/Loader';
 
 const rootRoute = createRootRoute({
   component: () => {
     useAnalytics();
+    const { isWeb3Ready, isClientInitialized } = useHaitheApi();
+
+    if (!isWeb3Ready || !isClientInitialized) {
+      return <Loader />;
+    }
 
     return (
       <div>
@@ -200,7 +208,12 @@ const becomeCreatorRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/marketplace/become-a-creator',
   component: function BecomeCreatorRoute() {
-    return withPageErrorBoundary(BecomeCreator)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(BecomeCreator, {
+        walletConnected: true,
+        signedInToHaithe: true,
+      })
+    )({});
   },
 })
 
@@ -220,6 +233,14 @@ const itemDetailRoute = createRoute({
   },
 })
 
+const marketplaceProfileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/marketplace/profile/$id',
+  component: function MarketplaceProfileRoute() {
+    return withPageErrorBoundary(MarketplaceProfilePage)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   onboardingRoute,
@@ -235,7 +256,8 @@ const routeTree = rootRoute.addChildren([
   marketplaceRoute,
   becomeCreatorRoute,
   createItemsRoute,
-  itemDetailRoute
+  itemDetailRoute,
+  marketplaceProfileRoute
 ])
 
 const router = createRouter({

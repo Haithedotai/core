@@ -83,11 +83,6 @@ export class HaitheClient {
     return this.auth.logout();
   }
 
-  // Creator methods
-  registerAsCreator(uri: string): Promise<Creator> {
-    return this.creator.becomeCreator(uri);
-  }
-
   // Organization methods
   createOrganization(name: string): Promise<Organization> {
     return this.orgs.createOrganization(name);
@@ -189,6 +184,32 @@ export class HaitheClient {
     return this.projects.getProjects(orgId);
   }
 
+  // Creator methods
+  becomeCreator(uri: string): Promise<Creator> {
+    return this.creator.becomeCreator(uri);
+  }
+
+   uploadToMarketplaceAndGetReward(
+    name: string,
+    file: File,
+    category: "knowledge:text" | "knowledge:html" | "knowledge:pdf" | "knowledge:csv" | "knowledge:html" | "knowledge:url" | "promptset" | "mcp" | "tool:rs" | "tool:js" | "tool:py" | "tool:rpc",
+    pricePerCall: bigint,
+    upload_fn: (data: File) => Promise<string>
+  ) {
+    return this.creator.uploadToMarketplaceAndGetReward(name, file, category, pricePerCall, upload_fn);
+  }
+
+  isCreator(): Promise<boolean> {
+    return this.creator.isCreator();
+  }
+
+  getCreator(id: string): Promise<{
+    name: string;
+    description: string;
+    avatar: string;
+  }> {
+    return this.creator.getCreator(id);
+  }
 }
 
 export * from "./clients";
