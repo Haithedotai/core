@@ -147,7 +147,7 @@ export default function MarketplacePage() {
             <div
               className={
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 w-full @xl:grid-cols-2 @4xl:grid-cols-4 gap-4 @md:gap-6'
+                  ? 'grid grid-cols-1 w-full @2xl:grid-cols-2 @3xl:grid-cols-3 gap-8'
                   : 'space-y-4'
               }
             >

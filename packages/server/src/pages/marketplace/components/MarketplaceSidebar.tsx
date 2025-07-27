@@ -7,6 +7,11 @@ import {
   Clock,
   Heart,
   ShoppingCart,
+  FileText,
+  Code,
+  Database,
+  Link as LinkIcon,
+  MessageSquare,
 } from "lucide-react";
 import Icon from "@/src/lib/components/custom/Icon";
 
@@ -47,26 +52,47 @@ export default function MarketplaceSidebar() {
 
         <Separator />
 
-        {/* AI Asset Types */}
+        {/* Knowledge Types */}
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
-            Asset Types
+            Knowledge
           </p>
           <Button variant="ghost" className="w-full justify-start h-10">
-            <Icon name="Brain" className="size-4 mr-3" />
-            Knowledge Bases
+            <FileText className="size-4 mr-3" />
+            Text Knowledge
           </Button>
           <Button variant="ghost" className="w-full justify-start h-10">
-            <Icon name="Zap" className="size-4 mr-3" />
-            Lambda Functions
+            <Code className="size-4 mr-3" />
+            HTML Knowledge
           </Button>
           <Button variant="ghost" className="w-full justify-start h-10">
-            <Icon name="Clipboard" className="size-4 mr-3" />
-            Instruction Sets
+            <FileText className="size-4 mr-3" />
+            PDF Knowledge
           </Button>
           <Button variant="ghost" className="w-full justify-start h-10">
-            <Icon name="MessageSquare" className="size-4 mr-3" />
+            <Database className="size-4 mr-3" />
+            CSV Knowledge
+          </Button>
+          <Button variant="ghost" className="w-full justify-start h-10">
+            <LinkIcon className="size-4 mr-3" />
+            URL Knowledge
+          </Button>
+        </div>
+
+        <Separator />
+
+        {/* Tools & Prompts */}
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
+            Tools & Prompts
+          </p>
+          <Button variant="ghost" className="w-full justify-start h-10">
+            <MessageSquare className="size-4 mr-3" />
             Prompt Sets
+          </Button>
+          <Button variant="ghost" className="w-full justify-start h-10">
+            <Code className="size-4 mr-3" />
+            RPC Tools
           </Button>
         </div>
 

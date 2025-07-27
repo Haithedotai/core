@@ -1,7 +1,8 @@
-import { Heart, Star, Download, Eye, CheckCircle } from 'lucide-react';
+import { Heart, Star, Download, Eye, CheckCircle, FileText, Code, Database, Link, Plus } from 'lucide-react';
 import { Button } from '../../../lib/components/ui/button';
 import { Badge } from '../../../lib/components/ui/badge';
-import { Card } from '../../../lib/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../lib/components/ui/card';
+import { Separator } from '../../../lib/components/ui/separator';
 import type { MarketplaceItem } from '../types';
 
 interface MarketplaceItemCardProps {
@@ -11,33 +12,45 @@ interface MarketplaceItemCardProps {
   isFavorited?: boolean;
 }
 
-export const getTypeImage = (type: string) => {
-  switch (type) {
-    case 'knowledgeBase':
-      return 'https://framerusercontent.com/images/sdxq06qxPf3oNmBefnesFfv5vlY.png';
-    case 'lambda':
-      return 'https://framerusercontent.com/images/BCHiz0CCz66eQC5lZuYqZVlfH6Y.png';
-    case 'instructionSet':
-      return 'https://framerusercontent.com/images/nr3SJiAakfef2UkH4zI9nNUWPOo.png';
-    case 'promptSet':
-      return 'https://framerusercontent.com/images/ycGCNCmizXXrFz7EISDCHTuftd8.png';
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'knowledge:text':
+      return FileText;
+    case 'knowledge:html':
+      return Code;
+    case 'knowledge:pdf':
+      return FileText;
+    case 'knowledge:csv':
+      return Database;
+    case 'knowledge:url':
+      return Link;
+    case 'promptset':
+      return Code;
+    case 'tool:rpc':
+      return Code;
     default:
-      return 'https://images.pexels.com/photos/1906228/pexels-photo-1906228.jpeg';
+      return FileText;
   }
 };
 
-const getTypeLabel = (type: string) => {
-  switch (type) {
-    case 'knowledgeBase':
-      return 'Knowledge Base';
-    case 'lambda':
-      return 'Lambda Function';
-    case 'instructionSet':
-      return 'Instruction Set';
-    case 'promptSet':
+const getCategoryLabel = (category: string) => {
+  switch (category) {
+    case 'knowledge:text':
+      return 'Text Knowledge';
+    case 'knowledge:html':
+      return 'HTML Knowledge';
+    case 'knowledge:pdf':
+      return 'PDF Knowledge';
+    case 'knowledge:csv':
+      return 'CSV Knowledge';
+    case 'knowledge:url':
+      return 'URL Knowledge';
+    case 'promptset':
       return 'Prompt Set';
+    case 'tool:rpc':
+      return 'RPC Tool';
     default:
-      return 'AI Asset';
+      return category;
   }
 };
 
@@ -47,123 +60,114 @@ export default function MarketplaceItemCard({
   onFavorite, 
   isFavorited = false 
 }: MarketplaceItemCardProps) {
-  const typeImage = getTypeImage(item.type);
-  const typeLabel = getTypeLabel(item.type);
-  const mainImage = item.image || typeImage;
+  const Icon = getCategoryIcon(item.category);
+  const categoryLabel = getCategoryLabel(item.category);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer bg-card border border-border @container">
-      <div className="relative" onClick={() => onItemClick(item)}>
-        <img 
-          src={mainImage} 
-          alt={item.name}
-          className="w-full h-40 @md:h-48 object-cover transition-transform duration-100"
-        />
-        
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <Button variant="secondary">
-            View Details
-          </Button>
-        </div>
-
-        {/* Type Badge */}
-        <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm text-xs flex items-center gap-1">
-            <img src={typeImage} alt={typeLabel} className="inline-block w-5 h-5 rounded-full object-cover mr-1" />
-            <span className="hidden @md:inline">{typeLabel}</span>
+    <Card className="relative overflow-hidden shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group cursor-pointer @container border">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] to-secondary/[0.02]" />
+      
+      <CardHeader className="relative pb-4">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-3 @md:gap-4">
+            <div className="size-10 @md:size-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-primary/20">
+              <Icon className="size-5 @md:size-6 text-primary" />
+            </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-base @md:text-lg font-semibold truncate">{item.name}</span>
+              {item.featured && (
+                <Badge className="bg-primary text-primary-foreground text-xs w-fit mt-1">
+                  ⭐ Featured
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardTitle>
+        <CardDescription className="text-sm leading-relaxed mt-3 line-clamp-2 @md:line-clamp-3">
+          {item.description}
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="relative space-y-4 @md:space-y-6">
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="text-xs @md:text-sm px-2 @md:px-3 py-1">
+            {categoryLabel}
           </Badge>
+          <span className="text-base @md:text-lg font-bold text-primary">
+            {item.price.amount} {item.price.currency}
+          </span>
         </div>
-
-        {/* Featured Badge */}
-        {item.featured && (
-          <div className="absolute top-3 right-3">
-            <Badge className="bg-primary text-primary-foreground text-xs">
-              <span className="@md:hidden">⭐</span>
-              <span className="hidden @md:inline">⭐ Featured</span>
-            </Badge>
+        
+        <Separator />
+        
+        <div className="grid grid-cols-1 @sm:grid-cols-2 gap-3 @md:gap-4">
+          <div className="space-y-2 @md:space-y-3">
+            <div className="flex items-center justify-between text-xs @md:text-sm">
+              <span className="text-muted-foreground">Downloads:</span>
+              <span className="font-medium">{item.stats.downloads.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs @md:text-sm">
+              <span className="text-muted-foreground">Views:</span>
+              <span className="font-medium">{item.stats.views.toLocaleString()}</span>
+            </div>
           </div>
-        )}
-
-        {/* Verified Badge */}
-        {item.verified && (
-          <div className="absolute top-12 right-3">
-            <Badge variant="outline" className="bg-background/90 backdrop-blur-sm text-xs">
-              <CheckCircle className="size-3 @md:mr-1" />
-              <span className="hidden @md:inline">Verified</span>
-            </Badge>
+          <div className="space-y-2 @md:space-y-3">
+            <div className="flex items-center justify-between text-xs @md:text-sm">
+              <span className="text-muted-foreground">Rating:</span>
+              <div className="flex items-center gap-1">
+                <Star className="size-3 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium">{item.rating.average}</span>
+                <span className="text-muted-foreground hidden @sm:inline">({item.rating.count})</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-xs @md:text-sm">
+              <span className="text-muted-foreground">Created:</span>
+              <span className="font-medium">
+                {new Date(item.created_at).toLocaleDateString()}
+              </span>
+            </div>
           </div>
-        )}
-      </div>
-
-      <div className="p-3 @md:p-4">
-        {/* Header */}
-        <div className="mb-3">
-          <h3 className="font-semibold mb-1 line-clamp-1 group-hover:text-primary transition-colors text-sm @md:text-base">
-            {item.name}
-          </h3>
-          <p className="text-xs @md:text-sm text-muted-foreground line-clamp-2 mb-2">
-            {item.description}
-          </p>
-          
-          {/* Tags - responsive display */}
-          <div className="flex flex-wrap gap-1 mb-3">
+        </div>
+        
+        <Separator />
+        
+        <div className="space-y-2 @md:space-y-3">
+          <p className="text-xs @md:text-sm font-medium">Tags:</p>
+          <div className="flex flex-wrap gap-1 @md:gap-2">
             {item.tags.slice(0, 2).map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs px-2 py-0">
+              <Badge key={tag} variant="outline" className="text-xs px-2 py-1">
                 {tag}
               </Badge>
             ))}
             {item.tags.length > 2 && (
-              <Badge variant="outline" className="text-xs px-2 py-0">
+              <Badge variant="outline" className="text-xs px-2 py-1">
                 +{item.tags.length - 2}
               </Badge>
             )}
           </div>
         </div>
 
-        {/* Creator Info */}
-        <div className="flex items-center gap-2 mb-3">
-          <img 
-            src={item.creator.avatar} 
-            alt={item.creator.name}
-            className="size-5 @md:size-6 rounded-full"
-          />
-          <span className="text-xs @md:text-sm font-medium truncate">{item.creator.name}</span>
-          {item.creator.verified && (
-            <CheckCircle className="size-3 @md:size-4 text-primary flex-shrink-0" />
-          )}
-        </div>
-
-        {/* Stats - responsive layout */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-          <div className="flex items-center gap-3 @md:gap-4">
-            <div className="flex items-center gap-1">
-              <Star className="size-3 fill-yellow-400 text-yellow-400" />
-              <span>{item.rating.average}</span>
-              <span className="hidden @md:inline">({item.rating.count})</span>
+        <Separator />
+        
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2 @md:gap-3 min-w-0 flex-1">
+            <img 
+              src={item.creator.avatar} 
+              alt={item.creator.name}
+              className="size-6 @md:size-8 rounded-full border-2 border-border flex-shrink-0"
+            />
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs @md:text-sm font-medium truncate">{item.creator.name}</span>
+              {item.creator.verified && (
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="size-3 text-primary" />
+                  <span className="text-xs text-muted-foreground hidden @sm:inline">Verified</span>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-1">
-              <Download className="size-3" />
-              <span className="@md:hidden">{(item.stats.downloads / 1000).toFixed(0)}k</span>
-              <span className="hidden @md:inline">{item.stats.downloads.toLocaleString()}</span>
-            </div>
-            <div className="hidden @sm:flex items-center gap-1">
-              <Eye className="size-3" />
-              <span className="@md:hidden">{(item.stats.views / 1000).toFixed(0)}k</span>
-              <span className="hidden @md:inline">{item.stats.views.toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between">
-          <div className="text-right">
-            <p className="text-base @md:text-lg font-bold">
-              {item.price.amount} {item.price.currency}
-            </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 @md:gap-2 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
@@ -171,7 +175,7 @@ export default function MarketplaceItemCard({
                 e.stopPropagation();
                 onFavorite?.(item.id);
               }}
-              className="p-2"
+              className="p-1 @md:p-2 hover:bg-primary/10"
             >
               <Heart 
                 className={`size-4 transition-colors ${
@@ -185,13 +189,14 @@ export default function MarketplaceItemCard({
                 e.stopPropagation();
                 onItemClick(item);
               }}
-              className="text-xs @md:text-sm"
+              className="px-2 @md:px-4 py-1 @md:py-2 text-xs @md:text-sm"
             >
-              View
+              <span className="hidden @sm:inline">View Details</span>
+              <span className="@sm:hidden">View</span>
             </Button>
           </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 } 

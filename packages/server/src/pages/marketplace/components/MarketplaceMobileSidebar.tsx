@@ -13,6 +13,7 @@ import {
 } from "../../../lib/components/ui/sheet";
 import { categories } from "../mockData";
 import Icon from "@/src/lib/components/custom/Icon";
+import { FileText, Code, Database, Link as LinkIcon, MessageSquare } from "lucide-react";
 
 export default function MarketplaceMobileSidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,50 +60,51 @@ export default function MarketplaceMobileSidebar() {
 
       <Separator />
 
-      {/* AI Asset Types - with emojis */}
+      {/* Knowledge Types */}
       <div className="space-y-2">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
-          Asset Types
+          Knowledge Types
         </h4>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Icon name="Brain" className="size-4" />
-            Knowledge
+            <FileText className="size-4" />
+            Text
           </Button>
           <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Icon name="Zap" className="size-4" />
-            Functions
+            <Code className="size-4" />
+            HTML
           </Button>
           <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Icon name="Clipboard" className="size-4" />
-            Instructions
+            <FileText className="size-4" />
+            PDF
           </Button>
           <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Icon name="MessageSquare" className="size-4" />
-            Prompts
+            <Database className="size-4" />
+            CSV
+          </Button>
+          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
+            <LinkIcon className="size-4" />
+            URL
           </Button>
         </div>
       </div>
 
       <Separator />
 
-      {/* Categories */}
+      {/* Tools & Prompts */}
       <div className="space-y-2">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
-          Popular Categories
+          Tools & Prompts
         </h4>
-        <div className="space-y-1 max-h-40 overflow-y-auto">
-          {marketplaceCategories.slice(0, 6).map((category) => (
-            <Button
-              key={category}
-              variant="ghost"
-              className="w-full justify-start h-9 text-sm"
-              onClick={handleLinkClick}
-            >
-              <Icon name="Tag" className="size-3 mr-2" />
-              {category}
-            </Button>
-          ))}
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
+            <MessageSquare className="size-4" />
+            Prompts
+          </Button>
+          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
+            <Code className="size-4" />
+            RPC Tools
+          </Button>
         </div>
       </div>
 
