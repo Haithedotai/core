@@ -46,8 +46,8 @@ export default function CreatorSheet() {
     return (
       <Button asChild variant="outline" className="rounded-sm">
         <Link to="/marketplace/profile/$id" params={{ id: "1" }} className="flex items-center gap-2">
-          <Icon name="User" className="h-4 w-4 text-orange-400" />
-          <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Profile</span>
+          <Icon name="User" className="h-4 w-4" />
+          <span className="hidden sm:inline">Profile</span>
         </Link>
       </Button>
     );
