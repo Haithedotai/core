@@ -1,9 +1,11 @@
 import * as viem from "viem";
+import type { Address } from "viem";
 import {
   HaitheAuthClient,
   HaitheOrgsClient,
   HaitheProjectsClient,
   HaitheCreatorClient,
+  HaitheProductsClient,
   type MinimalPersistentStorage,
   type Organization,
   type OrganizationMember,
@@ -11,6 +13,7 @@ import {
   type ProjectMember,
   type UserProfile,
   type Creator,
+  type Product,
 } from "./clients";
 
 export class HaitheClient {
@@ -18,6 +21,7 @@ export class HaitheClient {
   public orgs: HaitheOrgsClient;
   public projects: HaitheProjectsClient;
   public creator: HaitheCreatorClient;
+  public products: HaitheProductsClient;
 
   constructor(options: {
     walletClient: viem.WalletClient;
@@ -30,6 +34,9 @@ export class HaitheClient {
       debug: options.debug,
     });
     this.creator = new HaitheCreatorClient(this.auth, { debug: options.debug });
+    this.products = new HaitheProductsClient(this.auth, {
+      debug: options.debug,
+    });
   }
 
 
@@ -83,11 +90,6 @@ export class HaitheClient {
     return this.auth.logout();
   }
 
-  // Creator methods
-  registerAsCreator(uri: string): Promise<Creator> {
-    return this.creator.becomeCreator(uri);
-  }
-
   // Organization methods
   createOrganization(name: string): Promise<Organization> {
     return this.orgs.createOrganization(name);
@@ -136,6 +138,35 @@ export class HaitheClient {
     return this.orgs.removeOrganizationMember(orgId, walletAddress);
   }
 
+  getAvailableModels(): Promise<{
+    id: number;
+    name: string;
+    display_name: string;
+    provider: string;
+    is_active: boolean;
+    price_per_call: number;
+  }[]> {
+    return this.orgs.getAvailableModels();
+  }
+
+  enableProduct(
+    productAddress: `0x${string}`,
+    orgAddress: `0x${string}`
+  ): Promise<void> {
+    return this.orgs.enableProduct(productAddress, orgAddress);
+  }
+
+  disableProduct(
+    productAddress: `0x${string}`,
+    orgAddress: `0x${string}`
+  ): Promise<void> {
+    return this.orgs.disableProduct(productAddress, orgAddress);
+  }
+
+  getEnabledProducts(orgAddress: `0x${string}`): Promise<`0x${string}`[]> {
+    return this.orgs.getEnabledProducts(orgAddress);
+  }
+
 
   // Project methods
   createProject(orgId: number, name: string): Promise<Project> {
@@ -145,6 +176,11 @@ export class HaitheClient {
   getProject(id: number): Promise<Project> {
     return this.projects.getProject(id);
   }
+
+  getProjects(orgId: number): Promise<Project[]> {
+    return this.projects.getProjects(orgId);
+  }
+
 
   updateProject(id: number, name: string): Promise<Project> {
     return this.projects.updateProject(id, name);
@@ -185,10 +221,41 @@ export class HaitheClient {
     return this.projects.removeProjectMember(projectId, walletAddress);
   }
 
-  getProjects(orgId: number): Promise<Project[]> {
-    return this.projects.getProjects(orgId);
+  // Creator methods
+  becomeCreator(uri: string): Promise<Creator> {
+    return this.creator.becomeCreator(uri);
   }
 
+  uploadToMarketplaceAndGetReward(
+    name: string,
+    file: File,
+    category: "knowledge:text" | "knowledge:html" | "knowledge:pdf" | "knowledge:csv" | "knowledge:html" | "knowledge:url" | "promptset" | "mcp" | "tool:rs" | "tool:js" | "tool:py" | "tool:rpc",
+    pricePerCall: bigint,
+    upload_fn: (data: File) => Promise<string>
+  ) {
+    return this.creator.uploadToMarketplaceAndGetReward(name, file, category, pricePerCall, upload_fn);
+  }
+
+  isCreator(): Promise<boolean> {
+    return this.creator.isCreator();
+  }
+
+  getCreator(id: string): Promise<{
+    name: string;
+    description: string;
+    avatar: string;
+  }> {
+    return this.creator.getCreator(id);
+  }
+
+  // Product methods
+  getAllProducts(): Promise<Product[]> {
+    return this.products.getAllProducts();
+  }
+
+  getProductById(id: number): Promise<Product> {
+    return this.products.getProductById(id);
+  }
 }
 
 export * from "./clients";

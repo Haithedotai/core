@@ -5,10 +5,7 @@ import { BaseClient } from "../shared/baseClient";
 import definitions from "../../definitions";
 import { extractPrivateKeyFromSignature } from "../shared/utils";
 import type { Creator } from "../shared/types";
-import { Client as AlithClient } from "alith/lazai";
 import { encrypt } from "alith/data";
-import NodeRSA from "node-rsa";
-import axios from "axios";
 
 export class HaitheCreatorClient extends BaseClient {
   private authClient: HaitheAuthClient;
@@ -54,6 +51,24 @@ export class HaitheCreatorClient extends BaseClient {
     });
 
     return isCreator > 0n;
+  }
+
+  async getCreator(id: string): Promise<{
+    name: string;
+    description: string;
+    avatar: string;
+  }> {
+    if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    // TODO: read from smart contract
+
+    return {
+      name: "Haithe",
+      description: "Haithe is a platform for creating and sharing AI agents.",
+      avatar: "https://haithe.ai/logo.png",
+    };
   }
 
   async becomeCreator(uri: string): Promise<Creator> {
@@ -103,7 +118,7 @@ export class HaitheCreatorClient extends BaseClient {
       | "tool:py"
       | "tool:rpc",
     pricePerCall: bigint,
-    upload_fn: (data: Blob) => Promise<string>
+    upload_fn: (data: File) => Promise<string>
   ) {
     if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
       throw new Error("Wallet client is not ready");
@@ -120,7 +135,7 @@ export class HaitheCreatorClient extends BaseClient {
 
     const arrayBuffer = await file.arrayBuffer();
     const encryptedData = await encrypt(new Uint8Array(arrayBuffer), password);
-    const encryptedFile = new Blob([encryptedData], { type: file.type });
+    const encryptedFile = new File([encryptedData], file.name, { type: file.type });  
     const encryptedKeyUint8 = await encrypt(
       new TextEncoder().encode(tee_pubkey + encryptionKey),
       password
@@ -131,7 +146,7 @@ export class HaitheCreatorClient extends BaseClient {
 
     const url = await upload_fn(encryptedFile);
 
-    this.authClient.walletClient.writeContract({
+    const hash = await this.authClient.walletClient.writeContract({
       ...definitions.HaitheOrchestrator,
       functionName: "addProduct",
       args: [
@@ -142,6 +157,19 @@ export class HaitheCreatorClient extends BaseClient {
         category,
         pricePerCall,
       ],
+    });
+
+    await this.authClient.publicClient.waitForTransactionReceipt({ hash });
+
+    return this.fetch("/v1/products", this.authClient.getAuthToken(), {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        url,
+        encrypted_key: encryptedKey,
+        category,
+        price_per_call: pricePerCall.toString(),
+      }),
     });
   }
 }

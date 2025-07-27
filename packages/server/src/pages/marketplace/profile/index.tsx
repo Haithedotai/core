@@ -1,10 +1,10 @@
 import MarketplaceLayout from "../components/MarketplaceLayout";
-import CreatePage from "./Create";
+import ProfilePage from "./profile";
 
-export default function Create() {
+export default function Profile() {
     return (
         <MarketplaceLayout>
-            <CreatePage />
+            <ProfilePage />
         </MarketplaceLayout>
-    )
+    );
 }

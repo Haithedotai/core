@@ -189,8 +189,8 @@ export function useHaitheApi() {
             },
             onSuccess: (_, id) => {
                 toast.success('Organization deleted successfully');
-                queryClient.invalidateQueries({ queryKey: ['organizations'] });
                 queryClient.removeQueries({ queryKey: ['organization', id] });
+                queryClient.invalidateQueries({ queryKey: ['organizations'] });
             },
             onError: (error) => {
                 console.error(error?.toString?.() || error);
@@ -262,6 +262,55 @@ export function useHaitheApi() {
                 console.error(error?.toString?.() || error);
                 toast.error('Could not remove organization member. Please try again.');
             }
+        }),
+
+        // Organization product management
+        getAvailableModels: () => useQuery({
+            queryKey: ['availableModels'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getAvailableModels();
+            },
+            enabled: isLoggedIn() && !!client,
+        }),
+
+        enableProduct: useMutation({
+            mutationKey: ['enableProduct'],
+            mutationFn: ({ product_address, org_address }: { product_address: string; org_address: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.enableProduct(product_address as `0x${string}`, org_address as `0x${string}`);
+            },
+            onSuccess: () => {
+                toast.success('Product enabled successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not enable product. Please try again.');
+            }
+        }),
+
+        disableProduct: useMutation({
+            mutationKey: ['disableProduct'],
+            mutationFn: ({ product_address, org_address }: { product_address: string; org_address: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.disableProduct(product_address as `0x${string}`, org_address as `0x${string}`);
+            },
+            onSuccess: () => {
+                toast.success('Product disabled successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not disable product. Please try again.');
+            }
+        }),
+
+        getEnabledProducts: (org_address: string) => useQuery({
+            queryKey: ['enabledProducts', org_address],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getEnabledProducts(org_address as `0x${string}`);
+            },
+            enabled: isLoggedIn() && !!client && !!org_address,
         }),
 
         // Project mutations and queries
@@ -389,11 +438,20 @@ export function useHaitheApi() {
             }
         }),
 
-        registerAsCreator: useMutation({
-            mutationKey: ['registerAsCreator'],
+        getProjects: (orgId: number) => useQuery({
+            queryKey: ['projects', orgId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProjects(orgId);
+            },
+            enabled: !!orgId && !!client,
+        }),
+
+        becomeCreator: useMutation({
+            mutationKey: ['becomeCreator'],
             mutationFn: ({ uri }: { uri: string }) => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.registerAsCreator(uri);
+                return client.becomeCreator(uri);
             },
             onSuccess: () => {
                 toast.success('Registered as creator successfully');
@@ -404,13 +462,48 @@ export function useHaitheApi() {
             }
         }),
 
-        getProjects: (orgId: number) => useQuery({
-            queryKey: ['projects', orgId],
+        uploadToMarketplaceAndGetReward: useMutation({
+            mutationKey: ['uploadToMarketplaceAndGetReward'],
+            mutationFn: ({ name, file, category, pricePerCall, upload_fn }: { name: string; file: File; category: "knowledge:text" | "knowledge:html" | "knowledge:pdf" | "knowledge:csv" | "knowledge:html" | "knowledge:url" | "promptset" | "mcp" | "tool:rs" | "tool:js" | "tool:py" | "tool:rpc"; pricePerCall: bigint; upload_fn: (data: File) => Promise<string> }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.uploadToMarketplaceAndGetReward(name, file, category, pricePerCall, upload_fn);
+            },
+        }),
+
+        isCreator: () => useQuery({
+            queryKey: ['isCreator'],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.getProjects(orgId);
+                return client.isCreator();
             },
-            enabled: !!orgId && !!client,
+            enabled: isLoggedIn() && !!client,
+        }),
+
+        getCreator: (id: string) => useQuery({
+            queryKey: ['creator', id],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getCreator(id);
+            },
+            enabled: isLoggedIn() && !!client && !!id,
+        }),
+
+        getAllProducts: () => useQuery({
+            queryKey: ['allProducts'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getAllProducts();
+            },
+            enabled: isLoggedIn() && !!client,
+        }),
+
+            getProductById: (id: number) => useQuery({
+            queryKey: ['product', id],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProductById(id);
+            },
+            enabled: isLoggedIn() && !!client && !!id,
         }),
     };
 } 

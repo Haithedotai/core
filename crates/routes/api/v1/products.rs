@@ -1,6 +1,6 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{contracts, error::ApiError, respond, state::AppState};
-use actix_web::{Responder, delete, post, web};
+use actix_web::{Responder, delete, post, get, web};
 use alith::data::crypto::{DecodeRsaPublicKey, Pkcs1v15Encrypt, RsaPublicKey};
 use alith::lazai::{ProofRequest, U256};
 use reqwest;
@@ -268,8 +268,68 @@ async fn delete_disable_handler(
     ))
 }
 
+#[derive(Debug, Clone, FromRow, Serialize)]
+pub struct ProductSummary {
+    pub id: i64,
+    pub creator: String,
+    pub name: String,
+    pub price_per_call: i64,
+    pub category: String,
+    pub created_at: String,
+}
+
+#[get("")]
+async fn get_all_products(
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let products = sqlx::query_as::<_, ProductSummary>(
+        "SELECT id, creator, name, price_per_call, category, created_at FROM products ORDER BY created_at DESC"
+    )
+    .fetch_all(&state.db)
+    .await
+    .map_err(|e| {
+        ApiError::Internal("Failed to fetch products".into())
+    })?;
+
+    Ok(respond::ok(
+        "Products fetched successfully",
+        serde_json::json!({ "products": products }),
+    ))
+}
+
+
+#[get("/{id}")]
+async fn get_product_by_id(
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let product_id = path.into_inner();
+    
+    let product = sqlx::query_as::<_, ProductSummary>(
+        "SELECT id, creator, name, price_per_call, created_at FROM products WHERE id = ?"
+    )
+    .bind(product_id)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|e| {
+        ApiError::Internal("Failed to fetch product".into())
+    })?;
+
+    match product {
+        Some(product) => Ok(respond::ok(
+            "Product fetched successfully",
+            serde_json::json!({ "product": product }),
+        )),
+        None => Err(ApiError::NotFound("Product not found".into())),
+    }
+}
+
+
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(post_index_handler)
+    cfg.service(get_all_products)
+        .service(get_product_by_id)
+        .service(post_index_handler)
         .service(post_enable_handler)
         .service(delete_disable_handler);
 }

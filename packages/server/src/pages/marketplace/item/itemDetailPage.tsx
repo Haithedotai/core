@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Star, Download, Eye, Heart, CheckCircle, ExternalLink, Clock, Users, Tag } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { Button } from '../../../lib/components/ui/button';
 import { Badge } from '../../../lib/components/ui/badge';
 import { Card } from '../../../lib/components/ui/card';
@@ -9,18 +10,8 @@ import { Separator } from '../../../lib/components/ui/separator';
 import type { MarketplaceItem } from '../types';
 import { mockMarketplaceData } from '../mockData';
 import { getTypeImage } from '../components/MarketplaceItemCard';
-import MarketplaceNavbar from '../components/MarketplaceNavbar';
 import MarketplaceLayout from '../components/MarketplaceLayout';
-
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'knowledgeBase': return '🧠';
-    case 'lambda': return '⚡';
-    case 'instructionSet': return '📋';
-    case 'promptSet': return '💬';
-    default: return '🤖';
-  }
-};
+import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 
 const getTypeLabel = (type: string) => {
   switch (type) {
@@ -67,7 +58,7 @@ const renderMetadata = (item: MarketplaceItem) => {
           </div>
         </div>
       );
-    
+
     case 'lambda':
       return (
         <div className="grid grid-cols-2 gap-4">
@@ -99,7 +90,7 @@ const renderMetadata = (item: MarketplaceItem) => {
           </div>
         </div>
       );
-    
+
     case 'instructionSet':
       return (
         <div className="grid grid-cols-2 gap-4">
@@ -107,7 +98,7 @@ const renderMetadata = (item: MarketplaceItem) => {
             <h4 className="font-medium text-sm text-muted-foreground">Complexity</h4>
             <Badge variant={
               item.metadata.complexity === 'beginner' ? 'secondary' :
-              item.metadata.complexity === 'intermediate' ? 'outline' : 'destructive'
+                item.metadata.complexity === 'intermediate' ? 'outline' : 'destructive'
             }>
               {item.metadata.complexity}
             </Badge>
@@ -136,7 +127,7 @@ const renderMetadata = (item: MarketplaceItem) => {
           </div>
         </div>
       );
-    
+
     case 'promptSet':
       return (
         <div className="grid grid-cols-2 gap-4">
@@ -148,7 +139,7 @@ const renderMetadata = (item: MarketplaceItem) => {
             <h4 className="font-medium text-sm text-muted-foreground">Difficulty</h4>
             <Badge variant={
               item.metadata.difficulty === 'beginner' ? 'secondary' :
-              item.metadata.difficulty === 'intermediate' ? 'outline' : 'destructive'
+                item.metadata.difficulty === 'intermediate' ? 'outline' : 'destructive'
             }>
               {item.metadata.difficulty}
             </Badge>
@@ -169,7 +160,7 @@ const renderMetadata = (item: MarketplaceItem) => {
           </div>
         </div>
       );
-    
+
     default:
       return null;
   }
@@ -181,6 +172,8 @@ export default function ItemDetailPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [item, setItem] = useState<MarketplaceItem | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const haithe = useHaitheApi();
+  const { data: itemData, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
 
   useEffect(() => {
     // Find the item by ID from mock data
@@ -213,8 +206,8 @@ export default function ItemDetailPage() {
 
   const handleSearch = (query: string) => {
     // Navigate back to marketplace with search query
-    navigate({ 
-      to: '/marketplace', 
+    navigate({
+      to: '/marketplace',
       search: { q: query }
     });
   };
@@ -223,10 +216,7 @@ export default function ItemDetailPage() {
     return (
       <MarketplaceLayout>
         <div className="h-full flex flex-col @container">
-          <div className="z-40 fixed top-0 left-0 right-0 w-full">
-            <MarketplaceNavbar onSearch={handleSearch} searchQuery="" />
-          </div>
-          <div className="flex-1 mt-72 overflow-y-auto pt-6 pb-12 lg:ml-[var(--sidebar-width)]">
+          <div className="flex-1 overflow-y-auto pt-6 pb-12">
             <div className="mx-auto px-8 w-full @container">
               <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="text-center">
@@ -248,13 +238,8 @@ export default function ItemDetailPage() {
   return (
     <MarketplaceLayout>
       <div className="h-full flex flex-col @container">
-        {/* Fixed navbar */}
-        <div className="z-40 fixed top-0 left-0 right-0 w-full">
-          <MarketplaceNavbar onSearch={handleSearch} searchQuery="" />
-        </div>
-
         {/* Main content area with responsive padding */}
-        <div className="flex-1 mt-20 overflow-y-auto pt-6 pb-12 lg:ml-[var(--sidebar-width)]">
+        <div className="flex-1 overflow-y-auto pt-6 pb-12">
           <div className="mx-auto px-8 w-full @container">
             {/* Back button */}
             <div className="mb-6">
@@ -280,7 +265,7 @@ export default function ItemDetailPage() {
                       <p className="text-lg text-muted-foreground">{getTypeLabel(item.type)}</p>
                     </div>
                   </div>
-                  
+
                   {/* Badges */}
                   <div className="flex items-center gap-2 mb-4">
                     {item.featured && (
@@ -299,7 +284,7 @@ export default function ItemDetailPage() {
 
                 {/* Image */}
                 <div className="relative mb-8">
-                  <img 
+                  <img
                     src={item.image || getTypeImage(item.type)}
                     alt={item.name}
                     className="w-full h-80 object-cover rounded-lg"
@@ -378,15 +363,15 @@ export default function ItemDetailPage() {
                   </div>
 
                   <div className="space-y-3 mb-6">
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       size="lg"
                       onClick={() => handlePurchase(item)}
                     >
                       Purchase Now
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
                       onClick={() => handleFavorite(item.id)}
                     >
@@ -436,8 +421,8 @@ export default function ItemDetailPage() {
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">Creator</h3>
                   <div className="flex items-center gap-3 mb-4">
-                    <img 
-                      src={item.creator.avatar} 
+                    <img
+                      src={item.creator.avatar}
                       alt={item.creator.name}
                       className="size-12 rounded-full"
                     />
@@ -450,9 +435,11 @@ export default function ItemDetailPage() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full">
-                    <Users className="size-4 mr-2" />
-                    View Profile
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/marketplace/profile/$id" params={{ id: item.creator.id }}>
+                      <Users className="size-4 mr-2" />
+                      View Profile
+                      </Link>
                   </Button>
                 </Card>
               </div>

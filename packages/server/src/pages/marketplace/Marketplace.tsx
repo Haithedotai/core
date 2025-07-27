@@ -4,10 +4,10 @@ import { Grid, List } from 'lucide-react';
 import { Button } from '../../lib/components/ui/button';
 import type { MarketplaceFilters as MarketplaceFiltersType, MarketplaceItem } from './types';
 import { mockMarketplaceData } from './mockData';
-import MarketplaceNavbar from './components/MarketplaceNavbar';
 import MinimalFilters from './components/MinimalFilters';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
 import MarketplaceSidebar from './components/MarketplaceSidebar';
+import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 
 export default function MarketplacePage() {
   const navigate = useNavigate();
@@ -15,6 +15,10 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const haithe = useHaitheApi();
+  const { data: products, isLoading: isLoadingProducts } = haithe.getAllProducts();
+
+  console.log({products});
 
   // Filter and search logic
   const filteredItems = useMemo(() => {
@@ -121,11 +125,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="h-full flex flex-col @container">
-      {/* Fixed navbar */}
-      <div className="z-40 fixed top-0 left-0 right-0 w-full">
-        <MarketplaceNavbar onSearch={handleSearch} searchQuery={searchQuery} />
-      </div>
-
       {/* Minimal filters bar */}
       <div className="z-30 fixed top-[var(--navbar-height)] left-0 right-0 lg:left-[var(--sidebar-width)]">
         <MinimalFilters
@@ -140,7 +139,7 @@ export default function MarketplacePage() {
       </div>
 
       {/* Main content area with responsive padding */}
-      <div className="flex-1 mt-72 overflow-y-auto pt-6 pb-12 lg:ml-[var(--sidebar-width)]">
+      <div className="flex-1 mt-52 overflow-y-auto pt-6 pb-12">
         <div className="mx-auto px-8 w-full @container">
 
           {/* Items Grid/List - responsive columns */}

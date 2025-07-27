@@ -1,24 +1,15 @@
-import { Search, ShoppingCart } from 'lucide-react';
 import { Link } from "@tanstack/react-router";
-import { Button } from "../../../lib/components/ui/button";
-import { Input } from "../../../lib/components/ui/input";
 import Connect from "../../../lib/components/app/Connect";
-import OrganizationSelector from "../../dashboard/OrganizationSelector";
 import MarketplaceMobileSidebar from "./MarketplaceMobileSidebar";
 import CreatorSheet from '@/src/lib/components/app/CreatorSheet';
 
-interface MarketplaceNavbarProps {
-  onSearch?: (query: string) => void;
-  searchQuery?: string;
-}
-
-export default function MarketplaceNavbar({ onSearch, searchQuery }: MarketplaceNavbarProps) {
+export default function MarketplaceNavbar() {
   return (
     <nav className="bg-background border-b flex items-center justify-between h-20 px-4 @container">
       {/* Left side - Mobile menu + Logo */}
       <div className="flex items-center gap-4">
         <MarketplaceMobileSidebar />
-        <Link to="/dashboard" className="flex gap-2 items-center">
+        <Link to="/marketplace" className="flex gap-2 items-center">
           <img
             src="/static/haitheLogo.webp"
             alt="Logo"

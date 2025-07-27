@@ -1,41 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
 import { Switch } from "@/src/lib/components/ui/switch";
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Separator } from "@/src/lib/components/ui/separator";
 import Icon from "@/src/lib/components/custom/Icon";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 
 interface LLMModel {
-  id: string;
+  id: number;
   name: string;
+  display_name: string;
   provider: string;
+  is_active: boolean;
+  price_per_call: number;
   recommended?: boolean;
 }
 
-const llmModels: LLMModel[] = [
-  // Kimi Models (Featured)
-  { id: "kimi-k2", name: "Kimi K2", provider: "Kimi", recommended: true },
-
-  // Other Models
-  { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", provider: "Google" },
-  { id: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash Lite", provider: "Google" },
-  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", provider: "Google" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", provider: "Google" },
-  { id: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite", provider: "Google" },
-  { id: "gpt-o3", name: "GPT-o3", provider: "OpenAI" },
-  { id: "gpt-o3-mini", name: "GPT-o3 Mini", provider: "OpenAI" },
-  { id: "gpt-o4-mini", name: "GPT-o4 Mini", provider: "OpenAI" },
-  { id: "gpt-4.1-nano", name: "GPT-4.1 Nano", provider: "OpenAI" },
-  { id: "gpt-4.1-mini", name: "GPT-4.1 Mini", provider: "OpenAI" },
-  { id: "deepseek-chat", name: "DeepSeek Chat", provider: "DeepSeek" },
-  { id: "deepseek-reasoner", name: "DeepSeek Reasoner", provider: "DeepSeek" },
-];
-
 export default function SettingsPage() {
-  const [enabledModels, setEnabledModels] = useState<Set<string>>(new Set(["kimi-k2"]));
+  const haithe = useHaitheApi();
+  const { data: availableModels } = haithe.getAvailableModels();
 
-  const toggleModel = (modelId: string) => {
+  // Initialize enabled models based on is_active status from API
+  const [enabledModels, setEnabledModels] = useState<Set<number>>(new Set());
+
+  // Update enabled models when API data is available
+  useEffect(() => {
+    if (availableModels) {
+      const activeModelIds = availableModels
+        .filter((model: LLMModel) => model.is_active)
+        .map((model: LLMModel) => model.id);
+      setEnabledModels(new Set(activeModelIds));
+    }
+  }, [availableModels]);
+
+  const toggleModel = (modelId: number) => {
     const newEnabledModels = new Set(enabledModels);
     if (newEnabledModels.has(modelId)) {
       newEnabledModels.delete(modelId);
@@ -45,8 +44,40 @@ export default function SettingsPage() {
     setEnabledModels(newEnabledModels);
   };
 
-  const featuredModel = llmModels.find(model => model.recommended);
-  const otherModels = llmModels.filter(model => !model.recommended);
+  // Process API data to add recommended flag
+  const processedModels = availableModels?.map((model: LLMModel) => ({
+    ...model,
+    recommended: model.name === "kimi-k2-0711-preview" // Mark Kimi K2 as recommended
+  })) || [];
+
+  const featuredModel = processedModels.find((model: LLMModel) => model.recommended);
+  const otherModels = processedModels.filter((model: LLMModel) => !model.recommended);
+
+  // Show loading state if data is not yet available
+  if (!availableModels) {
+    return (
+      <div className="min-h-full bg-background">
+        <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-foreground leading-tight">Settings</h1>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                Manage your organization settings and LLM model preferences
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading available models...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const getProviderLogo = (provider: string) => {
     switch (provider) {
@@ -56,7 +87,7 @@ export default function SettingsPage() {
         return "https://plugins.jetbrains.com/files/21671/668761/icon/default.svg";
       case "DeepSeek":
         return "https://cdn.worldvectorlogo.com/logos/deepseek-2.svg";
-      case "Kimi":
+      case "Haithe":
         return "https://pbs.twimg.com/media/Gv-AY7eXEAAIM-l.jpg";
       default:
         return null;
@@ -88,7 +119,7 @@ export default function SettingsPage() {
       case "Google": return "Sparkles";
       case "OpenAI": return "Zap";
       case "DeepSeek": return "Brain";
-      case "Kimi": return "Star";
+      case "Haithe": return "Star";
       default: return "Bot";
     }
   };
@@ -130,13 +161,13 @@ export default function SettingsPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">
-                            {featuredModel.name}
+                            {featuredModel.display_name}
                           </h3>
                           <Badge variant="secondary" className="text-xs bg-gradient-to-r from-orange-400/20 via-red-500/20 to-sky-400/20 border-orange-400/30">
                             Recommended
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">Model ID: {featuredModel.id}</p>
+                        <p className="text-xs text-muted-foreground">Model ID: {featuredModel.name}</p>
                       </div>
                     </div>
                     <Switch
@@ -153,7 +184,7 @@ export default function SettingsPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Other Available Models</CardTitle>
                 <CardDescription className="text-sm">
-                  {otherModels.length} additional models from Google, OpenAI, and DeepSeek
+                  {otherModels.length} additional models from Google, OpenAI, DeepSeek, and Haithe
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -167,7 +198,7 @@ export default function SettingsPage() {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-foreground truncate">{model.name}</span>
+                            <span className="font-medium text-sm text-foreground truncate">{model.display_name}</span>
                             <span className="text-xs text-muted-foreground">({model.provider})</span>
                           </div>
                         </div>

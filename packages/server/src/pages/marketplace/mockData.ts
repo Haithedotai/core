@@ -8,7 +8,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Comprehensive database containing 10+ years of financial market data, news articles, and expert analysis covering global markets, cryptocurrencies, and economic indicators.',
     type: 'knowledgeBase',
     creator: {
-      id: 'creator-001',
+      id: '1',
       name: 'FinanceAI Labs',
       avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face',
       verified: true,
@@ -46,7 +46,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Curated collection of peer-reviewed medical research papers, clinical trial data, and pharmaceutical information from leading medical journals.',
     type: 'knowledgeBase',
     creator: {
-      id: 'creator-002',
+      id: '2',
       name: 'MedTech Solutions',
       avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face',
       verified: true,
@@ -86,7 +86,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'High-performance Lambda function that analyzes sentiment from social media feeds, news articles, and customer reviews in real-time using advanced NLP models.',
     type: 'lambda',
     creator: {
-      id: 'creator-003',
+      id: '3',
       name: 'CodeWave Studios',
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
       verified: true,
@@ -125,7 +125,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Scalable image classification function supporting 1000+ object categories with 95%+ accuracy. Perfect for e-commerce, content moderation, and inventory management.',
     type: 'lambda',
     creator: {
-      id: 'creator-004',
+      id: '4',
       name: 'VisionAI Corp',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
       verified: false,
@@ -166,7 +166,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Step-by-step instructions for implementing Retrieval-Augmented Generation (RAG) systems with vector databases, embedding models, and optimization techniques.',
     type: 'instructionSet',
     creator: {
-      id: 'creator-005',
+      id: '5',
       name: 'AI Architecture Guild',
       avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face',
       verified: true,
@@ -205,7 +205,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Comprehensive guide for designing and implementing multi-agent AI systems with coordination protocols, task distribution, and conflict resolution.',
     type: 'instructionSet',
     creator: {
-      id: 'creator-006',
+      id: '6',
       name: 'Distributed AI Labs',
       avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
       verified: true,
@@ -246,7 +246,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Collection of 150+ carefully crafted prompts for creative writing, storytelling, character development, and narrative structure across multiple genres.',
     type: 'promptSet',
     creator: {
-      id: 'creator-007',
+      id: '7',
       name: 'Literary AI Collective',
       avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
       verified: true,
@@ -285,7 +285,7 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     description: 'Professional-grade prompts for automated code review, security analysis, performance optimization suggestions, and best practice recommendations.',
     type: 'promptSet',
     creator: {
-      id: 'creator-008',
+      id: '8',
       name: 'DevOps Automation',
       avatar: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=400&h=400&fit=crop&crop=face',
       verified: false,
