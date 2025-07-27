@@ -12,5 +12,6 @@ export type {
   ProjectMember,
   UserProfile,
   Creator,
+  CreatorDetails,
   Product,
 } from "../shared/types";

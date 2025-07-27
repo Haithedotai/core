@@ -4,7 +4,7 @@ import { HaitheAuthClient } from "./auth";
 import { BaseClient } from "../shared/baseClient";
 import definitions from "../../definitions";
 import { extractPrivateKeyFromSignature } from "../shared/utils";
-import type { Creator } from "../shared/types";
+import type { Creator, CreatorDetails } from "../shared/types";
 import { encrypt } from "alith/data";
 
 export class HaitheCreatorClient extends BaseClient {
@@ -53,22 +53,30 @@ export class HaitheCreatorClient extends BaseClient {
     return isCreator > 0n;
   }
 
-  async getCreator(id: string): Promise<{
-    name: string;
-    description: string;
-    avatar: string;
-  }> {
-    if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
-      throw new Error("Wallet client is not ready");
-    }
+  // async getCreator(id: string): Promise<{
+  //   name: string;
+  //   description: string;
+  //   avatar: string;
+  // }> {
+  //   if (!HaitheAuthClient.ensureWeb3Ready(this.authClient.walletClient)) {
+  //     throw new Error("Wallet client is not ready");
+  //   }
 
-    // TODO: read from smart contract
+  //   // TODO: read from smart contract
 
-    return {
-      name: "Haithe",
-      description: "Haithe is a platform for creating and sharing AI agents.",
-      avatar: "https://haithe.ai/logo.png",
-    };
+  //   return {
+  //     name: "Haithe",
+  //     description: "Haithe is a platform for creating and sharing AI agents.",
+  //     avatar: "https://haithe.ai/logo.png",
+  //   };
+  // }
+
+  async getCreatorByAddress(walletAddress: string): Promise<CreatorDetails> {
+    const response = await this.fetch<{ creator: CreatorDetails }>(
+      `/v1/creator/${walletAddress}`,
+      this.authClient.getAuthToken()
+    );
+    return response.creator;
   }
 
   async becomeCreator(uri: string): Promise<Creator> {
@@ -135,7 +143,7 @@ export class HaitheCreatorClient extends BaseClient {
 
     const arrayBuffer = await file.arrayBuffer();
     const encryptedData = await encrypt(new Uint8Array(arrayBuffer), password);
-    const encryptedFile = new File([encryptedData], file.name, { type: file.type });  
+    const encryptedFile = new File([encryptedData], file.name, { type: file.type });
     const encryptedKeyUint8 = await encrypt(
       new TextEncoder().encode(tee_pubkey + encryptionKey),
       password
