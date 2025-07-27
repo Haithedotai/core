@@ -4,7 +4,7 @@ import { HaitheAuthClient } from "./auth";
 import { BaseClient } from "../shared/baseClient";
 import definitions from "../../definitions";
 import { extractPrivateKeyFromSignature } from "../shared/utils";
-import type { Creator, CreatorDetails } from "../shared/types";
+import type { Creator, CreatorDetails, Product } from "../shared/types";
 import { encrypt } from "alith/data";
 
 export class HaitheCreatorClient extends BaseClient {
@@ -74,9 +74,17 @@ export class HaitheCreatorClient extends BaseClient {
   async getCreatorByAddress(walletAddress: string): Promise<CreatorDetails> {
     const response = await this.fetch<{ creator: CreatorDetails }>(
       `/v1/creator/${walletAddress}`,
-      this.authClient.getAuthToken()
+      null
     );
     return response.creator;
+  }
+
+  async getCreatorProducts(walletAddress: string): Promise<Product[]> {
+    const response = await this.fetch<{ products: Product[] }>(
+      `/v1/creator/${walletAddress}/products`,
+      null
+    );
+    return response.products;
   }
 
   async becomeCreator(uri: string): Promise<Creator> {

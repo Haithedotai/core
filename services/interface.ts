@@ -245,6 +245,10 @@ export class HaitheClient {
     return this.creator.getCreatorByAddress(walletAddress);
   }
 
+  getCreatorProducts(walletAddress: string): Promise<Product[]> {
+    return this.creator.getCreatorProducts(walletAddress);
+  }
+
   // Product methods
   getAllProducts(): Promise<Product[]> {
     return this.products.getAllProducts();
