@@ -147,7 +147,7 @@ export class HaitheCreatorClient extends BaseClient {
 
     const url = await upload_fn(encryptedFile);
 
-    this.authClient.walletClient.writeContract({
+    const hash = await this.authClient.walletClient.writeContract({
       ...definitions.HaitheOrchestrator,
       functionName: "addProduct",
       args: [
@@ -158,6 +158,19 @@ export class HaitheCreatorClient extends BaseClient {
         category,
         pricePerCall,
       ],
+    });
+
+    await this.authClient.publicClient.waitForTransactionReceipt({ hash });
+
+    return this.fetch("/v1/products", this.authClient.getAuthToken(), {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        url,
+        encrypted_key: encryptedKey,
+        category,
+        price_per_call: pricePerCall.toString(),
+      }),
     });
   }
 }
