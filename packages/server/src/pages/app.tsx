@@ -25,6 +25,7 @@ import ItemDetailPage from './marketplace/item/itemDetailPage';
 import MarketplaceProfilePage from './marketplace/profile';
 import { useHaitheApi } from '../lib/hooks/use-haithe-api';
 import Loader from '../lib/components/app/Loader';
+import AgentsConfiguration from './dashboard/agents/configuration';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -109,6 +110,15 @@ const agentsRoute = createRoute({
         hasOrg: true
       })
     )({});
+  },
+})
+
+// agents configuration route
+const agentsConfigurationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/agents/$id',
+  component: function AgentsConfigurationRoute() {
+    return withPageErrorBoundary(AgentsConfiguration)({});
   },
 })
 
@@ -247,6 +257,7 @@ const routeTree = rootRoute.addChildren([
   dashboardRoute,
   profileRoute,
   agentsRoute,
+  agentsConfigurationRoute,
   workflowsRoute,
   analyticsRoute,
   purchasesRoute,
@@ -257,7 +268,7 @@ const routeTree = rootRoute.addChildren([
   becomeCreatorRoute,
   createItemsRoute,
   itemDetailRoute,
-  marketplaceProfileRoute
+  marketplaceProfileRoute 
 ])
 
 const router = createRouter({
