@@ -45,8 +45,22 @@ export interface Creator {
     created_at: string;
 }
 
+export interface Creator {
+    wallet_address: string;
+    uri: string;
+    pub_key: string;
+    created_at: string;
+}
+
+export interface CreatorDetails {
+    wallet_address: string;
+    uri: string;
+    created_at: string;
+}
+
 export interface Product {
   id: number;
+  address: string;
   creator: string;
   name: string;
   price_per_call: number;
