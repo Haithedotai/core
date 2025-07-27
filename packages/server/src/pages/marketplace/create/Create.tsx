@@ -266,7 +266,7 @@ export default function CreatePage() {
                 parameters: {}
             });
 
-            navigate({ to: "/marketplace/profile" });
+            navigate({ to: "/marketplace/profile/$id", params: { id: "1" } });
 
         } catch (error) {
             console.error("Error creating item:", error);

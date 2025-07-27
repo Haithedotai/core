@@ -1,4 +1,5 @@
 import * as viem from "viem";
+import type { Address } from "viem";
 import {
   HaitheAuthClient,
   HaitheOrgsClient,
@@ -131,6 +132,36 @@ export class HaitheClient {
     return this.orgs.removeOrganizationMember(orgId, walletAddress);
   }
 
+  getAvailableModels(): Promise<
+    {
+      id: number;
+      name: string;
+      display_name: string;
+      provider: string;
+      is_active: boolean;
+      price_per_call: number;
+    }[]
+  > {
+    return this.orgs.getAvailableModels();
+  }
+
+  enableProduct(
+    product_address: Address,
+    org_address: Address
+  ): Promise<void> {
+    return this.orgs.enableProduct(product_address, org_address);
+  }
+
+  disableProduct(
+    product_address: Address,
+    org_address: Address
+  ): Promise<void> {
+    return this.orgs.disableProduct(product_address, org_address);
+  }
+
+  getEnabledProducts(org_address: Address): Promise<Address[]> {
+    return this.orgs.getEnabledProducts(org_address);
+  }
 
   // Project methods
   createProject(orgId: number, name: string): Promise<Project> {

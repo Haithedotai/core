@@ -189,8 +189,8 @@ export function useHaitheApi() {
             },
             onSuccess: (_, id) => {
                 toast.success('Organization deleted successfully');
-                queryClient.invalidateQueries({ queryKey: ['organizations'] });
                 queryClient.removeQueries({ queryKey: ['organization', id] });
+                queryClient.invalidateQueries({ queryKey: ['organizations'] });
             },
             onError: (error) => {
                 console.error(error?.toString?.() || error);
@@ -262,6 +262,55 @@ export function useHaitheApi() {
                 console.error(error?.toString?.() || error);
                 toast.error('Could not remove organization member. Please try again.');
             }
+        }),
+
+        // Organization product management
+        getAvailableModels: () => useQuery({
+            queryKey: ['availableModels'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getAvailableModels();
+            },
+            enabled: isLoggedIn() && !!client,
+        }),
+
+        enableProduct: useMutation({
+            mutationKey: ['enableProduct'],
+            mutationFn: ({ product_address, org_address }: { product_address: string; org_address: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.enableProduct(product_address as `0x${string}`, org_address as `0x${string}`);
+            },
+            onSuccess: () => {
+                toast.success('Product enabled successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not enable product. Please try again.');
+            }
+        }),
+
+        disableProduct: useMutation({
+            mutationKey: ['disableProduct'],
+            mutationFn: ({ product_address, org_address }: { product_address: string; org_address: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.disableProduct(product_address as `0x${string}`, org_address as `0x${string}`);
+            },
+            onSuccess: () => {
+                toast.success('Product disabled successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not disable product. Please try again.');
+            }
+        }),
+
+        getEnabledProducts: (org_address: string) => useQuery({
+            queryKey: ['enabledProducts', org_address],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getEnabledProducts(org_address as `0x${string}`);
+            },
+            enabled: isLoggedIn() && !!client && !!org_address,
         }),
 
         // Project mutations and queries

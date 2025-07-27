@@ -3,19 +3,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "../../../lib/components/ui/button";
 import { Badge } from "../../../lib/components/ui/badge";
 import { Separator } from "../../../lib/components/ui/separator";
-import {
-  Sparkles,
-  Crown,
-  Zap,
-  Clock,
-  Tag,
-  Heart,
-  Package,
-  DollarSign,
-  PlusCircle,
-  ArrowLeft,
-  ShoppingCart,
-} from "lucide-react";
+
 import {
   Sheet,
   SheetContent,
@@ -51,20 +39,20 @@ export default function MarketplaceMobileSidebar() {
           onClick={handleLinkClick}
         >
           <Link to="/marketplace">
-            <Sparkles className="size-4 mr-3" />
+            <Icon name="Sparkles" className="size-4 mr-3" />
             Explore All
           </Link>
         </Button>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Crown className="size-4 mr-3" />
+          <Icon name="Crown" className="size-4 mr-3" />
           Premium Assets
         </Button>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Zap className="size-4 mr-3" />
+          <Icon name="Zap" className="size-4 mr-3" />
           Trending Now
         </Button>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Clock className="size-4 mr-3" />
+          <Icon name="Clock" className="size-4 mr-3" />
           New Releases
         </Button>
       </div>
@@ -111,7 +99,7 @@ export default function MarketplaceMobileSidebar() {
               className="w-full justify-start h-9 text-sm"
               onClick={handleLinkClick}
             >
-              <Tag className="size-3 mr-2" />
+              <Icon name="Tag" className="size-3 mr-2" />
               {category}
             </Button>
           ))}
@@ -126,12 +114,12 @@ export default function MarketplaceMobileSidebar() {
           My Marketplace
         </h4>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Heart className="size-4 mr-3" />
+          <Icon name="Heart" className="size-4 mr-3" />
           Wishlist
           <Badge variant="secondary" className="ml-auto text-xs">0</Badge>
         </Button>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <ShoppingCart className="size-4 mr-3" />
+          <Icon name="ShoppingCart" className="size-4 mr-3" />
           Cart
           <Badge variant="secondary" className="ml-auto text-xs">1</Badge>
         </Button>

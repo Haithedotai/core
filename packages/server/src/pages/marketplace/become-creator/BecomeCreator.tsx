@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle } from "lucide-react";
 import Loader from "@/src/lib/components/app/Loader";
+import Icon from "@/src/lib/components/custom/Icon";
 
 // Step 1: Form (Name, Description, Profile Photo)
 function CreatorFormStep({ name, setName, desc, setDesc, photo, setPhoto, onNext }: {
@@ -24,7 +25,7 @@ function CreatorFormStep({ name, setName, desc, setDesc, photo, setPhoto, onNext
     setPhoto: (f: File | null) => void;
     onNext: () => void;
 }) {
-    const isValid = name.trim() && desc.trim() && photo;
+    const isValid = name.trim();
 
     return (
         <Card className="w-full max-w-md mx-auto ">
@@ -85,13 +86,15 @@ function ReviewStep({ name, desc, photo, onBack, onSubmit }: { name: string; des
             <CardContent>
                 <div className="flex flex-col items-center gap-4">
                     <Avatar className="size-52">
-                        {preview ? <AvatarImage src={preview} alt="Profile preview" /> : <AvatarFallback>?</AvatarFallback>}
+                        {preview ? <AvatarImage src={preview} alt="Profile preview" /> : <AvatarFallback>
+                            <Icon name="User" className="size-12" />
+                        </AvatarFallback>}
                     </Avatar>
                     <div className="w-full">
                         <Label className="text-muted-foreground">Name</Label>
                         <div className="font-medium text-xl mt-1 mb-2">{name}</div>
                         <Label className="text-muted-foreground">Description</Label>
-                        <div className="text-sm mt-1 whitespace-pre-line">{desc}</div>
+                        <div className="text-sm mt-1 whitespace-pre-line">{desc || "No description"}</div>
                     </div>
                 </div>
             </CardContent>
@@ -178,8 +181,6 @@ export default function BecomeCreatorPage() {
             const profileURL = `https://${process.env.BUN_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${cid}`;
             await becomeCreator.mutateAsync({ uri: profileURL });
 
-            // Show success message and move to success step
-            toast.success('Successfully registered as creator!');
             setIsSuccess(true);
         } catch (error) {
             console.error(error);
@@ -192,7 +193,7 @@ export default function BecomeCreatorPage() {
     }
 
     if (isCreatorData) {
-        navigate({ to: "/marketplace/profile" });
+        navigate({ to: "/marketplace/profile/$id", params: { id: "1" } });
     }
 
     return (
