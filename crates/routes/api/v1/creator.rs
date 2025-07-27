@@ -1,15 +1,86 @@
 use crate::lib::{contracts, error::ApiError, extractors::AuthUser, respond, state::AppState};
-use actix_web::{Responder, post, web};
+use actix_web::{Responder, post, get, web};
 use ethers::abi::{Token, encode};
 use ethers::providers::Middleware;
 use ethers::types::{Address, H256};
 use ethers::utils::keccak256;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 #[derive(Deserialize)]
 pub struct PostBecomeCreatorRequest {
     pub uri: String,
     pub pub_key: String,
+}
+
+#[derive(Debug, Clone, FromRow, Serialize)]
+pub struct CreatorDetails {
+    pub wallet_address: String,
+    pub uri: String,
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, FromRow, Serialize)]
+pub struct CreatorProduct {
+    pub id: i64,
+    pub address: String,
+    pub creator: String,
+    pub name: String,
+    pub price_per_call: i64,
+    pub category: String,
+    pub created_at: String,
+}
+
+
+#[get("/{wallet_address}")]
+async fn get_creator_by_address(
+    path: web::Path<String>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let wallet_address = path.into_inner();
+    
+    let creator = sqlx::query_as::<_, CreatorDetails>(
+        "SELECT wallet_address, uri, created_at FROM creators WHERE wallet_address = ?"
+    )
+    .bind(&wallet_address)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|e| {
+        println!("DB Error fetching creator: {:?}", e);
+        ApiError::Internal("Failed to fetch creator details".into())
+    })?;
+
+    match creator {
+        Some(creator) => Ok(respond::ok(
+            "Creator details fetched successfully",
+            serde_json::json!({ "creator": creator }),
+        )),
+        None => Err(ApiError::NotFound("Creator not found".into())),
+    }
+}
+
+#[get("/{wallet_address}/products")]
+async fn get_creator_products(
+    path: web::Path<String>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let wallet_address = path.into_inner();
+    
+    let products = sqlx::query_as::<_, CreatorProduct>(
+        "SELECT id, address, creator, name, price_per_call, category, created_at FROM products WHERE creator = ? ORDER BY created_at DESC"
+    )
+    .bind(&wallet_address)
+    .fetch_all(&state.db)
+    .await
+    .map_err(|e| {
+        println!("DB Error fetching creator products: {:?}", e);
+        ApiError::Internal("Failed to fetch creator products".into())
+    })?;
+
+    Ok(respond::ok(
+        "Creator products fetched successfully",
+        serde_json::json!({ "products": products }),
+    ))
 }
 
 #[post("")]
@@ -114,5 +185,7 @@ async fn become_creator(
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(become_creator);
+    cfg.service(get_creator_by_address)
+       .service(get_creator_products)
+       .service(become_creator);
 }

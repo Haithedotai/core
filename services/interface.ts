@@ -14,6 +14,7 @@ import {
   type UserProfile,
   type Creator,
   type Product,
+  type CreatorDetails,
 } from "./clients";
 
 export class HaitheClient {
@@ -240,12 +241,12 @@ export class HaitheClient {
     return this.creator.isCreator();
   }
 
-  getCreator(id: string): Promise<{
-    name: string;
-    description: string;
-    avatar: string;
-  }> {
-    return this.creator.getCreator(id);
+  getCreatorByAddress(walletAddress: string): Promise<CreatorDetails> {
+    return this.creator.getCreatorByAddress(walletAddress);
+  }
+
+  getCreatorProducts(walletAddress: string): Promise<Product[]> {
+    return this.creator.getCreatorProducts(walletAddress);
   }
 
   // Product methods
