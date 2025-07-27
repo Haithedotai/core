@@ -4,6 +4,7 @@ import {
   HaitheOrgsClient,
   HaitheProjectsClient,
   HaitheCreatorClient,
+  HaitheProductsClient,
   type MinimalPersistentStorage,
   type Organization,
   type OrganizationMember,
@@ -11,6 +12,7 @@ import {
   type ProjectMember,
   type UserProfile,
   type Creator,
+  type Product,
 } from "./clients";
 
 export class HaitheClient {
@@ -18,6 +20,7 @@ export class HaitheClient {
   public orgs: HaitheOrgsClient;
   public projects: HaitheProjectsClient;
   public creator: HaitheCreatorClient;
+  public products: HaitheProductsClient;
 
   constructor(options: {
     walletClient: viem.WalletClient;
@@ -30,6 +33,9 @@ export class HaitheClient {
       debug: options.debug,
     });
     this.creator = new HaitheCreatorClient(this.auth, { debug: options.debug });
+    this.products = new HaitheProductsClient(this.auth, {
+      debug: options.debug,
+    });
   }
 
 
@@ -189,7 +195,7 @@ export class HaitheClient {
     return this.creator.becomeCreator(uri);
   }
 
-   uploadToMarketplaceAndGetReward(
+  uploadToMarketplaceAndGetReward(
     name: string,
     file: File,
     category: "knowledge:text" | "knowledge:html" | "knowledge:pdf" | "knowledge:csv" | "knowledge:html" | "knowledge:url" | "promptset" | "mcp" | "tool:rs" | "tool:js" | "tool:py" | "tool:rpc",
@@ -209,6 +215,15 @@ export class HaitheClient {
     avatar: string;
   }> {
     return this.creator.getCreator(id);
+  }
+
+  // Product methods
+  getAllProducts(): Promise<Product[]> {
+    return this.products.getAllProducts();
+  }
+
+  getProductById(id: number): Promise<Product> {
+    return this.products.getProductById(id);
   }
 }
 
