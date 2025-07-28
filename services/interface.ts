@@ -40,6 +40,9 @@ export class HaitheClient {
     });
   }
 
+  get fetch() {
+    return this.auth.fetch.bind(this.auth);
+  }
 
   static ensureWeb3Ready(
     walletClient: viem.WalletClient
@@ -139,14 +142,16 @@ export class HaitheClient {
     return this.orgs.removeOrganizationMember(orgId, walletAddress);
   }
 
-  getAvailableModels(): Promise<{
-    id: number;
-    name: string;
-    display_name: string;
-    provider: string;
-    is_active: boolean;
-    price_per_call: number;
-  }[]> {
+  getAvailableModels(): Promise<
+    {
+      id: number;
+      name: string;
+      display_name: string;
+      provider: string;
+      is_active: boolean;
+      price_per_call: number;
+    }[]
+  > {
     return this.orgs.getAvailableModels();
   }
 
@@ -168,7 +173,6 @@ export class HaitheClient {
     return this.orgs.getEnabledProducts(orgAddress);
   }
 
-
   // Project methods
   createProject(orgId: number, name: string): Promise<Project> {
     return this.projects.createProject(orgId, name);
@@ -181,7 +185,6 @@ export class HaitheClient {
   getProjects(orgId: number): Promise<Project[]> {
     return this.projects.getProjects(orgId);
   }
-
 
   updateProject(id: number, name: string): Promise<Project> {
     return this.projects.updateProject(id, name);
@@ -230,11 +233,29 @@ export class HaitheClient {
   uploadToMarketplaceAndGetReward(
     name: string,
     file: File,
-    category: "knowledge:text" | "knowledge:html" | "knowledge:pdf" | "knowledge:csv" | "knowledge:html" | "knowledge:url" | "promptset" | "mcp" | "tool:rs" | "tool:js" | "tool:py" | "tool:rpc",
+    category:
+      | "knowledge:text"
+      | "knowledge:html"
+      | "knowledge:pdf"
+      | "knowledge:csv"
+      | "knowledge:html"
+      | "knowledge:url"
+      | "promptset"
+      | "mcp"
+      | "tool:rs"
+      | "tool:js"
+      | "tool:py"
+      | "tool:rpc",
     pricePerCall: bigint,
     upload_fn: (data: File) => Promise<string>
   ) {
-    return this.creator.uploadToMarketplaceAndGetReward(name, file, category, pricePerCall, upload_fn);
+    return this.creator.uploadToMarketplaceAndGetReward(
+      name,
+      file,
+      category,
+      pricePerCall,
+      upload_fn
+    );
   }
 
   isCreator(): Promise<boolean> {

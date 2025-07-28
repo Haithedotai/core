@@ -15,9 +15,11 @@ contract HaitheOrchestrator {
 
     mapping(address => bool) public isProduct;
     address[] public products;
+    mapping(string => bool) public productNameExists;
 
     mapping(address => bool) public isOrganization;
     address[] public organizations;
+    mapping(string => bool) public organizationNameExists;
 
     constructor(address usdc_) {
         server = msg.sender;
@@ -54,6 +56,8 @@ contract HaitheOrchestrator {
             creators[msg.sender] != 0,
             "Only registered creators can add products"
         );
+        require(!productNameExists[name_], "Product name already exists");
+
         address product = address(
             new HaitheProduct(
                 name_,
@@ -67,13 +71,20 @@ contract HaitheOrchestrator {
         );
         products.push(product);
         isProduct[product] = true;
+        productNameExists[name_] = true;
     }
 
     function createOrganization(string memory name_) external {
+        require(
+            !organizationNameExists[name_],
+            "Organization name already exists"
+        );
+
         HaitheOrganization org = new HaitheOrganization(name_, msg.sender);
 
         isOrganization[address(org)] = true;
         organizations.push(address(org));
+        organizationNameExists[name_] = true;
     }
 
     function organizationsCount() external view returns (uint256) {

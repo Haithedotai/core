@@ -31,6 +31,12 @@ async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
 
     let db_url = std::env::var("DATABASE_URL").unwrap();
+    let db_path = db_url.strip_prefix("sqlite://").unwrap_or(&db_url);
+    if !std::path::Path::new(db_path).exists() {
+        println!("Database file '{}' does not exist. Creating it...", db_path);
+        std::fs::File::create(db_path).expect("Failed to create database file");
+    }
+
     let db_pool = SqlitePool::connect(&db_url).await.unwrap();
 
     ensure_db_migration(&db_pool)

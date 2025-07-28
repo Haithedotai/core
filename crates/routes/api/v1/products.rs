@@ -1,6 +1,6 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{contracts, error::ApiError, respond, state::AppState};
-use actix_web::{Responder, delete, post, get, web};
+use actix_web::{Responder, delete, get, post, web};
 use alith::data::crypto::{DecodeRsaPublicKey, Pkcs1v15Encrypt, RsaPublicKey};
 use alith::lazai::{ProofRequest, U256};
 use reqwest;
@@ -36,7 +36,7 @@ async fn post_index_handler(
 
     let mut synced_count: u32 = 0;
 
-    let alith_client = alith::lazai::Client::new_default()?;
+    let alith_client = alith::lazai::Client::new_testnet()?;
 
     // iterate from highest_orchestrator_idx + 1 to onchain_length
     for idx in (highest_orchestrator_idx + 1)..=onchain_length.as_u64() as i64 {
@@ -106,47 +106,60 @@ async fn post_index_handler(
         .await?;
         synced_count += 1;
 
-        // let tee_secret = std::env::var("TEE_SECRET")?;
+        // Try to handle alith client operations, but continue if they fail
+        if let Err(e) = async {
+            let tee_secret = std::env::var("TEE_SECRET")?;
 
-        // let mut file_id = alith_client
-        //     .get_file_id_by_url(product_uri.as_str())
-        //     .await?;
-        // if file_id.is_zero() {
-        //     file_id = alith_client.add_file(product_uri.as_str()).await?;
-        // }
+            let mut file_id = alith_client
+                .get_file_id_by_url(product_uri.as_str())
+                .await?;
+            if file_id.is_zero() {
+                file_id = alith_client.add_file(product_uri.as_str()).await?;
+            }
 
-        // alith_client.request_proof(file_id, U256::from(100)).await?;
+            alith_client.request_proof(file_id, U256::from(100)).await?;
 
-        // let job_id = alith_client
-        //     .file_job_ids(file_id)
-        //     .await?
-        //     .last()
-        //     .cloned()
-        //     .unwrap();
-        // let job = alith_client.get_job(job_id).await?;
-        // let node_info = alith_client.get_node(job.nodeAddress).await?.unwrap();
-        // let node_url = node_info.url;
-        // let pub_key = node_info.publicKey;
-        // let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
-        // let mut rng = rand::thread_rng();
-        // let encryption_key = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
-        // let encryption_key = hex::encode(encryption_key);
-        // let encryption_seed = "default_seed"; // You may want to generate this dynamically
-        // let _ = reqwest::Client::new()
-        //     .post(format!("{node_url}/proof"))
-        //     .json(
-        //         &ProofRequest::builder()
-        //             .job_id(job_id.to())
-        //             .file_id(file_id.to())
-        //             .file_url(product_uri.clone())
-        //             .encryption_key(encryption_key)
-        //             .encryption_seed(encryption_seed.to_string())
-        //             .build(),
-        //     )
-        //     .send()
-        //     .await?;
+            let job_id = alith_client
+                .file_job_ids(file_id)
+                .await?
+                .last()
+                .cloned()
+                .unwrap();
+            let job = alith_client.get_job(job_id).await?;
+            let node_info = alith_client.get_node(job.nodeAddress).await?.unwrap();
+            let node_url = node_info.url;
+            let pub_key = node_info.publicKey;
+            let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
+            let mut rng = rand::thread_rng();
+            let encryption_key =
+                pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
+            let encryption_key = hex::encode(encryption_key);
+            let encryption_seed = "default_seed"; // You may want to generate this dynamically
+            let _ = reqwest::Client::new()
+                .post(format!("{node_url}/proof"))
+                .json(
+                    &ProofRequest::builder()
+                        .job_id(job_id.to())
+                        .file_id(file_id.to())
+                        .file_url(product_uri.clone())
+                        .encryption_key(encryption_key)
+                        .encryption_seed(encryption_seed.to_string())
+                        .build(),
+                )
+                .send()
+                .await?;
 
-        // alith_client.request_reward(file_id, None).await?;
+            alith_client.request_reward(file_id, None).await?;
+
+            Ok::<(), Box<dyn std::error::Error>>(())
+        }
+        .await
+        {
+            println!(
+                "Warning: Failed to process alith operations for product {}: {}",
+                product_name, e
+            );
+        }
     }
 
     Ok(respond::ok(
@@ -283,9 +296,7 @@ pub struct ProductSummary {
 }
 
 #[get("")]
-async fn get_all_products(
-    state: web::Data<AppState>,
-) -> Result<impl Responder, ApiError> {
+async fn get_all_products(state: web::Data<AppState>) -> Result<impl Responder, ApiError> {
     let products = sqlx::query_as::<_, ProductSummary>(
         "SELECT id, address, creator, name, price_per_call, category, created_at FROM products ORDER BY created_at DESC"
     )
@@ -301,14 +312,13 @@ async fn get_all_products(
     ))
 }
 
-
 #[get("/{id}")]
 async fn get_product_by_id(
     path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let product_id = path.into_inner();
-    
+
     let product = sqlx::query_as::<_, ProductSummary>(
         "SELECT id, address, creator, name, price_per_call, category, created_at FROM products WHERE id = ?"
     )
@@ -327,8 +337,6 @@ async fn get_product_by_id(
         None => Err(ApiError::NotFound("Product not found".into())),
     }
 }
-
-
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_all_products)

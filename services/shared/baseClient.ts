@@ -7,7 +7,7 @@ export abstract class BaseClient {
     this.debug = debug;
   }
 
-  protected fetch<T>(
+  public fetch<T>(
     uri: string,
     authToken: string | null,
     args?: Omit<Parameters<typeof fetch>[1], "headers">

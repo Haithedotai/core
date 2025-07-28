@@ -315,7 +315,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0xb261dbc8bd02101397b665cb3b28f04075e9b338"
+    "address": "0xf201f1c97d5d163cc64f2a35eee00aa7d81e98ad"
   },
   "HaitheOrchestrator": {
     "abi": [
@@ -473,6 +473,25 @@ const definitions = {
       {
         "inputs": [
           {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "name": "organizationNameExists",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
             "internalType": "uint256",
             "name": "",
             "type": "uint256"
@@ -497,6 +516,25 @@ const definitions = {
             "internalType": "uint256",
             "name": "",
             "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "name": "productNameExists",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
           }
         ],
         "stateMutability": "view",
@@ -589,7 +627,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0xa10e0cf637433f424bd19650907858a766f3b491"
+    "address": "0x7fa8cbea4f069c6ce3d39dd3e2c9457be0f560dd"
   },
   "HaitheOrganization": {
     "abi": [
@@ -1285,7 +1323,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0xdF8f212079A032BCe7e758161417d3ecC86Ec457"
+    "address": "0x9E963C07ad7fB7F6b4Af841BE7C3f7669F76DF39"
   },
   "HaitheProduct": {
     "abi": [
