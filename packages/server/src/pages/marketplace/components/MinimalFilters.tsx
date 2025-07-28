@@ -57,8 +57,6 @@ export default function MinimalFilters({
   const activeFilterCount = (filters.type?.length || 0) +
     (filters.category?.length || 0) +
     (filters.tags?.length || 0) +
-    (filters.verified ? 1 : 0) +
-    (filters.featured ? 1 : 0) +
     (filters.priceRange ? 1 : 0) +
     (filters.rating ? 1 : 0);
 
@@ -186,7 +184,7 @@ export default function MinimalFilters({
                         onClick={() => updateFilters({ priceRange: { min: 0, max: 1 } })}
                         className="text-xs"
                       >
-                        Under 1 ETH
+                        Under 1 USDT
                       </Button>
                       <Button
                         variant={filters.priceRange?.min === 1 && filters.priceRange?.max === 5 ? "default" : "outline"}
@@ -194,7 +192,7 @@ export default function MinimalFilters({
                         onClick={() => updateFilters({ priceRange: { min: 1, max: 5 } })}
                         className="text-xs"
                       >
-                        1-5 ETH
+                        1-5 USDT
                       </Button>
                       <Button
                         variant={filters.priceRange?.min === 5 ? "default" : "outline"}
@@ -202,34 +200,12 @@ export default function MinimalFilters({
                         onClick={() => updateFilters({ priceRange: { min: 5, max: 100 } })}
                         className="text-xs"
                       >
-                        5+ ETH
+                        5+ USDT
                       </Button>
                     </div>
                   </div>
 
-                  {/* Options */}
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="verified-filter"
-                        checked={filters.verified || false}
-                        onCheckedChange={(checked) => updateFilters({ verified: checked ? true : undefined })}
-                      />
-                      <label htmlFor="verified-filter" className="text-sm cursor-pointer">
-                        Verified items only
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="featured-filter"
-                        checked={filters.featured || false}
-                        onCheckedChange={(checked) => updateFilters({ featured: checked ? true : undefined })}
-                      />
-                      <label htmlFor="featured-filter" className="text-sm cursor-pointer">
-                        Featured items only
-                      </label>
-                    </div>
-                  </div>
+
                 </div>
               </PopoverContent>
             </Popover>

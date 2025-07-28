@@ -3,6 +3,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "../../../lib/components/ui/button";
 import { Badge } from "../../../lib/components/ui/badge";
 import { Separator } from "../../../lib/components/ui/separator";
+import { Checkbox } from "../../../lib/components/ui/checkbox";
 
 import {
   Sheet,
@@ -14,10 +15,16 @@ import {
 import { categories } from "../mockData";
 import Icon from "@/src/lib/components/custom/Icon";
 import { FileText, Code, Database, Link as LinkIcon, MessageSquare } from "lucide-react";
+import type { MarketplaceCategory } from "../types";
+import { useMarketplaceStore } from "../../../lib/hooks/use-store";
 
 export default function MarketplaceMobileSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
+  const { filters, updateFilters } = useMarketplaceStore();
+
+  // Ensure filters is always an object
+  const safeFilters = filters || {};
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(path + '/');
@@ -25,6 +32,19 @@ export default function MarketplaceMobileSidebar() {
 
   const handleLinkClick = () => {
     setIsOpen(false);
+  };
+
+  const handleCategoryClick = (category: MarketplaceCategory) => {
+    const currentCategories = Array.isArray(safeFilters.category) ? safeFilters.category : [];
+    const newCategories = currentCategories.includes(category)
+      ? currentCategories.filter((c: MarketplaceCategory) => c !== category)
+      : [...currentCategories, category];
+    updateFilters({ category: newCategories.length > 0 ? newCategories : undefined });
+  };
+
+  const isCategoryActive = (category: MarketplaceCategory) => {
+    if (!Array.isArray(safeFilters.category)) return false;
+    return safeFilters.category.includes(category);
   };
 
   const marketplaceCategories = categories.filter(cat => cat !== 'All Categories');
@@ -65,27 +85,62 @@ export default function MarketplaceMobileSidebar() {
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
           Knowledge Types
         </h4>
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <FileText className="size-4" />
-            Text
-          </Button>
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Code className="size-4" />
-            HTML
-          </Button>
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <FileText className="size-4" />
-            PDF
-          </Button>
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Database className="size-4" />
-            CSV
-          </Button>
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <LinkIcon className="size-4" />
-            URL
-          </Button>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-knowledge-text"
+              checked={isCategoryActive('knowledge:text')}
+              onCheckedChange={() => handleCategoryClick('knowledge:text')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <FileText className="size-4 mr-2" />
+              Text Knowledge
+            </label>
+          </div>
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-knowledge-html"
+              checked={isCategoryActive('knowledge:html')}
+              onCheckedChange={() => handleCategoryClick('knowledge:html')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <Code className="size-4 mr-2" />
+              HTML Knowledge
+            </label>
+          </div>
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-knowledge-pdf"
+              checked={isCategoryActive('knowledge:pdf')}
+              onCheckedChange={() => handleCategoryClick('knowledge:pdf')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <FileText className="size-4 mr-2" />
+              PDF Knowledge
+            </label>
+          </div>
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-knowledge-csv"
+              checked={isCategoryActive('knowledge:csv')}
+              onCheckedChange={() => handleCategoryClick('knowledge:csv')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <Database className="size-4 mr-2" />
+              CSV Knowledge
+            </label>
+          </div>
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-knowledge-url"
+              checked={isCategoryActive('knowledge:url')}
+              onCheckedChange={() => handleCategoryClick('knowledge:url')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <LinkIcon className="size-4 mr-2" />
+              URL Knowledge
+            </label>
+          </div>
         </div>
       </div>
 
@@ -96,15 +151,29 @@ export default function MarketplaceMobileSidebar() {
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
           Tools & Prompts
         </h4>
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <MessageSquare className="size-4" />
-            Prompts
-          </Button>
-          <Button variant="outline" className="h-16 flex-col gap-1 text-xs" onClick={handleLinkClick}>
-            <Code className="size-4" />
-            RPC Tools
-          </Button>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-promptset"
+              checked={isCategoryActive('promptset')}
+              onCheckedChange={() => handleCategoryClick('promptset')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <MessageSquare className="size-4 mr-2" />
+              Prompt Sets
+            </label>
+          </div>
+          <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <Checkbox
+              id="mobile-tool-rpc"
+              checked={isCategoryActive('tool:rpc')}
+              onCheckedChange={() => handleCategoryClick('tool:rpc')}
+            />
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center">
+              <Code className="size-4 mr-2" />
+              RPC Tools
+            </label>
+          </div>
         </div>
       </div>
 

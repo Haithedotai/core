@@ -19,12 +19,12 @@ const mockInstalledExtensions = [
     category: "knowledge:text",
     status: "active",
     icon: "FileText" as const,
-    pricePerCall: "0.001 ETH",
+    pricePerCall: "0.001 USDT",
     features: ["Text-based knowledge", "Searchable content", "Easy updates"],
     installedAt: "2024-01-15T10:30:00Z",
     usageCount: 1250,
     lastUsed: "2024-01-20T14:22:00Z",
-    totalSpent: "1.25 ETH"
+    totalSpent: "1.25 USDT"
   },
   {
     id: "ext_2", 
@@ -33,12 +33,12 @@ const mockInstalledExtensions = [
     category: "knowledge:html",
     status: "active",
     icon: "Code" as const,
-    pricePerCall: "0.002 ETH",
+    pricePerCall: "0.002 USDT",
     features: ["HTML formatting", "Rich content", "Structured data"],
     installedAt: "2024-01-10T09:15:00Z",
     usageCount: 890,
     lastUsed: "2024-01-19T16:45:00Z",
-    totalSpent: "1.78 ETH"
+    totalSpent: "1.78 USDT"
   },
   {
     id: "ext_3",
@@ -47,12 +47,12 @@ const mockInstalledExtensions = [
     category: "knowledge:pdf",
     status: "active",
     icon: "FileText" as const,
-    pricePerCall: "0.003 ETH",
+    pricePerCall: "0.003 USDT",
     features: ["PDF format", "Professional layout", "Print-ready"],
     installedAt: "2024-01-08T11:20:00Z",
     usageCount: 567,
     lastUsed: "2024-01-18T10:30:00Z",
-    totalSpent: "1.701 ETH"
+    totalSpent: "1.701 USDT"
   },
   {
     id: "ext_4",
@@ -61,12 +61,12 @@ const mockInstalledExtensions = [
     category: "knowledge:csv",
     status: "active",
     icon: "Database" as const,
-    pricePerCall: "0.0015 ETH",
+    pricePerCall: "0.0015 USDT",
     features: ["Structured data", "Analytics ready", "Easy import"],
     installedAt: "2024-01-12T13:45:00Z",
     usageCount: 234,
     lastUsed: "2024-01-17T08:15:00Z",
-    totalSpent: "0.351 ETH"
+    totalSpent: "0.351 USDT"
   },
   {
     id: "ext_5",
@@ -75,12 +75,12 @@ const mockInstalledExtensions = [
     category: "tool:rpc",
     status: "active", 
     icon: "Code" as const,
-    pricePerCall: "0.005 ETH",
+    pricePerCall: "0.005 USDT",
     features: ["HTTP requests", "Data extraction", "API integration"],
     installedAt: "2024-01-05T15:30:00Z",
     usageCount: 1890,
     lastUsed: "2024-01-20T12:00:00Z",
-    totalSpent: "9.45 ETH"
+    totalSpent: "9.45 USDT"
   },
   {
     id: "ext_6",
@@ -89,12 +89,12 @@ const mockInstalledExtensions = [
     category: "promptset",
     status: "active",
     icon: "Code" as const,
-    pricePerCall: "0.002 ETH",
+    pricePerCall: "0.002 USDT",
     features: ["Multiple prompts", "Context-aware", "Customizable"],
     installedAt: "2024-01-03T14:20:00Z",
     usageCount: 3456,
     lastUsed: "2024-01-20T18:30:00Z",
-    totalSpent: "6.912 ETH"
+    totalSpent: "6.912 USDT"
   },
   {
     id: "ext_7",
@@ -103,12 +103,12 @@ const mockInstalledExtensions = [
     category: "tool:rpc",
     status: "inactive",
     icon: "Code" as const,
-    pricePerCall: "0.004 ETH",
+    pricePerCall: "0.004 USDT",
     features: ["REST API", "Authentication", "Error handling"],
     installedAt: "2024-01-01T10:00:00Z",
     usageCount: 123,
     lastUsed: "2024-01-10T09:45:00Z",
-    totalSpent: "0.492 ETH"
+    totalSpent: "0.492 USDT"
   },
   {
     id: "ext_8",
@@ -117,12 +117,12 @@ const mockInstalledExtensions = [
     category: "knowledge:text",
     status: "active",
     icon: "FileText" as const,
-    pricePerCall: "0.001 ETH",
+    pricePerCall: "0.001 USDT",
     features: ["Step-by-step guides", "Troubleshooting tips", "FAQ section"],
     installedAt: "2024-01-14T16:30:00Z",
     usageCount: 678,
     lastUsed: "2024-01-20T11:20:00Z",
-    totalSpent: "0.678 ETH"
+    totalSpent: "0.678 USDT"
   }
 ];
 
@@ -263,7 +263,7 @@ export default function PurchasesPage() {
               <Icon name="Coins" className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalSpent.toFixed(4)} ETH</div>
+              <div className="text-2xl font-bold">{totalSpent.toFixed(4)} USDT</div>
               <p className="text-xs text-muted-foreground">
                 From agent calls
               </p>

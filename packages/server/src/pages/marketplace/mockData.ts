@@ -12,11 +12,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '1',
       name: 'FinanceAI Labs',
       avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 2.5,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['finance', 'markets', 'analysis', 'trading'],
     rating: {
@@ -30,8 +29,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-12-01T14:22:00Z',
-    featured: true,
-    verified: true,
     metadata: {
       size: '12.3 GB',
       documents: 45680,
@@ -50,11 +47,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '2',
       name: 'MedTech Solutions',
       avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 1.8,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['medical', 'research', 'healthcare', 'clinical'],
     rating: {
@@ -68,8 +64,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-02-10T09:15:00Z',
     updated_at: '2024-11-28T11:45:00Z',
-    featured: false,
-    verified: true,
     metadata: {
       size: '8.7 GB',
       documents: 23450,
@@ -90,11 +84,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '3',
       name: 'CodeWave Studios',
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 0.75,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['html', 'web-development', 'documentation', 'frontend'],
     rating: {
@@ -108,8 +101,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-03-05T16:20:00Z',
     updated_at: '2024-11-30T09:10:00Z',
-    featured: true,
-    verified: true,
     metadata: {
       size: '2.1 GB',
       documents: 1250,
@@ -130,11 +121,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '4',
       name: 'DataInsights Corp',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-      verified: false,
     },
     price: {
       amount: 1.2,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['data-analysis', 'customer-behavior', 'ecommerce', 'analytics'],
     rating: {
@@ -148,8 +138,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-04-12T11:30:00Z',
     updated_at: '2024-11-25T15:45:00Z',
-    featured: false,
-    verified: false,
     metadata: {
       size: '5.8 GB',
       documents: 2500000,
@@ -170,11 +158,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '5',
       name: 'TechPulse Media',
       avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 0.45,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['tech-news', 'aggregator', 'real-time', 'industry'],
     rating: {
@@ -188,8 +175,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-05-08T14:15:00Z',
     updated_at: '2024-11-29T13:20:00Z',
-    featured: true,
-    verified: true,
     metadata: {
       size: '1.2 GB',
       documents: 150,
@@ -210,11 +195,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '7',
       name: 'Literary AI Collective',
       avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 0.35,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['creative-writing', 'storytelling', 'literature', 'fiction'],
     rating: {
@@ -228,8 +212,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-07-22T12:00:00Z',
     updated_at: '2024-11-26T10:15:00Z',
-    featured: true,
-    verified: true,
     metadata: {
       prompts: 157,
       models: ['GPT-4', 'Claude-3', 'Gemini Pro'],
@@ -249,11 +231,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '8',
       name: 'DevOps Automation',
       avatar: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=400&h=400&fit=crop&crop=face',
-      verified: false,
     },
     price: {
       amount: 0.85,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['code-review', 'security', 'optimization', 'development'],
     rating: {
@@ -267,8 +248,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-08-10T15:30:00Z',
     updated_at: '2024-11-24T08:45:00Z',
-    featured: false,
-    verified: false,
     metadata: {
       prompts: 89,
       models: ['GPT-4', 'Claude-3', 'CodeLlama'],
@@ -290,11 +269,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '9',
       name: 'WeatherTech Solutions',
       avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 0.25,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['weather', 'api', 'forecasting', 'location'],
     rating: {
@@ -308,8 +286,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-06-15T10:45:00Z',
     updated_at: '2024-11-27T16:30:00Z',
-    featured: false,
-    verified: true,
     metadata: {
       method: 'GET',
       endpoints: 3,
@@ -328,11 +304,10 @@ export const mockMarketplaceData: MarketplaceItem[] = [
       id: '10',
       name: 'FinanceData Pro',
       avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face',
-      verified: true,
     },
     price: {
       amount: 0.65,
-      currency: 'ETH',
+      currency: 'USDT',
     },
     tags: ['stocks', 'finance', 'real-time', 'trading'],
     rating: {
@@ -346,8 +321,6 @@ export const mockMarketplaceData: MarketplaceItem[] = [
     },
     created_at: '2024-07-20T14:30:00Z',
     updated_at: '2024-11-28T12:15:00Z',
-    featured: true,
-    verified: true,
     metadata: {
       method: 'GET',
       endpoints: 5,
@@ -374,7 +347,6 @@ export const mockStats: MarketplaceStats = {
   },
 };
 
-export const featuredItems = mockMarketplaceData.filter(item => item.featured);
 
 export const categories = [
   'All Categories',

@@ -75,11 +75,6 @@ export default function MarketplaceItemCard({
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-base @md:text-lg font-semibold truncate">{item.name}</span>
-              {item.featured && (
-                <Badge className="bg-primary text-primary-foreground text-xs w-fit mt-1">
-                  ⭐ Featured
-                </Badge>
-              )}
             </div>
           </div>
         </CardTitle>
@@ -158,12 +153,6 @@ export default function MarketplaceItemCard({
             />
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-xs @md:text-sm font-medium truncate">{item.creator.name}</span>
-              {item.creator.verified && (
-                <div className="flex items-center gap-1">
-                  <CheckCircle className="size-3 text-primary" />
-                  <span className="text-xs text-muted-foreground hidden @sm:inline">Verified</span>
-                </div>
-              )}
             </div>
           </div>
           

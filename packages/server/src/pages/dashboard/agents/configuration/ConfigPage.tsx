@@ -25,7 +25,7 @@ const mockInstalledExtensions = [
     status: "active",
     enabled: true,
     icon: "FileText" as const,
-    pricePerCall: "0.001 ETH",
+    pricePerCall: "0.001 USDT",
     features: ["Text-based knowledge", "Searchable content", "Easy updates"]
   },
   {
@@ -36,7 +36,7 @@ const mockInstalledExtensions = [
     status: "active",
     enabled: false,
     icon: "Code" as const,
-    pricePerCall: "0.002 ETH",
+    pricePerCall: "0.002 USDT",
     features: ["HTML formatting", "Rich content", "Structured data"]
   },
   {
@@ -47,7 +47,7 @@ const mockInstalledExtensions = [
     status: "active",
     enabled: true,
     icon: "FileText" as const,
-    pricePerCall: "0.003 ETH",
+    pricePerCall: "0.003 USDT",
     features: ["PDF format", "Professional layout", "Print-ready"]
   },
   {
@@ -58,7 +58,7 @@ const mockInstalledExtensions = [
     status: "active",
     enabled: false,
     icon: "Database" as const,
-    pricePerCall: "0.0015 ETH",
+    pricePerCall: "0.0015 USDT",
     features: ["Structured data", "Analytics ready", "Easy import"]
   },
   {
@@ -69,7 +69,7 @@ const mockInstalledExtensions = [
     status: "active",
     enabled: false,
     icon: "Code" as const,
-    pricePerCall: "0.005 ETH",
+    pricePerCall: "0.005 USDT",
     features: ["HTTP requests", "Data extraction", "API integration"]
   },
   {
@@ -80,7 +80,7 @@ const mockInstalledExtensions = [
     status: "active",
     enabled: true,
     icon: "Code" as const,
-    pricePerCall: "0.002 ETH",
+    pricePerCall: "0.002 USDT",
     features: ["Multiple prompts", "Context-aware", "Customizable"]
   },
   {
@@ -91,7 +91,7 @@ const mockInstalledExtensions = [
     status: "inactive",
     enabled: false,
     icon: "Code" as const,
-    pricePerCall: "0.004 ETH",
+    pricePerCall: "0.004 USDT",
     features: ["REST API", "Authentication", "Error handling"]
   }
 ];

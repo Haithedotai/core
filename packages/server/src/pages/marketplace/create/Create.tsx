@@ -234,7 +234,7 @@ export default function CreatePage() {
                     return;
             }
 
-            // Convert ETH to wei using viem
+            // Convert USDT to wei using viem
             const priceInWei = parseEther(pricePerCall || "0");
 
             await uploadToMarketplaceAndGetReward.mutateAsync({
@@ -683,7 +683,7 @@ export default function CreatePage() {
                         </div>
 
                         <div>
-                            <Label htmlFor="price">Price per Call (in ETH)</Label>
+                            <Label htmlFor="price">Price per Call (in USDT)</Label>
                             <Input
                                 id="price"
                                 type="number"

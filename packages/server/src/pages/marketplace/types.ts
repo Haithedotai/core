@@ -12,11 +12,10 @@ export interface BaseMarketplaceItem {
     id: string;
     name: string;
     avatar?: string;
-    verified: boolean;
   };
   price: {
     amount: number;
-    currency: 'ETH' | 'USD';
+    currency: 'USDT' | 'USD';
   };
   tags: string[];
   rating: {
@@ -30,8 +29,6 @@ export interface BaseMarketplaceItem {
   };
   created_at: string;
   updated_at: string;
-  featured: boolean;
-  verified: boolean;
 }
 
 export interface KnowledgeBase extends BaseMarketplaceItem {
@@ -82,8 +79,6 @@ export interface MarketplaceFilters {
   };
   rating?: number;
   tags?: string[];
-  verified?: boolean;
-  featured?: boolean;
   sortBy?: 'recent' | 'popular' | 'price_low' | 'price_high' | 'rating';
 }
 
