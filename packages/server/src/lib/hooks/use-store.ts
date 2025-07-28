@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { MarketplaceFilters } from '../../pages/marketplace/types'
 
 type Store = {
   selectedOrganizationId: number
@@ -85,6 +86,73 @@ export const useStore = create<Store>()(
         selectedOrganizationId: state.selectedOrganizationId,
         onboardingData: state.onboardingData,
         profile: state.profile,
+      }),
+    }
+  )
+)
+
+// Marketplace Store
+interface MarketplaceStore {
+  // State
+  filters: MarketplaceFilters
+  searchQuery: string
+  viewMode: 'grid' | 'list'
+  favorites: string[]
+  
+  // Actions
+  setFilters: (filters: MarketplaceFilters) => void
+  setSearchQuery: (query: string) => void
+  setViewMode: (mode: 'grid' | 'list') => void
+  toggleFavorite: (itemId: string) => void
+  clearFilters: () => void
+  updateFilters: (updates: Partial<MarketplaceFilters>) => void
+}
+
+export const useMarketplaceStore = create<MarketplaceStore>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      filters: {},
+      searchQuery: '',
+      viewMode: 'grid',
+      favorites: [],
+
+      // Actions
+      setFilters: (filters: MarketplaceFilters) =>
+        set({ filters }),
+
+      setSearchQuery: (query: string) =>
+        set({ searchQuery: query }),
+
+      setViewMode: (mode: 'grid' | 'list') =>
+        set({ viewMode: mode }),
+
+      toggleFavorite: (itemId: string) =>
+        set((state) => {
+          const newFavorites = state.favorites.includes(itemId)
+            ? state.favorites.filter(id => id !== itemId)
+            : [...state.favorites, itemId]
+          return { favorites: newFavorites }
+        }),
+
+      clearFilters: () =>
+        set({ 
+          filters: {},
+          searchQuery: ''
+        }),
+
+      updateFilters: (updates: Partial<MarketplaceFilters>) =>
+        set((state) => ({
+          filters: { ...state.filters, ...updates }
+        })),
+    }),
+    {
+      name: 'haithe-marketplace-store',
+      partialize: (state) => ({
+        filters: state.filters,
+        searchQuery: state.searchQuery,
+        viewMode: state.viewMode,
+        favorites: state.favorites,
       }),
     }
   )

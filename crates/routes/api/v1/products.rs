@@ -10,6 +10,7 @@ use sqlx::FromRow;
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Product {
     pub id: i64,
+    pub address: String,
     pub orchestrator_idx: i64,
     pub creator: String,
     pub name: String,
@@ -90,8 +91,9 @@ async fn post_index_handler(
             .await?;
 
         sqlx::query_as::<_, Product>(
-            "INSERT INTO products (orchestrator_idx, creator, name, uri, encrypted_key, price_per_call, category) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *",
+            "INSERT INTO products (address, orchestrator_idx, creator, name, uri, encrypted_key, price_per_call, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *",
         )
+        .bind(&product_address.to_string())
         .bind(idx)
         .bind(&format!("{:#x}", product_creator))
         .bind(&product_name)
@@ -271,6 +273,7 @@ async fn delete_disable_handler(
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct ProductSummary {
     pub id: i64,
+    pub address: String,
     pub creator: String,
     pub name: String,
     pub price_per_call: i64,
@@ -283,7 +286,7 @@ async fn get_all_products(
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let products = sqlx::query_as::<_, ProductSummary>(
-        "SELECT id, creator, name, price_per_call, category, created_at FROM products ORDER BY created_at DESC"
+        "SELECT id, address, creator, name, price_per_call, category, created_at FROM products ORDER BY created_at DESC"
     )
     .fetch_all(&state.db)
     .await
@@ -306,7 +309,7 @@ async fn get_product_by_id(
     let product_id = path.into_inner();
     
     let product = sqlx::query_as::<_, ProductSummary>(
-        "SELECT id, creator, name, price_per_call, created_at FROM products WHERE id = ?"
+        "SELECT id, address, creator, name, price_per_call, category, created_at FROM products WHERE id = ?"
     )
     .bind(product_id)
     .fetch_optional(&state.db)

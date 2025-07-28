@@ -5,7 +5,7 @@ import CreatorSheet from '@/src/lib/components/app/CreatorSheet';
 
 export default function MarketplaceNavbar() {
   return (
-    <nav className="bg-background border-b flex items-center justify-between h-20 px-4 @container">
+    <nav className="bg-background border-b flex items-center justify-between h-20 px-4 @container bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
       {/* Left side - Mobile menu + Logo */}
       <div className="flex items-center gap-4">
         <MarketplaceMobileSidebar />

@@ -23,7 +23,7 @@ export default function ProfilePage() {
                 description: "High-performance Lambda function for real-time sentiment analysis using advanced NLP models.",
                 price: {
                     amount: 0.75,
-                    currency: "ETH"
+                    currency: "USDT"
                 },
                 tags: ["nlp", "sentiment", "realtime", "api"],
                 category: "Natural Language Processing",
@@ -44,8 +44,6 @@ export default function ProfilePage() {
                 },
                 created_at: "2024-03-05T16:20:00Z",
                 updated_at: "2024-11-30T09:10:00Z",
-                featured: true,
-                verified: true,
                 metadata: {
                     runtime: "Python 3.11",
                     memory: "1 GB",
@@ -62,7 +60,7 @@ export default function ProfilePage() {
                 description: "Comprehensive database with 10+ years of financial market data and expert analysis.",
                 price: {
                     amount: 2.5,
-                    currency: "ETH"
+                    currency: "USDT"
                 },
                 tags: ["finance", "markets", "analysis", "trading"],
                 category: "Finance & Trading",
@@ -83,8 +81,6 @@ export default function ProfilePage() {
                 },
                 created_at: "2024-01-15T10:30:00Z",
                 updated_at: "2024-12-01T14:22:00Z",
-                featured: true,
-                verified: true,
                 metadata: {
                     size: "12.3 GB",
                     documents: 45680,
@@ -100,7 +96,7 @@ export default function ProfilePage() {
                 description: "Step-by-step instructions for implementing Retrieval-Augmented Generation systems.",
                 price: {
                     amount: 0.95,
-                    currency: "ETH"
+                    currency: "USDT"
                 },
                 tags: ["rag", "vector-db", "embeddings", "llm"],
                 category: "AI Architecture",
@@ -121,8 +117,6 @@ export default function ProfilePage() {
                 },
                 created_at: "2024-05-08T14:15:00Z",
                 updated_at: "2024-11-29T13:20:00Z",
-                featured: true,
-                verified: true,
                 metadata: {
                     complexity: "advanced",
                     useCase: "Building production-ready RAG systems",

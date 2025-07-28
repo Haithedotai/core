@@ -1,23 +1,23 @@
-export type MarketplaceItemType = 'knowledgeBase' | 'lambda' | 'instructionSet' | 'promptSet';
+export type MarketplaceItemType = 'knowledgeBase' | 'promptSet' | 'tool';
+
+export type MarketplaceCategory = 'knowledge:text' | 'knowledge:html' | 'knowledge:pdf' | 'knowledge:csv' | 'knowledge:url' | 'promptset' | 'tool:rpc';
 
 export interface BaseMarketplaceItem {
   id: string;
   name: string;
   description: string;
   type: MarketplaceItemType;
+  category: MarketplaceCategory;
   creator: {
     id: string;
     name: string;
     avatar?: string;
-    verified: boolean;
   };
   price: {
     amount: number;
-    currency: 'ETH' | 'USD';
+    currency: 'USDT' | 'USD';
   };
-  image?: string;
   tags: string[];
-  category: string;
   rating: {
     average: number;
     count: number;
@@ -29,8 +29,6 @@ export interface BaseMarketplaceItem {
   };
   created_at: string;
   updated_at: string;
-  featured: boolean;
-  verified: boolean;
 }
 
 export interface KnowledgeBase extends BaseMarketplaceItem {
@@ -41,30 +39,6 @@ export interface KnowledgeBase extends BaseMarketplaceItem {
     sources: string[];
     domains: string[];
     lastUpdated: string;
-  };
-}
-
-export interface LambdaFunction extends BaseMarketplaceItem {
-  type: 'lambda';
-  metadata: {
-    runtime: string; // e.g., "Python 3.9", "Node.js 18"
-    memory: string; // e.g., "512 MB"
-    timeout: string; // e.g., "30s"
-    triggers: string[];
-    apiEndpoints: number;
-    language: string;
-  };
-}
-
-export interface InstructionSet extends BaseMarketplaceItem {
-  type: 'instructionSet';
-  metadata: {
-    complexity: 'beginner' | 'intermediate' | 'advanced';
-    useCase: string;
-    steps: number;
-    estimatedTime: string; // e.g., "5-10 minutes"
-    prerequisites: string[];
-    compatibility: string[];
   };
 }
 
@@ -80,19 +54,31 @@ export interface PromptSet extends BaseMarketplaceItem {
   };
 }
 
-export type MarketplaceItem = KnowledgeBase | LambdaFunction | InstructionSet | PromptSet;
+export interface Tool extends BaseMarketplaceItem {
+  type: 'tool';
+  metadata: {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    endpoints: number;
+    responseFormat: string;
+    rateLimit?: string;
+    supportedServices?: string[];
+    supportedExchanges?: string[];
+    dataTypes?: string[];
+    updateFrequency?: string;
+  };
+}
+
+export type MarketplaceItem = KnowledgeBase | PromptSet | Tool;
 
 export interface MarketplaceFilters {
   type?: MarketplaceItemType[];
-  category?: string[];
+  category?: MarketplaceCategory[];
   priceRange?: {
     min: number;
     max: number;
   };
   rating?: number;
   tags?: string[];
-  verified?: boolean;
-  featured?: boolean;
   sortBy?: 'recent' | 'popular' | 'price_low' | 'price_high' | 'rating';
 }
 
@@ -101,6 +87,6 @@ export interface MarketplaceStats {
   totalCreators: number;
   totalSales: number;
   categories: {
-    [key: string]: number;
+    [key in MarketplaceCategory]?: number;
   };
 } 

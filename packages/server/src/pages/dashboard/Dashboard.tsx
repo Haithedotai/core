@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/lib/components/ui/tabs";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
@@ -27,8 +26,10 @@ function StatsCard({
   trend,
   description,
 }: StatsCardProps) {
+  const link = `/dashboard/${title.toLowerCase()}`;
+
   return (
-    <Card className="relative overflow-hidden shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+    <Link to={link} className="relative overflow-hidden shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm rounded-lg">
       <div className={`absolute inset-0 bg-gradient-to-br from-primary/[0.08] to-secondary/[0.02]`} />
       <CardHeader className="relative pb-3">
         <div className="flex items-center justify-between">
@@ -64,7 +65,7 @@ function StatsCard({
           </p>
         )}
       </CardContent>
-    </Card>
+    </Link>
   );
 }
 
@@ -170,27 +171,13 @@ function RecentActivitySection() {
 
 export default function DashboardPage() {
   const api = useHaitheApi();
-  const [activeTab, setActiveTab] = useState("overview");
 
   // Get profile data
   const profileQuery = api.profile();
-  const isLoggedIn = api.isLoggedIn;
-
-  // Get utility values
-  const isWeb3Ready = api.isWeb3Ready();
-  const authToken = api.getAuthToken();
-
-  // Get store data - must be called before any conditional returns
-  const { selectedOrganizationId } = useStore();
-
-  // All protection is now handled by ProtectedRoute wrapper
-  // Just get the profile data (guaranteed to exist due to ProtectedRoute)
   const profile = profileQuery.data;
-
-  if (!profile) {
-    return null; // This should never happen with ProtectedRoute, but satisfies TypeScript
-  }
-
+  const { selectedOrganizationId } = useStore();
+  const { data: organization } = api.getOrganization(selectedOrganizationId);
+  const { data: agents } = api.getProjects(selectedOrganizationId);
 
   return (
     <div className="min-h-full bg-background">
@@ -209,7 +196,7 @@ export default function DashboardPage() {
                     Dashboard
                   </h1>
                   <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    {profile.address ? `Registered since ${formatDate(profile.registered, "MMM D, YYYY")}` : 'Manage your AI infrastructure and monitor performance'}
+                    {profile?.address ? `Registered since ${formatDate(profile?.registered, "MMM D, YYYY")}` : 'Manage your AI infrastructure and monitor performance'}
                   </p>
                 </div>
               </div>
@@ -220,101 +207,29 @@ export default function DashboardPage() {
 
       {/* Main Dashboard Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <div className="flex items-center justify-center">
-            <TabsList className="grid w-full max-w-2xl grid-cols-3 shadow-lg bg-gradient-to-r from-background to-background/50 backdrop-blur-sm border border-border/50">
-              <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/5">
-                <Icon name="LayoutDashboard" className="size-4" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="agents" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/5">
-                <Icon name="Bot" className="size-4" />
-                Agents
-              </TabsTrigger>
-              <TabsTrigger value="workflows" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/5">
-                <Icon name="GitBranch" className="size-4" />
-                Workflows
-              </TabsTrigger>
-            </TabsList>
+        <div className="space-y-8">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <StatsCard
+              title="Agents"
+              value={agents?.length || 0}
+              icon="Bot"
+              description="Running agents"
+            />
+            <StatsCard
+              title="Workflows"
+              value="0"
+              icon="GitBranch"
+              description="Automated flows"
+            />
           </div>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-8">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <StatsCard
-                title="Agents"
-                value="0"
-                icon="Bot"
-                description="Running agents"
-              />
-              <StatsCard
-                title="Workflows"
-                value="0"
-                icon="GitBranch"
-                description="Automated flows"
-              />
-            </div>
-
-            {/* Action Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <QuickActionsSection />
-              <RecentActivitySection />
-            </div>
-          </TabsContent>
-
-          {/* Agents Tab */}
-          <TabsContent value="agents" className="space-y-6">
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
-              <CardContent className="relative">
-                <div className="text-center py-20 space-y-6">
-                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mx-auto border border-border/50">
-                    <Icon name="Bot" className="size-10 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="text-2xl font-semibold text-foreground">No Agents Yet</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                      Create your first AI agent to get started with automated tasks and workflows.
-                    </p>
-                  </div>
-                  <Button asChild className="shadow-lg">
-                    <Link to="/dashboard/agents">
-                      <Icon name="Plus" className="size-4 mr-2" />
-                      Create First Agent
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Workflows Tab */}
-          <TabsContent value="workflows" className="space-y-6">
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
-              <CardContent className="relative">
-                <div className="text-center py-20 space-y-6">
-                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mx-auto border border-border/50">
-                    <Icon name="GitBranch" className="size-10 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="text-2xl font-semibold text-foreground">No Workflows Yet</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                      Build your first workflow to automate complex tasks with multiple agents.
-                    </p>
-                  </div>
-                  <Button asChild className="shadow-lg">
-                    <Link to="/dashboard/workflows">
-                      <Icon name="Plus" className="size-4 mr-2" />
-                      Create First Workflow
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          {/* Action Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <QuickActionsSection />
+            <RecentActivitySection />
+          </div>
+        </div>
       </div>
     </div>
   );

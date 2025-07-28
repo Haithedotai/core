@@ -5,7 +5,7 @@ import MobileNav from "./SidebarMobile";
 
 export default function Navbar() {
   return (
-    <nav className="fixed bg-background top-0 gap-2 h-[var(--navbar-height)] w-full z-50 border-b flex items-center justify-between px-8 lg:px-4">
+    <nav className="fixed bg-background top-0 gap-2 h-[var(--navbar-height)] w-full z-50 border-b flex items-center justify-between px-8 lg:px-4 ">
       {/* Left side - Logo and main navigation */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3">

@@ -108,7 +108,7 @@ export default function AgentsPage() {
                     Agents
                   </h1>
                   <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    Manage your AI agents.
+                    Manage your AI agents and their marketplace extensions.
                   </p>
                 </div>
               </div>
@@ -164,13 +164,20 @@ export default function AgentsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>{agent.name}</span>
-                    <Button size="icon" variant="ghost" onClick={() => {
-                      setEditAgent(agent);
-                      setAgentName(agent.name);
-                      setEditOpen(true);
-                    }}>
-                      <Icon name="Pencil" />
-                    </Button>
+                    <div>
+                      <Button asChild size="icon" variant="ghost">
+                        <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
+                          <Icon name="Settings" />
+                        </Link>
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => {
+                        setEditAgent(agent);
+                        setAgentName(agent.name);
+                        setEditOpen(true);
+                      }}>
+                        <Icon name="Pencil" />
+                      </Button>
+                    </div>
                   </CardTitle>
                   <CardDescription>Created: {new Date(agent.created_at).toLocaleString()}</CardDescription>
                 </CardHeader>

@@ -80,6 +80,7 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        address TEXT NOT NULL,
         orchestrator_idx INTEGER NOT NULL,
         creator TEXT NOT NULL REFERENCES creators (wallet_address) ON DELETE CASCADE,
         name TEXT NOT NULL,

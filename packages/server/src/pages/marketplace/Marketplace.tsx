@@ -1,20 +1,27 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Grid, List } from 'lucide-react';
 import { Button } from '../../lib/components/ui/button';
-import type { MarketplaceFilters as MarketplaceFiltersType, MarketplaceItem } from './types';
+import type { MarketplaceItem } from './types';
 import { mockMarketplaceData } from './mockData';
 import MinimalFilters from './components/MinimalFilters';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
-import MarketplaceSidebar from './components/MarketplaceSidebar';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
+import { useMarketplaceStore } from '../../lib/hooks/use-store';
 
 export default function MarketplacePage() {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState<MarketplaceFiltersType>({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const { 
+    filters, 
+    searchQuery, 
+    viewMode, 
+    favorites,
+    setFilters,
+    setSearchQuery,
+    setViewMode,
+    toggleFavorite,
+    clearFilters
+  } = useMarketplaceStore();
   const haithe = useHaitheApi();
   const { data: products, isLoading: isLoadingProducts } = haithe.getAllProducts();
 
@@ -62,18 +69,8 @@ export default function MarketplacePage() {
     // Tags filter
     if (filters.tags && filters.tags.length > 0) {
       items = items.filter(item =>
-        filters.tags!.some(tag => item.tags.includes(tag))
+        filters.tags!.some((tag: string) => item.tags.includes(tag))
       );
-    }
-
-    // Verified filter
-    if (filters.verified) {
-      items = items.filter(item => item.verified);
-    }
-
-    // Featured filter
-    if (filters.featured) {
-      items = items.filter(item => item.featured);
     }
 
     // Sorting
@@ -102,15 +99,7 @@ export default function MarketplacePage() {
   };
 
   const handleFavorite = (itemId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(itemId)) {
-        newFavorites.delete(itemId);
-      } else {
-        newFavorites.add(itemId);
-      }
-      return newFavorites;
-    });
+    toggleFavorite(itemId);
   };
 
   const handlePurchase = (item: MarketplaceItem) => {
@@ -121,6 +110,10 @@ export default function MarketplacePage() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+  };
+
+  const handleClearFilters = () => {
+    clearFilters();
   };
 
   return (
@@ -147,8 +140,8 @@ export default function MarketplacePage() {
             <div
               className={
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 w-full @xl:grid-cols-2 @4xl:grid-cols-4 gap-4 @md:gap-6'
-                  : 'space-y-4'
+                  ? 'grid grid-cols-1 w-full @3xl:grid-cols-2 @5xl:grid-cols-3 gap-8'
+                  : 'space-y-8'
               }
             >
               {filteredItems.map((item) => (
@@ -157,7 +150,7 @@ export default function MarketplacePage() {
                   item={item}
                   onItemClick={handleItemClick}
                   onFavorite={handleFavorite}
-                  isFavorited={favorites.has(item.id)}
+                  isFavorited={favorites.includes(item.id)}
                 />
               ))}
             </div>
@@ -170,10 +163,7 @@ export default function MarketplacePage() {
               </p>
               <Button
                 variant="outline"
-                onClick={() => {
-                  setFilters({});
-                  setSearchQuery('');
-                }}
+                onClick={handleClearFilters}
               >
                 Clear all filters
               </Button>

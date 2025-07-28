@@ -268,17 +268,7 @@ export default function ItemDetailPage() {
 
                   {/* Badges */}
                   <div className="flex items-center gap-2 mb-4">
-                    {item.featured && (
-                      <Badge className="bg-primary text-primary-foreground">
-                        ⭐ Featured
-                      </Badge>
-                    )}
-                    {item.verified && (
-                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm">
-                        <CheckCircle className="size-3 mr-1" />
-                        Verified
-                      </Badge>
-                    )}
+                    
                   </div>
                 </div>
 
