@@ -483,7 +483,8 @@ export function useHaitheApi() {
             queryKey: ['creator', id],
             queryFn: async () => {
                 if (!client) throw new Error("Wallet not connected");
-                const res = await client.getCreatorByAddress(id);
+                const idToLower = id.toLowerCase();
+                const res = await client.getCreatorByAddress(idToLower);
                 const ipfsData = await fetch(res.uri);
                 const data = await ipfsData.json();
                 return {
@@ -498,7 +499,8 @@ export function useHaitheApi() {
             queryKey: ['creatorProducts', id],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.getCreatorProducts(id);
+                const idToLower = id.toLowerCase();
+                return client.getCreatorProducts(idToLower);
             },
             enabled: isLoggedIn() && !!client && !!id,
         }),

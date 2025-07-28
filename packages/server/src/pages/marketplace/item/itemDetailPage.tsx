@@ -208,11 +208,11 @@ export default function ItemDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-semibold mb-4">About This Product</h3>
+                    <h3 className="text-xl font-semibold mb-4">Description</h3>
                     <div className="prose prose-sm max-w-none text-muted-foreground">
                       <p>
-                        This is a <strong>{categoryLabel}</strong> product created by{' '}
-                        <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                        This is a <span className='font-bold text-primary'>{categoryLabel}</span> product created by{' '}
+                        <code className="text-xs bg-muted-foreground px-1 py-0.5 rounded">
                           {item.creator.slice(0, 6)}...{item.creator.slice(-4)}
                         </code>
                         . It's available for purchase and can be used in your AI applications.

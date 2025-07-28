@@ -6,13 +6,14 @@ import MarketplaceItemCard from './components/MarketplaceItemCard';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 import { useMarketplaceStore } from '../../lib/hooks/use-store';
 import type { Product } from '../../../../../services/shared/types';
+import Icon from '@/src/lib/components/custom/Icon';
 
 export default function MarketplacePage() {
   const navigate = useNavigate();
-  const { 
-    filters, 
-    searchQuery, 
-    viewMode, 
+  const {
+    filters,
+    searchQuery,
+    viewMode,
     favorites,
     setFilters,
     setSearchQuery,
@@ -112,7 +113,7 @@ export default function MarketplacePage() {
           {/* Items Grid/List - responsive columns */}
           {isLoadingProducts ? (
             <div className="text-center py-16">
-              <div className="text-4xl @md:text-6xl mb-4">⏳</div>
+              <Icon name="LoaderCircle" className="size-16 mb-4 w-full animate-spin" />
               <h3 className="text-lg @md:text-xl font-semibold mb-2">Loading products...</h3>
               <p className="text-muted-foreground mb-6 text-sm @md:text-base">
                 Please wait while we fetch the latest marketplace items.
@@ -138,12 +139,12 @@ export default function MarketplacePage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="text-4xl @md:text-6xl mb-4">🤖</div>
-              <h3 className="text-lg @md:text-xl font-semibold mb-2">
+              <Icon name="Bot" className="size-16 mb-4 w-full" />
+              <h3 className="text-lg @md:text-xl font-semibold mb-1">
                 {products && products.length === 0 ? 'No products available' : 'No items found'}
               </h3>
               <p className="text-muted-foreground mb-6 text-sm @md:text-base">
-                {products && products.length === 0 
+                {products && products.length === 0
                   ? 'There are currently no products in the marketplace.'
                   : 'Try adjusting your filters or search query to find more items.'
                 }
