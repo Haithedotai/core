@@ -315,7 +315,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0x7ef8e99980da5bcedcf7c10f41e55f759f6a174b"
+    "address": "0xb261dbc8bd02101397b665cb3b28f04075e9b338"
   },
   "HaitheOrchestrator": {
     "abi": [
@@ -589,7 +589,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0x82b769500e34362a76df81150e12c746093d954f"
+    "address": "0xa10e0cf637433f424bd19650907858a766f3b491"
   },
   "HaitheOrganization": {
     "abi": [
@@ -1285,7 +1285,156 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0xBE6566b6d79dF8EA95b2619478019333aA758BE8"
+    "address": "0xdF8f212079A032BCe7e758161417d3ecC86Ec457"
+  },
+  "HaitheProduct": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "name_",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "uri_",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "iv_",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "encryptedKeyForTEE_",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "creator_",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "category_",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pricePerCall_",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "name": "category",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "creator",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "encryptedKeyForTEE",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "iv",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "pricePerCall",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "newPrice",
+            "type": "uint256"
+          }
+        ],
+        "name": "setPricePerCall",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "uri",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
   }
 }as const;
 export default definitions;

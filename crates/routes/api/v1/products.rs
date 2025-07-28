@@ -40,6 +40,7 @@ async fn post_index_handler(
 
     // iterate from highest_orchestrator_idx + 1 to onchain_length
     for idx in (highest_orchestrator_idx + 1)..=onchain_length.as_u64() as i64 {
+        println!("Syncing product with orchestrator index: {}", idx);
         // Convert to 0-based index for Solidity array access
         let solidity_idx = ethers::types::U256::from((idx - 1) as u64);
         let product_address: ethers::types::Address =
@@ -105,47 +106,47 @@ async fn post_index_handler(
         .await?;
         synced_count += 1;
 
-        let tee_secret = std::env::var("TEE_SECRET")?;
+        // let tee_secret = std::env::var("TEE_SECRET")?;
 
-        let mut file_id = alith_client
-            .get_file_id_by_url(product_uri.as_str())
-            .await?;
-        if file_id.is_zero() {
-            file_id = alith_client.add_file(product_uri.as_str()).await?;
-        }
+        // let mut file_id = alith_client
+        //     .get_file_id_by_url(product_uri.as_str())
+        //     .await?;
+        // if file_id.is_zero() {
+        //     file_id = alith_client.add_file(product_uri.as_str()).await?;
+        // }
 
-        alith_client.request_proof(file_id, U256::from(100)).await?;
+        // alith_client.request_proof(file_id, U256::from(100)).await?;
 
-        let job_id = alith_client
-            .file_job_ids(file_id)
-            .await?
-            .last()
-            .cloned()
-            .unwrap();
-        let job = alith_client.get_job(job_id).await?;
-        let node_info = alith_client.get_node(job.nodeAddress).await?.unwrap();
-        let node_url = node_info.url;
-        let pub_key = node_info.publicKey;
-        let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
-        let mut rng = rand::thread_rng();
-        let encryption_key = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
-        let encryption_key = hex::encode(encryption_key);
-        let encryption_seed = "default_seed"; // You may want to generate this dynamically
-        let _ = reqwest::Client::new()
-            .post(format!("{node_url}/proof"))
-            .json(
-                &ProofRequest::builder()
-                    .job_id(job_id.to())
-                    .file_id(file_id.to())
-                    .file_url(product_uri.clone())
-                    .encryption_key(encryption_key)
-                    .encryption_seed(encryption_seed.to_string())
-                    .build(),
-            )
-            .send()
-            .await?;
+        // let job_id = alith_client
+        //     .file_job_ids(file_id)
+        //     .await?
+        //     .last()
+        //     .cloned()
+        //     .unwrap();
+        // let job = alith_client.get_job(job_id).await?;
+        // let node_info = alith_client.get_node(job.nodeAddress).await?.unwrap();
+        // let node_url = node_info.url;
+        // let pub_key = node_info.publicKey;
+        // let pub_key = RsaPublicKey::from_pkcs1_pem(&pub_key)?;
+        // let mut rng = rand::thread_rng();
+        // let encryption_key = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, tee_secret.as_bytes())?;
+        // let encryption_key = hex::encode(encryption_key);
+        // let encryption_seed = "default_seed"; // You may want to generate this dynamically
+        // let _ = reqwest::Client::new()
+        //     .post(format!("{node_url}/proof"))
+        //     .json(
+        //         &ProofRequest::builder()
+        //             .job_id(job_id.to())
+        //             .file_id(file_id.to())
+        //             .file_url(product_uri.clone())
+        //             .encryption_key(encryption_key)
+        //             .encryption_seed(encryption_seed.to_string())
+        //             .build(),
+        //     )
+        //     .send()
+        //     .await?;
 
-        alith_client.request_reward(file_id, None).await?;
+        // alith_client.request_reward(file_id, None).await?;
     }
 
     Ok(respond::ok(

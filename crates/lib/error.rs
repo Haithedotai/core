@@ -103,3 +103,15 @@ impl From<rsa::Error> for ApiError {
         ApiError::Internal(format!("RSA error: {}", err))
     }
 }
+
+impl From<alith::ToolError> for ApiError {
+    fn from(err: alith::ToolError) -> Self {
+        ApiError::Internal(format!("Tool error: {}", err))
+    }
+}
+
+impl From<ApiError> for alith::ToolError {
+    fn from(err: ApiError) -> Self {
+        alith::ToolError::Unknown(format!("API error: {}", err))
+    }
+}

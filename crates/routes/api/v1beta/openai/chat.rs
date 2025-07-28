@@ -3,13 +3,15 @@ use crate::lib::state::AppState;
 use crate::lib::{contracts, error::ApiError, models};
 use actix_web::{HttpResponse, Responder, get, web};
 use alith::data::crypto::decrypt;
-use alith::{Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge};
+use alith::{Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge, StructureTool, ToolError};
 use chrono;
-use serde::Deserialize;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::io::Cursor;
 use url::Url;
 use uuid;
+use async_trait::async_trait;
 
 #[derive(Deserialize)]
 pub struct GetChatCompletionsBody {
@@ -180,12 +182,12 @@ async fn get_completions_handler(
     })))
 }
 
-#[derive(JsonSchema, Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct RpcToolInput {
     pub url: String,
     pub method: String,                 // GET, POST, etc.
     pub param_position: Option<String>, // "query" or "body"
-    pub params: Option<Value>,          // dynamic JSON input
+    pub params: Option<serde_json::Value>,          // dynamic JSON input
 }
 
 pub struct RpcTool;
@@ -193,7 +195,7 @@ pub struct RpcTool;
 #[async_trait]
 impl StructureTool for RpcTool {
     type Input = RpcToolInput;
-    type Output = Value;
+    type Output = serde_json::Value;
 
     fn name(&self) -> &str {
         "rpc"
@@ -203,8 +205,8 @@ impl StructureTool for RpcTool {
         "Send an HTTP request to a remote URL using GET/POST and return the response JSON"
     }
 
-    async fn run_with_args(&self, input: Self::Input) -> Result<Self::Output, ToolError> {
-        let client = Client::new();
+    async fn run_with_args<'a>(&'a self, input: Self::Input) -> Result<Self::Output, ToolError> {
+        let client = reqwest::Client::new();
 
         let method = input.method.to_uppercase();
         let param_pos = input.param_position.unwrap_or_else(|| "body".to_string());
@@ -225,14 +227,14 @@ impl StructureTool for RpcTool {
                     client.post(&input.url).json(&params).send().await
                 }
             }
-            _ => return Err(ToolError::custom("Unsupported HTTP method")),
+            _ => return Err(ToolError::Unknown("Unsupported HTTP method".to_string())),
         };
 
-        let res = response.map_err(|e| ToolError::custom(format!("HTTP error: {e}")))?;
+        let res = response.map_err(|e| ToolError::Unknown(format!("HTTP error: {e}")))?;
         let json = res
-            .json::<Value>()
+            .json::<serde_json::Value>()
             .await
-            .map_err(|e| ToolError::custom(format!("Invalid JSON: {e}")))?;
+            .map_err(|e| ToolError::Unknown(format!("Invalid JSON: {e}")))?;
 
         Ok(json)
     }
