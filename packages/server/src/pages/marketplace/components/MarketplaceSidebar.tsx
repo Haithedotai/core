@@ -78,7 +78,7 @@ export default function MarketplaceSidebar() {
             Knowledge
           </p>
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="knowledge-text"
                 checked={isCategoryActive('knowledge:text')}
@@ -91,7 +91,7 @@ export default function MarketplaceSidebar() {
                 Text Knowledge
               </label>
             </div>
-            <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="knowledge-html"
                 checked={isCategoryActive('knowledge:html')}
@@ -104,7 +104,7 @@ export default function MarketplaceSidebar() {
                 HTML Knowledge
               </label>
             </div>
-            <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="knowledge-pdf"
                 checked={isCategoryActive('knowledge:pdf')}
@@ -117,7 +117,7 @@ export default function MarketplaceSidebar() {
                 PDF Knowledge
               </label>
             </div>
-            <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="knowledge-csv"
                 checked={isCategoryActive('knowledge:csv')}
@@ -130,7 +130,7 @@ export default function MarketplaceSidebar() {
                 CSV Knowledge
               </label>
             </div>
-            <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="knowledge-url"
                 checked={isCategoryActive('knowledge:url')}
@@ -154,7 +154,7 @@ export default function MarketplaceSidebar() {
             Tools & Prompts
           </p>
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
+            <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="promptset"
                 checked={isCategoryActive('promptset')}
@@ -188,17 +188,13 @@ export default function MarketplaceSidebar() {
         {/* My Marketplace */}
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
-            My Account
+            Navigation
           </p>
-          <Button variant="ghost" className="w-full justify-start h-10">
-            <Heart className="size-4 mr-3" />
-            Wishlist
-            <Badge variant="secondary" className="ml-auto text-xs">3</Badge>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start h-10">
-            <ShoppingCart className="size-4 mr-3" />
-            Cart
-            <Badge variant="secondary" className="ml-auto text-xs">12</Badge>
+          <Button variant="ghost" className="w-full justify-start h-10" asChild>
+            <Link to="/dashboard">
+              <Icon name="LayoutDashboard" className="size-4 mr-2" />
+              Dashboard
+            </Link>
           </Button>
         </div>
       </div>
