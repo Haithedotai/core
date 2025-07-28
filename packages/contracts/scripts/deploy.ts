@@ -6,6 +6,7 @@ import tusdt from "../artifacts/src/tUSDT.sol/tusdt.json";
 import HaitheOrchestrator from "../artifacts/src/HaitheOrchestrator.sol/HaitheOrchestrator.json";
 import HaitheOrganization from "../artifacts/src/HaitheOrganization.sol/HaitheOrganization.json";
 import HaitheCreatorIdentity from "../artifacts/src/HaitheCreatorIdentity.sol/HaitheCreatorIdentity.json";
+import HaitheProduct from "../artifacts/src/HaitheProduct.sol/HaitheProduct.json"; // Assuming this is the correct import path
 
 const hyperion: viem.Chain = {
   id: 133717,
@@ -121,6 +122,9 @@ async function main() {
   definitions["HaitheCreatorIdentity"] = {
     abi: HaitheCreatorIdentity.abi,
     address: creatorIdentityAddress,
+  };
+  definitions["HaitheProduct"] = {
+    abi: HaitheProduct.abi,
   };
 }
 

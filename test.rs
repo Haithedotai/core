@@ -1,3 +1,4 @@
+use alith::data::crypto::decrypt;
 use ethers::abi::Abi;
 use ethers::prelude::*;
 use ethers::providers::{Http, Provider};
@@ -12,24 +13,17 @@ struct ContractInfo {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Load ABI and address from JSON
-    let file_content = fs::read_to_string("contract.json")?;
-    let contract_info: ContractInfo = serde_json::from_str(&file_content)?;
+    dotenvy::dotenv().ok();
 
-    // Setup Ethereum mainnet provider
-    let provider = Provider::<Http>::try_from("https://eth.rpc.blxrbdn.com")?;
-    let provider = Arc::new(provider);
+    let uri = "https://ipfs.io/ipfs/bafkreigod2i2gv6xnceyoidacxjsl2nqpq4ik5lq6cd73iu6hugcuq3j6m";
+    let response = reqwest::get(uri).await?;
+    let encrypted_data = response.bytes().await?;
+    let encrypted_bytes: Vec<u8> = encrypted_data.to_vec();
 
-    // Parse address and ABI
-    let address: Address = contract_info.address.parse()?;
-    let abi: Abi = serde_json::from_str(&contract_info.abi)?;
+    let decrypted_data = decrypt(&encrypted_bytes, std::env::var("TEE_SECRET")?)?;
 
-    // Create dynamic contract instance
-    let contract = Contract::new(address, abi, provider.clone());
-
-    // Example call to name() function
-    let name: String = contract.method::<_, String>("name", ())?.call().await?;
-    println!("Contract name(): {}", name);
+    let decrypted_string = String::from_utf8(decrypted_data)?;
+    println!("Decrypted data: {}", decrypted_string);
 
     Ok(())
 }

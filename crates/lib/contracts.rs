@@ -20,6 +20,7 @@ struct Contracts {
     HaitheOrchestrator: ContractInfo,
     tUSDT: ContractInfo,
     HaitheOrganization: ContractInfo,
+    HaitheProduct: ContractInfo,
 }
 
 impl Contracts {
@@ -28,6 +29,7 @@ impl Contracts {
             "HaitheOrchestrator" => Some(&self.HaitheOrchestrator),
             "tUSDT" => Some(&self.tUSDT),
             "HaitheOrganization" => Some(&self.HaitheOrganization),
+            "HaitheProduct" => Some(&self.HaitheProduct),
             _ => None,
         }
     }

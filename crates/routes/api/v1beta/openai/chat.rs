@@ -180,6 +180,64 @@ async fn get_completions_handler(
     })))
 }
 
+#[derive(JsonSchema, Serialize, Deserialize, Debug)]
+pub struct RpcToolInput {
+    pub url: String,
+    pub method: String,                 // GET, POST, etc.
+    pub param_position: Option<String>, // "query" or "body"
+    pub params: Option<Value>,          // dynamic JSON input
+}
+
+pub struct RpcTool;
+
+#[async_trait]
+impl StructureTool for RpcTool {
+    type Input = RpcToolInput;
+    type Output = Value;
+
+    fn name(&self) -> &str {
+        "rpc"
+    }
+
+    fn description(&self) -> &str {
+        "Send an HTTP request to a remote URL using GET/POST and return the response JSON"
+    }
+
+    async fn run_with_args(&self, input: Self::Input) -> Result<Self::Output, ToolError> {
+        let client = Client::new();
+
+        let method = input.method.to_uppercase();
+        let param_pos = input.param_position.unwrap_or_else(|| "body".to_string());
+        let params = input.params.unwrap_or(json!({}));
+
+        let response = match method.as_str() {
+            "GET" => {
+                if param_pos == "query" {
+                    client.get(&input.url).query(&params).send().await
+                } else {
+                    client.get(&input.url).send().await
+                }
+            }
+            "POST" => {
+                if param_pos == "query" {
+                    client.post(&input.url).query(&params).send().await
+                } else {
+                    client.post(&input.url).json(&params).send().await
+                }
+            }
+            _ => return Err(ToolError::custom("Unsupported HTTP method")),
+        };
+
+        let res = response.map_err(|e| ToolError::custom(format!("HTTP error: {e}")))?;
+        let json = res
+            .json::<Value>()
+            .await
+            .map_err(|e| ToolError::custom(format!("Invalid JSON: {e}")))?;
+
+        Ok(json)
+    }
+}
+
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(get_completions_handler);
 }
