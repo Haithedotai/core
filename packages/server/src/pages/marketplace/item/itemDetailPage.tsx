@@ -31,8 +31,6 @@ export default function ItemDetailPage() {
     }
   };
 
-  console.log({ item })
-
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'knowledge:text':

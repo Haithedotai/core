@@ -149,7 +149,7 @@ export default function MobileNav() {
           >
             <Link to="/marketplace">
               <Icon name="Store" className="size-4 mr-3" />
-              Browse
+              Browse Marketplace
             </Link>
           </Button>
           <Button 

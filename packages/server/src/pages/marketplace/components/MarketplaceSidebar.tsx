@@ -64,10 +64,6 @@ export default function MarketplaceSidebar() {
             <Icon name="TrendingUp" className="size-4 mr-3" />
             Trending Now
           </Button>
-          <Button variant="ghost" className="w-full justify-start h-10">
-            <Clock className="size-4 mr-3" />
-            New Releases
-          </Button>
         </div>
 
         <Separator />

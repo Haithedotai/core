@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { parseEther } from "viem";
 import { useNavigate } from "@tanstack/react-router";
 import { useApi } from "@/src/lib/hooks/use-api";
+import { useWalletClient } from "wagmi";
 
 // Define the category types
 const CATEGORIES = [
@@ -53,6 +54,8 @@ export default function CreatePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { uploadFile } = useApi();
     const navigate = useNavigate();
+    const { data: walletClient } = useWalletClient();
+    const address = walletClient?.account.address;
 
     // Form state
     const [name, setName] = useState("");
@@ -266,7 +269,7 @@ export default function CreatePage() {
                 parameters: {}
             });
 
-            navigate({ to: "/marketplace/profile/$id", params: { id: "1" } });
+            navigate({ to: "/marketplace/profile/$id", params: { id: address } });
 
         } catch (error) {
             console.error("Error creating item:", error);
