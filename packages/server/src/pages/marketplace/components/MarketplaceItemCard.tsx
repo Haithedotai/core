@@ -87,7 +87,7 @@ export default function MarketplaceItemCard({
   const Icon = getCategoryIcon(item.category);
   const categoryLabel = getCategoryLabel(item.category);
   const categoryEmoji = getCategoryEmoji(item.category);
-  const priceInEth = item.price_per_call / 1e15; // Convert from wei to ETH
+  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USD 18 decimals
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -145,7 +145,7 @@ export default function MarketplaceItemCard({
           </Badge>
           <div className="text-right">
             <div className="text-lg font-bold text-primary">
-              {priceInEth.toFixed(6)} ETH
+              {priceInEth.toFixed(6)} USD
             </div>
             <div className="text-xs text-muted-foreground">
               ≈ ${(priceInEth * 3000).toFixed(2)} USD
@@ -160,7 +160,7 @@ export default function MarketplaceItemCard({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Price per call:</span>
-              <span className="font-medium">{priceInEth.toFixed(6)} ETH</span>
+              <span className="font-medium">{priceInEth.toFixed(6)} USD</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Category:</span>

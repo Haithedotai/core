@@ -107,7 +107,7 @@ export default function MarketplacePage() {
       </div>
 
       {/* Main content area with responsive padding */}
-      <div className="flex-1 mt-52 overflow-y-auto pt-6 pb-12">
+      <div className="flex-1 mt-52 overflow-y-auto pt-8 pb-12">
         <div className="mx-auto px-8 w-full @container">
 
           {/* Items Grid/List - responsive columns */}

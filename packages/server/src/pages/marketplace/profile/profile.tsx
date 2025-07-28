@@ -8,6 +8,8 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import { truncateText } from "@/src/lib/utils";
+import { useWalletClient } from "wagmi";
+import Icon from "@/src/lib/components/custom/Icon";
 
 export default function ProfilePage() {
     // Mock data for AI marketplace creator - replace with actual data from your backend
@@ -19,8 +21,8 @@ export default function ProfilePage() {
     const { id } = useParams({ from: "/marketplace/profile/$id" });
     const { data: creatorData, isFetching: isCreatorFetching } = useHaitheApi().getCreatorByAddress(id);
     const { data: creatorProducts, isFetching: isProductsFetching } = useHaitheApi().getCreatorProducts(id);
-
-    console.log({ creatorData, creatorProducts })
+    const { data: walletClient } = useWalletClient();
+    const AmITheCreator = walletClient?.account.address?.toLowerCase() === id?.toLowerCase();
 
     const navigate = useNavigate();
 
@@ -42,20 +44,22 @@ export default function ProfilePage() {
         <div className="min-h-full bg-background p-8">
             <div className="space-y-8">
                 {/* Header Section */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground">Developer Profile</h1>
-                        <p className="text-muted-foreground mt-1">Manage your AI marketplace presence</p>
+                {AmITheCreator && (
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground">Welcome, {creatorData?.name}</h1>
+                            <p className="text-muted-foreground mt-1">Manage your AI marketplace presence</p>
+                        </div>
+                        <Button
+                            onClick={handleCreateNewItem}
+                            variant="primary"
+                            size="lg"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create New Item
+                        </Button>
                     </div>
-                    <Button
-                        onClick={handleCreateNewItem}
-                        variant="primary"
-                        size="lg"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Create New Item
-                    </Button>
-                </div>
+                )}
 
                 {/* Profile Card */}
                 <Card>
@@ -68,11 +72,14 @@ export default function ProfilePage() {
                                 </AvatarFallback>
                             </Avatar>
                             {!isCreatorFetching ? (
-                                <div className="flex-1 mt-4">
-                                    <CardTitle className="text-2xl font-bold text-foreground mb-1">{creatorData?.name}</CardTitle>
-                                    <p className="text-muted-foreground leading-relaxed max-w-2xl">
-                                        {truncateText(creatorData?.description || "", 100)}
-                                    </p>
+                                <div className="flex w-full justify-between">
+                                    <div className="flex-1 mt-4">
+                                        <CardTitle className="text-2xl font-bold text-foreground mb-1">{creatorData?.name}</CardTitle>
+                                        <p className="text-muted-foreground leading-relaxed max-w-2xl">
+                                            {truncateText(creatorData?.description || "No description provided", 100)}
+                                        </p>
+
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="flex-1 mt-6">

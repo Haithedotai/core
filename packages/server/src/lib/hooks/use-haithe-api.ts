@@ -278,7 +278,9 @@ export function useHaitheApi() {
             mutationKey: ['enableProduct'],
             mutationFn: ({ product_address, org_address }: { product_address: string; org_address: string }) => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.enableProduct(product_address as `0x${string}`, org_address as `0x${string}`);
+                const productAddress = product_address.toLowerCase();
+                const orgAddress = org_address.toLowerCase();
+                return client.enableProduct(productAddress as `0x${string}`, orgAddress as `0x${string}`);
             },
             onSuccess: () => {
                 toast.success('Product enabled successfully');

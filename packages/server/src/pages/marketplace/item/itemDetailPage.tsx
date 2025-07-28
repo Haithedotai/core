@@ -1,45 +1,24 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Heart, ExternalLink, Clock, Tag, Copy, CheckCircle, Wallet, Hash, User } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Copy, CheckCircle } from 'lucide-react';
 import { Button } from '../../../lib/components/ui/button';
 import { Badge } from '../../../lib/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../lib/components/ui/card';
-import { Separator } from '../../../lib/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../lib/components/ui/card';
 import { Skeleton } from '../../../lib/components/ui/skeleton';
 import MarketplaceLayout from '../components/MarketplaceLayout';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 import { toast } from 'sonner';
+import { useStore } from '@/src/lib/hooks/use-store';
 
 export default function ItemDetailPage() {
   const { id } = useParams({ from: '/marketplace/item/$id' });
   const navigate = useNavigate();
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const haithe = useHaitheApi();
   const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
-
-  const handleFavorite = (itemId: number) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      const itemIdStr = itemId.toString();
-      if (newFavorites.has(itemIdStr)) {
-        newFavorites.delete(itemIdStr);
-      } else {
-        newFavorites.add(itemIdStr);
-      }
-      return newFavorites;
-    });
-  };
-
-  const handlePurchase = (item: {
-    price_per_call: number;
-    name: string;
-  }) => {
-    // Mock purchase handler - replace with actual payment flow
-    console.log('Purchasing item:', item);
-    const priceInEth = item.price_per_call / 1e15; // Convert from wei to ETH
-    alert(`Would purchase ${item.name} for ${priceInEth} ETH`);
-  };
+  const { selectedOrganizationId } = useStore();
+  const { data: organization } = haithe.getOrganization(selectedOrganizationId);
+  const enableProduct = haithe.enableProduct;
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -51,6 +30,8 @@ export default function ItemDetailPage() {
       toast.error('Failed to copy to clipboard');
     }
   };
+
+  console.log({ item })
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -142,15 +123,14 @@ export default function ItemDetailPage() {
     );
   }
 
-  const priceInEth = item.price_per_call / 1e15; // Convert from wei to ETH
-  const isFavorited = favorites.has(item.id.toString());
+  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USD 18 decimals
   const categoryIcon = getCategoryIcon(item.category);
   const categoryLabel = getCategoryLabel(item.category);
 
   return (
     <MarketplaceLayout>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-8 py-8">
+      <div className="min-h-full bg-background">
+        <div className="mx-auto p-8">
           {/* Back button */}
           <div className="mb-8">
             <Button
@@ -163,9 +143,9 @@ export default function ItemDetailPage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 w-full @5xl:grid-cols-2 gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="space-y-8">
               {/* Header */}
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
@@ -178,10 +158,6 @@ export default function ItemDetailPage() {
                       <Badge variant="outline" className="text-sm px-3 py-1">
                         {categoryLabel}
                       </Badge>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Hash className="size-4" />
-                        #{item.id}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -203,10 +179,7 @@ export default function ItemDetailPage() {
 
               {/* Product Information */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Product Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 mt-6">
                   <div>
                     <h3 className="text-xl font-semibold mb-4">Description</h3>
                     <div className="prose prose-sm max-w-none text-muted-foreground">
@@ -220,98 +193,31 @@ export default function ItemDetailPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4">Technical Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Hash className="size-4" />
-                            Product ID
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <code className="text-sm font-mono">{item.id}</code>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(item.id.toString(), 'Product ID')}
-                            >
-                              {copiedField === 'Product ID' ? (
-                                <CheckCircle className="size-4 text-green-500" />
-                              ) : (
-                                <Copy className="size-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Tag className="size-4" />
-                            Category
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Badge variant="outline">{item.category}</Badge>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 mt-4">
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Wallet className="size-4" />
-                            Creator Address
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <code className="text-sm font-mono">{item.creator}</code>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(item.creator, 'Creator Address')}
-                            >
-                              {copiedField === 'Creator Address' ? (
-                                <CheckCircle className="size-4 text-green-500" />
-                              ) : (
-                                <Copy className="size-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <ExternalLink className="size-4" />
-                            Product Address
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <code className="text-sm font-mono">{item.address}</code>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(item.address, 'Product Address')}
-                            >
-                              {copiedField === 'Product Address' ? (
-                                <CheckCircle className="size-4 text-green-500" />
-                              ) : (
-                                <Copy className="size-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
+                  <div className="grid grid-cols-1 gap-4 mt-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <ExternalLink className="size-4" />
+                          Product Address
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <code className="text-sm font-mono">{item.address}</code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(item.address, 'Product Address')}
+                          >
+                            {copiedField === 'Product Address' ? (
+                              <CheckCircle className="size-4 text-green-500" />
+                            ) : (
+                              <Copy className="size-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </CardContent>
               </Card>
@@ -320,39 +226,40 @@ export default function ItemDetailPage() {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Price Card */}
-              <Card className="sticky top-8">
+              <Card className="lg:mt-28">
                 <CardHeader>
-                  <CardTitle className="text-center">Purchase</CardTitle>
+                  <CardTitle className="text-center">Purchase Tool</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-primary mb-2">
-                      {priceInEth.toFixed(6)} ETH
+                      {priceInEth.toFixed(6)} USD <span className="text-sm text-muted-foreground">per call</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">per call</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ≈ ${(priceInEth * 3000).toFixed(2)} USD
-                    </p>
+
                   </div>
 
-                  <Separator />
-
                   <div className="space-y-3">
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => handlePurchase(item)}
-                    >
-                      Purchase Now
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
+                    <Button
                       className="w-full"
-                      onClick={() => handleFavorite(item.id)}
+                      size="lg"
+                      onClick={async () => {
+                        try {
+                          if (!organization) {
+                            toast.error('No organization selected');
+                            return;
+                          }
+  
+                          await enableProduct.mutateAsync({
+                            product_address: item.address,
+                            org_address: organization.address
+                          })
+                        } catch (error) {
+                          toast.error('Failed to add product to organization');
+                          console.error(error);
+                        }
+                      }}
                     >
-                      <Heart className={`size-4 mr-2 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
-                      {isFavorited ? 'Favorited' : 'Add to Favorites'}
+                      {enableProduct.isPending ? 'Adding...' : 'Add to current organization'}
                     </Button>
                   </div>
                 </CardContent>
@@ -364,7 +271,7 @@ export default function ItemDetailPage() {
                   <CardTitle className="text-sm">Creator</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-2 mb-4">
                     <div className="size-12 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center border">
                       <span className="text-sm font-mono font-semibold">
                         {item.creator.slice(2, 4).toUpperCase()}
@@ -376,31 +283,25 @@ export default function ItemDetailPage() {
                       </p>
                       <p className="text-xs text-muted-foreground">Creator</p>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => navigate({ to: `/profile/${item.creator}` })}
-                    >
-                      <User className="size-4 mr-2" />
-                      Visit Creator
-                    </Button>
-                    
+
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full"
                       onClick={() => copyToClipboard(item.creator, 'Creator Address')}
                     >
                       {copiedField === 'Creator Address' ? (
-                        <CheckCircle className="size-4 mr-2 text-green-500" />
+                        <CheckCircle className="size-4 text-green-500" />
                       ) : (
-                        <Copy className="size-4 mr-2" />
+                        <Copy className="size-4" />
                       )}
-                      Copy Address
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate({ to: `/marketplace/profile/${item.creator}` })}
+                    >
+                      <ExternalLink className="size-4" />
                     </Button>
                   </div>
                 </CardContent>
@@ -414,16 +315,23 @@ export default function ItemDetailPage() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Created</span>
+                      <span className="text-sm text-muted-foreground">Product ID</span>
+                      <span className="text-sm font-medium">{item.id}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Created at</span>
                       <span className="text-sm font-medium">
                         {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
+
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Price</span>
-                      <span className="text-sm font-medium">{priceInEth.toFixed(6)} ETH</span>
+                      <span className="text-sm text-muted-foreground">Category</span>
+                      <span className="text-sm font-medium">{categoryLabel}</span>
                     </div>
                   </div>
+
                 </CardContent>
               </Card>
             </div>

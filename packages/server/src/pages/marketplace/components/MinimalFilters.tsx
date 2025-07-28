@@ -60,7 +60,7 @@ export default function MinimalFilters({
 
   return (
     <div className="border-b px-8 bg-background/95 backdrop-blur-sm @container">
-      <div className="flex items-center justify-between my-4">
+      <div className="flex items-center justify-between my-6">
         <div>
           <h1 className="text-xl @xl:text-2xl font-bold">Browse Assets</h1>
           <p className="text-sm text-muted-foreground">
