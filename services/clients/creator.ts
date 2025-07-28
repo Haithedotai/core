@@ -76,6 +76,7 @@ export class HaitheCreatorClient extends BaseClient {
       `/v1/creator/${walletAddress}`,
       null
     );
+
     return response.creator;
   }
 

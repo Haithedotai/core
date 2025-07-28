@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { MarketplaceFilters } from '../../pages/marketplace/types'
+
+interface MarketplaceFilters {
+  category?: string[];
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  sortBy?: 'recent' | 'price_low' | 'price_high';
+}
 
 type Store = {
   selectedOrganizationId: number

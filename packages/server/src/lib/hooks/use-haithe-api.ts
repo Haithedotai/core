@@ -24,7 +24,7 @@ export function useHaitheApi() {
         getAuthToken,
         isWeb3Ready,
         isClientInitialized,
-        
+
         // Direct client access (for testing)
         client,
 
@@ -37,17 +37,17 @@ export function useHaitheApi() {
             },
             onSuccess: async () => {
                 toast.success('Logged in successfully');
-                
+
                 // Invalidate queries to refresh data
                 queryClient.invalidateQueries({ queryKey: ['profile'] });
                 queryClient.invalidateQueries({ queryKey: ['organizations'] });
-                
+
                 // Wait a bit for queries to update, then check organizations
                 setTimeout(async () => {
                     try {
                         // Check if user has any organizations
                         const organizations = await client?.getUserOrganizations();
-                        
+
                         if (!organizations || organizations.length === 0) {
                             // New user - redirect to onboarding
                             navigate({ to: '/onboarding' });
@@ -479,11 +479,26 @@ export function useHaitheApi() {
             enabled: isLoggedIn() && !!client,
         }),
 
-        getCreator: (id: string) => useQuery({
+        getCreatorByAddress: (id: string) => useQuery({
             queryKey: ['creator', id],
+            queryFn: async () => {
+                if (!client) throw new Error("Wallet not connected");
+                const res = await client.getCreatorByAddress(id);
+                const ipfsData = await fetch(res.uri);
+                const data = await ipfsData.json();
+                return {
+                    ...res,
+                    ...data,
+                };
+            },
+            enabled: isLoggedIn() && !!client && !!id,
+        }),
+
+        getCreatorProducts: (id: string) => useQuery({
+            queryKey: ['creatorProducts', id],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.getCreator(id);
+                return client.getCreatorProducts(id);
             },
             enabled: isLoggedIn() && !!client && !!id,
         }),
@@ -497,7 +512,7 @@ export function useHaitheApi() {
             enabled: isLoggedIn() && !!client,
         }),
 
-            getProductById: (id: number) => useQuery({
+        getProductById: (id: number) => useQuery({
             queryKey: ['product', id],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");

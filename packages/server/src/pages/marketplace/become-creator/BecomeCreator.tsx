@@ -66,7 +66,7 @@ function CreatorFormStep({ name, setName, desc, setDesc, photo, setPhoto, onNext
 }
 
 // Step 2: Review & Submit
-function ReviewStep({ name, desc, photo, onBack, onSubmit }: { name: string; desc: string; photo: File | null; onBack: () => void; onSubmit: () => void }) {
+function ReviewStep({ name, desc, photo, onBack, onSubmit, isSubmitting }: { name: string; desc: string; photo: File | null; onBack: () => void; onSubmit: () => void; isSubmitting: boolean }) {
     const [preview, setPreview] = useState<string | null>(null);
     // Show preview if photo is present
     React.useEffect(() => {
@@ -100,7 +100,7 @@ function ReviewStep({ name, desc, photo, onBack, onSubmit }: { name: string; des
             </CardContent>
             <CardFooter className="justify-between">
                 <Button variant="outline" onClick={onBack}>Back</Button>
-                <Button onClick={onSubmit}>Submit</Button>
+                <Button onClick={onSubmit} disabled={isSubmitting}>{isSubmitting ? <Loader /> : "Submit"}</Button>
             </CardFooter>
         </Card>
     );
@@ -147,9 +147,11 @@ export default function BecomeCreatorPage() {
     const { uploadFile } = useApi();
     const { becomeCreator, isCreator } = useHaitheApi();
     const { data: isCreatorData, isFetching: isCreatorLoading } = isCreator();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleSubmit() {
         try {
+            setIsSubmitting(true);
             if (isCreatorData) {
                 toast.error('You are already a creator');
                 return;
@@ -185,6 +187,8 @@ export default function BecomeCreatorPage() {
         } catch (error) {
             console.error(error);
             toast.error('Failed to submit creator profile');
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -216,6 +220,7 @@ export default function BecomeCreatorPage() {
                     photo={photo}
                     onBack={() => setStep(0)}
                     onSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
                 />
             )}
             {isSuccess && (
