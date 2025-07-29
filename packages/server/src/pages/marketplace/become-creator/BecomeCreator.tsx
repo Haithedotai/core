@@ -100,7 +100,7 @@ function ReviewStep({ name, desc, photo, onBack, onSubmit, isSubmitting }: { nam
             </CardContent>
             <CardFooter className="justify-between">
                 <Button variant="outline" onClick={onBack}>Back</Button>
-                <Button onClick={onSubmit} disabled={isSubmitting}>{isSubmitting ? <Loader /> : "Submit"}</Button>
+                <Button onClick={onSubmit} disabled={isSubmitting}>{isSubmitting ? <Icon name="LoaderCircle" className="animate-spin" /> : "Submit"}</Button>
             </CardFooter>
         </Card>
     );
