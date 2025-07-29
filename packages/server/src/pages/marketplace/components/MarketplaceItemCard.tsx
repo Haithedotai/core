@@ -101,10 +101,7 @@ export default function MarketplaceItemCard({
   };
 
   return (
-    <Card className="group relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border bg-card/50 backdrop-blur-sm" onClick={() => onItemClick(item)}>
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-secondary/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
+    <Card className="group relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-100 cursor-pointer border bg-card/50 backdrop-blur-sm" onClick={() => onItemClick(item)}>
       <CardHeader className="relative pb-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -145,10 +142,7 @@ export default function MarketplaceItemCard({
           </Badge>
           <div className="text-right">
             <div className="text-lg font-bold text-primary">
-              {priceInEth.toFixed(6)} USD
-            </div>
-            <div className="text-xs text-muted-foreground">
-              ≈ ${(priceInEth * 3000).toFixed(2)} USD
+              {priceInEth} USDT
             </div>
           </div>
         </div>
@@ -156,11 +150,11 @@ export default function MarketplaceItemCard({
         <Separator />
         
         {/* Product Info Grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-5">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Price per call:</span>
-              <span className="font-medium">{priceInEth.toFixed(6)} USD</span>
+              <span className="font-medium">{priceInEth} USDT</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Category:</span>
@@ -176,7 +170,7 @@ export default function MarketplaceItemCard({
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Product ID:</span>
-              <span className="font-medium font-mono">#{item.id}</span>
+              <span className="font-medium font-mono">{item.id}</span>
             </div>
           </div>
         </div>

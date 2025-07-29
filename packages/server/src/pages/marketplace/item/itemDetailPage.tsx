@@ -9,27 +9,22 @@ import MarketplaceLayout from '../components/MarketplaceLayout';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 import { toast } from 'sonner';
 import { useStore } from '@/src/lib/hooks/use-store';
+import { truncateAddress } from '@/src/lib/utils';
+import { copyToClipboard } from '@/utils';
+import Icon from '@/src/lib/components/custom/Icon';
 
 export default function ItemDetailPage() {
-  const { id } = useParams({ from: '/marketplace/item/$id' });
-  const navigate = useNavigate();
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const haithe = useHaitheApi();
-  const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
+  const navigate = useNavigate();
+  const { id } = useParams({ from: '/marketplace/item/$id' });
   const { selectedOrganizationId } = useStore();
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
   const { data: organization } = haithe.getOrganization(selectedOrganizationId);
+  const { data: enabledProductAddresses, isLoading: isLoadingEnabledProducts, refetch: refetchEnabledProducts } = haithe.getEnabledProducts(organization?.address || "");
+  const isProductAlreadyEnabled = enabledProductAddresses?.some((address) => address.toLowerCase() === item?.address.toLowerCase());
   const enableProduct = haithe.enableProduct;
-
-  const copyToClipboard = async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedField(field);
-      toast.success(`${field} copied to clipboard`);
-      setTimeout(() => setCopiedField(null), 2000);
-    } catch (err) {
-      toast.error('Failed to copy to clipboard');
-    }
-  };
+  const disableProduct = haithe.disableProduct;
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -73,11 +68,11 @@ export default function ItemDetailPage() {
     }
   };
 
-  if (isLoadingItem) {
+  if (isLoadingItem || !haithe.isClientInitialized()) {
     return (
       <MarketplaceLayout>
         <div className="min-h-screen bg-background">
-          <div className="container mx-auto px-4 py-8">
+          <div className="container mx-auto p-8">
             <div className="mb-6">
               <Skeleton className="h-8 w-32" />
             </div>
@@ -201,11 +196,11 @@ export default function ItemDetailPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center justify-between">
-                          <code className="text-sm font-mono">{item.address}</code>
+                          <code className="text-sm font-mono">{truncateAddress(item.address)}</code>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyToClipboard(item.address, 'Product Address')}
+                            onClick={() => copyToClipboard(item.address, 'Product Address', setCopiedField)}
                           >
                             {copiedField === 'Product Address' ? (
                               <CheckCircle className="size-4 text-green-500" />
@@ -226,7 +221,7 @@ export default function ItemDetailPage() {
               {/* Price Card */}
               <Card className="lg:mt-28">
                 <CardHeader>
-                  <CardTitle className="text-center">Purchase Tool</CardTitle>
+                  <CardTitle className="text-center">Pricing</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center">
@@ -240,24 +235,37 @@ export default function ItemDetailPage() {
                     <Button
                       className="w-full"
                       size="lg"
+                      disabled={isLoadingEnabledProducts}
                       onClick={async () => {
                         try {
                           if (!organization) {
                             toast.error('No organization selected');
                             return;
                           }
-  
+
+                          if (isProductAlreadyEnabled) {
+                            await disableProduct.mutateAsync({
+                              product_address: item.address,
+                              org_address: organization.address
+                            })
+
+                            refetchEnabledProducts();
+                            return;
+                          }
+
                           await enableProduct.mutateAsync({
                             product_address: item.address,
                             org_address: organization.address
                           })
+
+                          refetchEnabledProducts();
                         } catch (error) {
                           toast.error('Failed to add product to organization');
                           console.error(error);
                         }
                       }}
                     >
-                      {enableProduct.isPending ? 'Adding...' : 'Add to current organization'}
+                      {isLoadingEnabledProducts ? <Icon name="LoaderCircle" className="size-4 animate-spin" /> : (enableProduct.isPending || disableProduct.isPending) ? <Icon name="LoaderCircle" className="size-4 animate-spin" /> : isProductAlreadyEnabled ? 'Disable' : 'Add to current organization'}
                     </Button>
                   </div>
                 </CardContent>
@@ -285,7 +293,7 @@ export default function ItemDetailPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyToClipboard(item.creator, 'Creator Address')}
+                      onClick={() => copyToClipboard(item.creator, 'Creator Address', setCopiedField)}
                     >
                       {copiedField === 'Creator Address' ? (
                         <CheckCircle className="size-4 text-green-500" />

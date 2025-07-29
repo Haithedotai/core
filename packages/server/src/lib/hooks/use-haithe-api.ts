@@ -494,7 +494,7 @@ export function useHaitheApi() {
                     ...data,
                 };
             },
-            enabled: isLoggedIn() && !!client && !!id,
+            enabled: !!client && !!id,
         }),
 
         getCreatorProducts: (id: string) => useQuery({
@@ -504,7 +504,7 @@ export function useHaitheApi() {
                 const idToLower = id.toLowerCase();
                 return client.getCreatorProducts(idToLower);
             },
-            enabled: isLoggedIn() && !!client && !!id,
+            enabled: !!client && !!id,
         }),
 
         getAllProducts: () => useQuery({
@@ -513,7 +513,7 @@ export function useHaitheApi() {
                 if (!client) throw new Error("Wallet not connected");
                 return client.getAllProducts();
             },
-            enabled: isLoggedIn() && !!client,
+            enabled: !!client,
         }),
 
         getProductById: (id: number) => useQuery({
@@ -522,7 +522,7 @@ export function useHaitheApi() {
                 if (!client) throw new Error("Wallet not connected");
                 return client.getProductById(id);
             },
-            enabled: isLoggedIn() && !!client && !!id,
+            enabled: !!client && !!id,
         }),
     };
 } 

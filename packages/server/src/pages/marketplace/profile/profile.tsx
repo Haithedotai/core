@@ -31,12 +31,10 @@ export default function ProfilePage() {
     };
 
     const handleItemClick = (item: Product) => {
-        // TODO: Navigate to item detail page
-        console.log("Navigate to item:", item.id);
+        navigate({ to: "/marketplace/item/$id", params: { id: item.id.toString() } });
     };
 
     const handleFavorite = (itemId: number) => {
-        // TODO: Handle favorite toggle
         console.log("Toggle favorite for item:", itemId);
     };
 
@@ -66,7 +64,7 @@ export default function ProfilePage() {
                     <CardHeader className="pb-6">
                         <div className="flex items-start space-x-6">
                             <Avatar className="w-24 h-24 border-4 border-background shadow-sm">
-                                <AvatarImage src={creatorData?.avatar} alt={creatorData?.name} />
+                                <AvatarImage src={creatorData?.image} alt={creatorData?.name} />
                                 <AvatarFallback className="text-2xl font-semibold bg-primary text-primary-foreground">
                                     {creatorData?.name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
                                 </AvatarFallback>
@@ -97,7 +95,7 @@ export default function ProfilePage() {
                         <CardTitle className="text-xl font-bold text-foreground">Recent AI Items</CardTitle>
                         <CardDescription>Your latest marketplace creations</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="@container">
                         {isProductsFetching ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[1, 2, 3].map((i) => (
@@ -109,7 +107,7 @@ export default function ProfilePage() {
                                 ))}
                             </div>
                         ) : creatorProducts && creatorProducts.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 @2xl:grid-cols-2 gap-6">
                                 {creatorProducts.map((item) => (
                                     <MarketplaceItemCard
                                         key={item.id}

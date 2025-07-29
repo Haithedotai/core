@@ -148,7 +148,7 @@ export function Navbar() {
                     </SheetClose>
                   )
                 ))}
-                <div className="flex gap-4 w-full max-w-xs mt-8 px-4">
+                <div className="flex items-center justify-center gap-4 w-full max-w-xs mt-8 px-4">
                   {ready && authenticated && isHaitheLoggedIn() && profileQuery.isSuccess &&
                     <Button asChild variant="outline" size="lg" className="rounded-sm">
                       <Link to="/dashboard">

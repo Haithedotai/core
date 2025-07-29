@@ -61,7 +61,6 @@ export default function CreatePage() {
     const [name, setName] = useState("");
     const [category, setCategory] = useState<CategoryType>("knowledge:text");
     const [pricePerCall, setPricePerCall] = useState("");
-    const [description, setDescription] = useState("");
 
     // Category-specific state
     const [textContent, setTextContent] = useState("");
@@ -170,7 +169,11 @@ export default function CreatePage() {
 
         try {
             let file: File;
-            let uploadData: any = {};
+            if(!address) {
+                toast.error("Please connect your wallet");
+                return;
+            }
+            
 
             switch (category) {
                 case "knowledge:text":
@@ -254,7 +257,6 @@ export default function CreatePage() {
             setName("");
             setCategory("knowledge:text");
             setPricePerCall("");
-            setDescription("");
             setTextContent("");
             setUrl("");
             setPrompts([""]);
@@ -673,17 +675,7 @@ export default function CreatePage() {
                             </Select>
                         </div>
 
-                        <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Describe your item..."
-                                rows={3}
-                                className="mt-2"
-                            />
-                        </div>
+
 
                         <div>
                             <Label htmlFor="price">Price per Call (in USDT)</Label>
