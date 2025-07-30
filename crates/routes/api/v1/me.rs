@@ -75,37 +75,32 @@ async fn disable_api_key_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    sqlx::query(
-        "UPDATE accounts SET api_key_last_issued_at = NULL WHERE wallet_address = ?"
-    ).bind(
-        &user.wallet_address
-
-    )
-    .execute(&state.db)
-    .await
-    .map_err(|_| ApiError::Internal("DB error".into()))?;
+    sqlx::query("UPDATE accounts SET api_key_last_issued_at = NULL WHERE wallet_address = ?")
+        .bind(&user.wallet_address)
+        .execute(&state.db)
+        .await
+        .map_err(|_| ApiError::Internal("DB error".into()))?;
 
     Ok(respond::ok("API key disabled", ()))
 }
-
 
 #[get("/api-key")]
 async fn get_api_key_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<u64> = sqlx::query_scalar(
-        "SELECT api_key_last_issued_at FROM accounts WHERE wallet_address = ?").
-        bind(&user.wallet_address)
-    .fetch_optional(&state.db)
-    .await?;
+    let api_key_last_issued_at: Option<u64> =
+        sqlx::query_scalar("SELECT api_key_last_issued_at FROM accounts WHERE wallet_address = ?")
+            .bind(&user.wallet_address)
+            .fetch_optional(&state.db)
+            .await?;
 
-    match  api_key_last_issued_at {
+    match api_key_last_issued_at {
         Some(ts) => {
             if ts > 0 {
                 return Err(ApiError::BadRequest("API key already issued".into()));
-            } 
-        },
+            }
+        }
         None => {}
     }
 
@@ -113,7 +108,10 @@ async fn get_api_key_handler(
         .map_err(|_| ApiError::Internal("TEE private key not configured".into()))?;
 
     let timestamp = chrono::Utc::now().timestamp();
-    let address = user.wallet_address.strip_prefix("0x").unwrap_or(&user.wallet_address);
+    let address = user
+        .wallet_address
+        .strip_prefix("0x")
+        .unwrap_or(&user.wallet_address);
     let nonce = Uuid::new_v4().to_string();
 
     let message = format!("{}.{}.{}", timestamp, address, nonce);
@@ -124,9 +122,9 @@ async fn get_api_key_handler(
     let api_key = format!("sk-{}.{}.{}", signature, nonce, address);
 
     sqlx::query(
-        "UPDATE accounts SET api_key_last_issued_at = CURRENT_TIMESTAMP WHERE wallet_address = ?").bind(
-            &user.wallet_address
-        )
+        "UPDATE accounts SET api_key_last_issued_at = CURRENT_TIMESTAMP WHERE wallet_address = ?",
+    )
+    .bind(&user.wallet_address)
     .execute(&state.db)
     .await?;
 
@@ -136,6 +134,25 @@ async fn get_api_key_handler(
             "api_key": api_key,
             "message": message,
             "issued_at": timestamp
+        }),
+    ))
+}
+
+#[get("/api-key/last")]
+async fn get_api_key_last_handler(
+    user: AuthUser,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let api_key_last_issued_at: Option<u64> =
+        sqlx::query_scalar("SELECT api_key_last_issued_at FROM accounts WHERE wallet_address = ?")
+            .bind(&user.wallet_address)
+            .fetch_optional(&state.db)
+            .await?;
+
+    Ok(respond::ok(
+        "Last API key issued at",
+        serde_json::json!({
+            "last_issued_at": api_key_last_issued_at
         }),
     ))
 }
