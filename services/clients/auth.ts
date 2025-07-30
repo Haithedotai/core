@@ -108,6 +108,13 @@ export class HaitheAuthClient extends BaseClient {
     return this.fetch("/v1/me", this.authToken);
   }
 
+  getApiStatus(): Promise<{
+    address: string;
+    registered: string;
+  }> {
+    return this.fetch("/v1/me", this.authToken);
+  }
+
   async generateApiKey(): Promise<{
     api_key: string;
     message: string;

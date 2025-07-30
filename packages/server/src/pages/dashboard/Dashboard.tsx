@@ -186,7 +186,7 @@ export default function DashboardPage() {
         <div className="absolute inset-0" />
         <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="space-y-3">
+            <div className="space-y-3 flex items-center justify-between w-full">
               <div className="flex items-center gap-4">
                 <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
                   <Icon name="LayoutDashboard" className="size-8 text-primary" />
@@ -200,6 +200,13 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
+
+              <Button variant="outline" asChild>
+                <Link to="/dashboard/generate-api-key">
+                  <Icon name="Key" className="size-4 mr-2" />
+                  Generate API Key
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
