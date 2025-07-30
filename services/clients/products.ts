@@ -25,4 +25,21 @@ export class HaitheProductsClient extends BaseClient {
     );
     return response.product;
   }
+
+  // Project product management
+  async enableProjectProduct(projectId: number, productId: number): Promise<void> {
+    return this.fetch(
+      `/v1/products/${productId}/enable?project_id=${projectId}`,
+      this.authClient.getAuthToken(),
+      { method: "POST" }
+    );
+  }
+
+  async disableProjectProduct(projectId: number, productId: number): Promise<void> {
+    return this.fetch(
+      `/v1/products/${productId}/disable?project_id=${projectId}`,
+      this.authClient.getAuthToken(),
+      { method: "DELETE" }
+    );
+  }
 }

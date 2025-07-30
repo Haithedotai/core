@@ -92,4 +92,12 @@ export class HaitheProjectsClient extends BaseClient {
       this.authClient.getAuthToken()
     );
   }
+
+  // Project product management
+  getProjectProducts(projectId: number): Promise<number[]> {
+    return this.fetch<{ product_ids: number[] }>(
+      `/v1/projects/${projectId}/products`,
+      this.authClient.getAuthToken()
+    ).then(response => response.product_ids);
+  }
 }

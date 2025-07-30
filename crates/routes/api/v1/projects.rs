@@ -153,7 +153,7 @@ async fn get_project_handler(
     let project_id = path.into_inner();
 
     let project = sqlx::query_as::<_, Project>(
-        "SELECT id, org_id, name, created_at FROM projects WHERE id = ?",
+        "SELECT * FROM projects WHERE id = ?",
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -177,7 +177,7 @@ async fn update_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "UPDATE projects SET name = ? WHERE id = ? RETURNING id, org_id, name, created_at",
+        "UPDATE projects SET name = ? WHERE id = ? RETURNING *",
     )
     .bind(&query.name)
     .bind(project_id)
@@ -201,7 +201,7 @@ async fn delete_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, name, created_at",
+        "DELETE FROM projects WHERE id = ? RETURNING *",
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -341,6 +341,30 @@ async fn remove_project_member_handler(
     Ok(respond::ok("Member removed from project", member))
 }
 
+#[get("/{id}/products")]
+async fn get_project_products_handler(
+    _: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = path.into_inner();
+
+    let product_ids = sqlx::query_scalar::<_, i64>(
+        "SELECT product_id FROM project_products_enabled WHERE project_id = ?"
+    )
+    .bind(project_id)
+    .fetch_all(&state.db)
+    .await
+    .map_err(|e| {
+        ApiError::Internal("Failed to fetch project products".into())
+    })?;
+
+    Ok(respond::ok(
+        "Project products fetched successfully",
+        serde_json::json!({ "product_ids": product_ids }),
+    ))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(create_project_handler)
         .service(get_project_handler)
@@ -349,5 +373,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(get_project_members_handler)
         .service(add_project_member_handler)
         .service(update_project_member_handler)
-        .service(remove_project_member_handler);
+        .service(remove_project_member_handler)
+        .service(get_project_products_handler);
 }

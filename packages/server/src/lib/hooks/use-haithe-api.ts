@@ -524,5 +524,47 @@ export function useHaitheApi() {
             },
             enabled: !!client && !!id,
         }),
+
+        // Project product management
+        enableProjectProduct: useMutation({
+            mutationKey: ['enableProjectProduct'],
+            mutationFn: ({ projectId, productId }: { projectId: number; productId: number }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.enableProjectProduct(projectId, productId);
+            },
+            onSuccess: (_, { projectId }) => {
+                toast.success('Product enabled for project successfully');
+                queryClient.invalidateQueries({ queryKey: ['projectProducts', projectId] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not enable product for project. Please try again.');
+            }
+        }),
+
+        disableProjectProduct: useMutation({
+            mutationKey: ['disableProjectProduct'],
+            mutationFn: ({ projectId, productId }: { projectId: number; productId: number }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.disableProjectProduct(projectId, productId);
+            },
+            onSuccess: (_, { projectId }) => {
+                toast.success('Product disabled for project successfully');
+                queryClient.invalidateQueries({ queryKey: ['projectProducts', projectId] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not disable product for project. Please try again.');
+            }
+        }),
+
+        getProjectProducts: (projectId: number) => useQuery({
+            queryKey: ['projectProducts', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProjectProducts(projectId);
+            },
+            enabled: !!client && !!projectId,
+        }),
     };
 } 

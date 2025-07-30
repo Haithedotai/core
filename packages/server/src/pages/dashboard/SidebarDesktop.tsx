@@ -100,7 +100,7 @@ export default function Sidebar() {
                     <Button variant={isActive("/marketplace") && pathname === "/marketplace" ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
                         <Link to="/marketplace">
                             <Icon name="Store" className="size-4 mr-3" />
-                            Browse Marketplace
+                            Marketplace
                         </Link>
                     </Button>
                     <Button variant={isActive("/dashboard/purchases") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
