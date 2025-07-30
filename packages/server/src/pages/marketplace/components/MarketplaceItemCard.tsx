@@ -6,6 +6,9 @@ import { Separator } from '../../../lib/components/ui/separator';
 import type { Product } from '../../../../../../services/shared/types';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import AddProductButton from '@/src/pages/marketplace/components/AddProductButton';
+import { useStore } from '@/src/lib/hooks/use-store';
+import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 
 interface MarketplaceItemCardProps {
   item: Product;
@@ -89,6 +92,10 @@ export default function MarketplaceItemCard({
   const categoryEmoji = getCategoryEmoji(item.category);
   const priceInEth = item.price_per_call / 1e18; // Convert from wei to USD 18 decimals
 
+  const haithe = useHaitheApi();
+  const { selectedOrganizationId } = useStore();
+  const { data: organization } = haithe.getOrganization(selectedOrganizationId);
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -115,21 +122,6 @@ export default function MarketplaceItemCard({
               </CardDescription>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavorite?.(item.id);
-            }}
-            className="p-2 hover:bg-primary/10 transition-colors"
-          >
-            <Heart 
-              className={`size-5 transition-colors ${
-                isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground group-hover:text-red-500'
-              }`} 
-            />
-          </Button>
         </div>
       </CardHeader>
       

@@ -120,6 +120,8 @@ export default function AgentsConfigurationPage() {
   // Get profile data
   const profileQuery = api.profile();
   const orgId = useStore((s) => s.selectedOrganizationId);
+  const { data: project, isLoading: isLoadingProject } = api.getProject(parseInt(params.id));
+  console.log({ project });
 
   // Loading state
   if (profileQuery.isPending) {

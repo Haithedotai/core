@@ -10,7 +10,7 @@ export default function Navbar() {
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3">
           <MobileNav />
-          <Link to="/" className="flex gap-2 items-center">
+          <Link to="/dashboard" className="flex gap-2 items-center">
             <img
               src="/static/haitheLogo.webp"
               alt="Logo"

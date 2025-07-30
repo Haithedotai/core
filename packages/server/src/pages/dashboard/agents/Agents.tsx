@@ -91,6 +91,8 @@ export default function AgentsPage() {
     }
   };
 
+  console.log("Agents:", agents);
+
   return (
     <div className="min-h-full bg-background">
       {/* Header */}

@@ -7,24 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../lib/component
 import { Skeleton } from '../../../lib/components/ui/skeleton';
 import MarketplaceLayout from '../components/MarketplaceLayout';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
-import { toast } from 'sonner';
 import { useStore } from '@/src/lib/hooks/use-store';
 import { truncateAddress } from '@/src/lib/utils';
 import { copyToClipboard } from '@/utils';
-import Icon from '@/src/lib/components/custom/Icon';
+import AddProductButton from '@/src/pages/marketplace/components/AddProductButton';
 
 export default function ItemDetailPage() {
+  const { id } = useParams({ from: '/marketplace/item/$id' });
   const haithe = useHaitheApi();
   const navigate = useNavigate();
-  const { id } = useParams({ from: '/marketplace/item/$id' });
   const { selectedOrganizationId } = useStore();
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-  const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
   const { data: organization } = haithe.getOrganization(selectedOrganizationId);
-  const { data: enabledProductAddresses, isLoading: isLoadingEnabledProducts, refetch: refetchEnabledProducts } = haithe.getEnabledProducts(organization?.address || "");
-  const isProductAlreadyEnabled = enabledProductAddresses?.some((address) => address.toLowerCase() === item?.address.toLowerCase());
-  const enableProduct = haithe.enableProduct;
-  const disableProduct = haithe.disableProduct;
+  const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -231,43 +226,9 @@ export default function ItemDetailPage() {
 
                   </div>
 
-                  <div className="space-y-3">
-                    <Button
-                      className="w-full"
-                      size="lg"
-                      disabled={isLoadingEnabledProducts}
-                      onClick={async () => {
-                        try {
-                          if (!organization) {
-                            toast.error('No organization selected');
-                            return;
-                          }
-
-                          if (isProductAlreadyEnabled) {
-                            await disableProduct.mutateAsync({
-                              product_address: item.address,
-                              org_address: organization.address
-                            })
-
-                            refetchEnabledProducts();
-                            return;
-                          }
-
-                          await enableProduct.mutateAsync({
-                            product_address: item.address,
-                            org_address: organization.address
-                          })
-
-                          refetchEnabledProducts();
-                        } catch (error) {
-                          toast.error('Failed to add product to organization');
-                          console.error(error);
-                        }
-                      }}
-                    >
-                      {isLoadingEnabledProducts ? <Icon name="LoaderCircle" className="size-4 animate-spin" /> : (enableProduct.isPending || disableProduct.isPending) ? <Icon name="LoaderCircle" className="size-4 animate-spin" /> : isProductAlreadyEnabled ? 'Disable' : 'Add to current organization'}
-                    </Button>
-                  </div>
+                  {organization && (
+                    <AddProductButton productAddress={item.address} orgAddress={organization.address} />
+                  )}
                 </CardContent>
               </Card>
 
