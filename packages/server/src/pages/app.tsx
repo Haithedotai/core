@@ -118,7 +118,13 @@ const agentsConfigurationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard/agents/$id',
   component: function AgentsConfigurationRoute() {
-    return withPageErrorBoundary(AgentsConfiguration)({});
+    return withPageErrorBoundary(
+      withProtectedRoute(AgentsConfiguration, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
   },
 })
 

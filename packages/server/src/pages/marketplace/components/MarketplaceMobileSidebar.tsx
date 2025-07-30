@@ -65,16 +65,8 @@ export default function MarketplaceMobileSidebar() {
           </Link>
         </Button>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Icon name="Crown" className="size-4 mr-3" />
-          Premium Assets
-        </Button>
-        <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
           <Icon name="Zap" className="size-4 mr-3" />
           Trending Now
-        </Button>
-        <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Icon name="Clock" className="size-4 mr-3" />
-          New Releases
         </Button>
       </div>
 

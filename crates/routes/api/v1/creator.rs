@@ -49,6 +49,8 @@ async fn get_creator_by_address(
         ApiError::Internal("Failed to fetch creator details".into())
     })?;
 
+    println!("Creator details: {:?}", creator);
+
     match creator {
         Some(creator) => Ok(respond::ok(
             "Creator details fetched successfully",

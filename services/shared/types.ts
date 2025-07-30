@@ -10,6 +10,8 @@ export interface Organization {
   name: string;
   owner: string;
   created_at: string;
+  address: `0x${string}`;
+  orchestrator_idx: number;
 }
 
 export interface OrganizationMember {

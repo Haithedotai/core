@@ -1,232 +1,91 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Star, Download, Eye, Heart, CheckCircle, ExternalLink, Clock, Users, Tag } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { ArrowLeft, ExternalLink, Copy, CheckCircle } from 'lucide-react';
 import { Button } from '../../../lib/components/ui/button';
 import { Badge } from '../../../lib/components/ui/badge';
-import { Card } from '../../../lib/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../lib/components/ui/tabs';
-import { Separator } from '../../../lib/components/ui/separator';
-import type { MarketplaceItem } from '../types';
-import { mockMarketplaceData } from '../mockData';
-import { getTypeImage } from '../components/MarketplaceItemCard';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../lib/components/ui/card';
+import { Skeleton } from '../../../lib/components/ui/skeleton';
 import MarketplaceLayout from '../components/MarketplaceLayout';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
-
-const getTypeLabel = (type: string) => {
-  switch (type) {
-    case 'knowledgeBase': return 'Knowledge Base';
-    case 'lambda': return 'Lambda Function';
-    case 'instructionSet': return 'Instruction Set';
-    case 'promptSet': return 'Prompt Set';
-    default: return 'AI Asset';
-  }
-};
-
-const renderMetadata = (item: MarketplaceItem) => {
-  switch (item.type) {
-    case 'knowledgeBase':
-      return (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Size</h4>
-            <p className="font-semibold">{item.metadata.size}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Documents</h4>
-            <p className="font-semibold">{item.metadata.documents.toLocaleString()}</p>
-          </div>
-          <div className="col-span-2">
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">Sources</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.metadata.sources.map((source) => (
-                <Badge key={source} variant="outline" className="text-xs">
-                  {source}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          <div className="col-span-2">
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">Domains</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.metadata.domains.map((domain) => (
-                <Badge key={domain} variant="secondary" className="text-xs">
-                  {domain}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-
-    case 'lambda':
-      return (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Runtime</h4>
-            <p className="font-semibold">{item.metadata.runtime}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Memory</h4>
-            <p className="font-semibold">{item.metadata.memory}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Timeout</h4>
-            <p className="font-semibold">{item.metadata.timeout}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">API Endpoints</h4>
-            <p className="font-semibold">{item.metadata.apiEndpoints}</p>
-          </div>
-          <div className="col-span-2">
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">Triggers</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.metadata.triggers.map((trigger) => (
-                <Badge key={trigger} variant="outline" className="text-xs">
-                  {trigger}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-
-    case 'instructionSet':
-      return (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Complexity</h4>
-            <Badge variant={
-              item.metadata.complexity === 'beginner' ? 'secondary' :
-                item.metadata.complexity === 'intermediate' ? 'outline' : 'destructive'
-            }>
-              {item.metadata.complexity}
-            </Badge>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Steps</h4>
-            <p className="font-semibold">{item.metadata.steps}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Estimated Time</h4>
-            <p className="font-semibold">{item.metadata.estimatedTime}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Use Case</h4>
-            <p className="font-semibold text-xs">{item.metadata.useCase}</p>
-          </div>
-          <div className="col-span-2">
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">Prerequisites</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.metadata.prerequisites.map((prereq) => (
-                <Badge key={prereq} variant="outline" className="text-xs">
-                  {prereq}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-
-    case 'promptSet':
-      return (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Prompts</h4>
-            <p className="font-semibold">{item.metadata.prompts}</p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm text-muted-foreground">Difficulty</h4>
-            <Badge variant={
-              item.metadata.difficulty === 'beginner' ? 'secondary' :
-                item.metadata.difficulty === 'intermediate' ? 'outline' : 'destructive'
-            }>
-              {item.metadata.difficulty}
-            </Badge>
-          </div>
-          <div className="col-span-2">
-            <h4 className="font-medium text-sm text-muted-foreground">Response Type</h4>
-            <p className="font-semibold">{item.metadata.responseType}</p>
-          </div>
-          <div className="col-span-2">
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">Compatible Models</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.metadata.models.map((model) => (
-                <Badge key={model} variant="secondary" className="text-xs">
-                  {model}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-
-    default:
-      return null;
-  }
-};
+import { useStore } from '@/src/lib/hooks/use-store';
+import { truncateAddress } from '@/src/lib/utils';
+import { copyToClipboard } from '@/utils';
+import AddProductButton from '@/src/pages/marketplace/components/AddProductButton';
 
 export default function ItemDetailPage() {
   const { id } = useParams({ from: '/marketplace/item/$id' });
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [item, setItem] = useState<MarketplaceItem | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const haithe = useHaitheApi();
-  const { data: itemData, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
+  const navigate = useNavigate();
+  const { selectedOrganizationId } = useStore();
+  const { data: organization } = haithe.getOrganization(selectedOrganizationId);
+  const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Find the item by ID from mock data
-    const foundItem = mockMarketplaceData.find(item => item.id === id);
-    if (foundItem) {
-      setItem(foundItem);
-    } else {
-      // Handle item not found - could redirect to 404 or marketplace
-      navigate({ to: '/marketplace' });
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'knowledge:text':
+        return '📄';
+      case 'knowledge:html':
+        return '🌐';
+      case 'knowledge:pdf':
+        return '📕';
+      case 'knowledge:csv':
+        return '📊';
+      case 'knowledge:url':
+        return '🔗';
+      case 'promptset':
+        return '💬';
+      case 'tool:rpc':
+        return '⚙️';
+      default:
+        return '🤖';
     }
-  }, [id, navigate]);
-
-  const handleFavorite = (itemId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(itemId)) {
-        newFavorites.delete(itemId);
-      } else {
-        newFavorites.add(itemId);
-      }
-      return newFavorites;
-    });
   };
 
-  const handlePurchase = (item: MarketplaceItem) => {
-    // Mock purchase handler - replace with actual payment flow
-    console.log('Purchasing item:', item);
-    alert(`Would purchase ${item.name} for ${item.price.amount} ${item.price.currency}`);
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'knowledge:text':
+        return 'Text Knowledge';
+      case 'knowledge:html':
+        return 'HTML Knowledge';
+      case 'knowledge:pdf':
+        return 'PDF Knowledge';
+      case 'knowledge:csv':
+        return 'CSV Knowledge';
+      case 'knowledge:url':
+        return 'URL Knowledge';
+      case 'promptset':
+        return 'Prompt Set';
+      case 'tool:rpc':
+        return 'RPC Tool';
+      default:
+        return category;
+    }
   };
 
-  const handleSearch = (query: string) => {
-    // Navigate back to marketplace with search query
-    navigate({
-      to: '/marketplace',
-      search: { q: query }
-    });
-  };
-
-  if (!item) {
+  if (isLoadingItem || !haithe.isClientInitialized()) {
     return (
       <MarketplaceLayout>
-        <div className="h-full flex flex-col @container">
-          <div className="flex-1 overflow-y-auto pt-6 pb-12">
-            <div className="mx-auto px-8 w-full @container">
-              <div className="flex items-center justify-center min-h-[50vh]">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">🤖</div>
-                  <h3 className="text-xl font-semibold mb-2">Item not found</h3>
-                  <p className="text-muted-foreground mb-6">The item you're looking for doesn't exist.</p>
-                  <Button onClick={() => navigate({ to: '/marketplace' })}>
-                    Back to Marketplace
-                  </Button>
+        <div className="min-h-screen bg-background">
+          <div className="container mx-auto p-8">
+            <div className="mb-6">
+              <Skeleton className="h-8 w-32" />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-80 w-full" />
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-6 w-1/2" />
                 </div>
+              </div>
+              <div className="space-y-6">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
               </div>
             </div>
           </div>
@@ -235,204 +94,213 @@ export default function ItemDetailPage() {
     );
   }
 
+  if (!item) {
+    return (
+      <MarketplaceLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-6xl mb-4">🤖</div>
+            <h3 className="text-2xl font-semibold mb-2">Product Not Found</h3>
+            <p className="text-muted-foreground mb-6">The product you're looking for doesn't exist.</p>
+            <Button onClick={() => navigate({ to: '/marketplace' })}>
+              Back to Marketplace
+            </Button>
+          </div>
+        </div>
+      </MarketplaceLayout>
+    );
+  }
+
+  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USD 18 decimals
+  const categoryIcon = getCategoryIcon(item.category);
+  const categoryLabel = getCategoryLabel(item.category);
+
   return (
     <MarketplaceLayout>
-      <div className="h-full flex flex-col @container">
-        {/* Main content area with responsive padding */}
-        <div className="flex-1 overflow-y-auto pt-6 pb-12">
-          <div className="mx-auto px-8 w-full @container">
-            {/* Back button */}
-            <div className="mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => navigate({ to: '/marketplace' })}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="size-4" />
-                Back to Marketplace
-              </Button>
+      <div className="min-h-full bg-background">
+        <div className="mx-auto p-8">
+          {/* Back button */}
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => navigate({ to: '/marketplace' })}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              Back to Marketplace
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 w-full @5xl:grid-cols-2 gap-8">
+            {/* Main Content */}
+            <div className="space-y-8">
+              {/* Header */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="size-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-primary/20 text-3xl">
+                    {categoryIcon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-4xl font-bold text-foreground mb-2">{item.name}</h1>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="text-sm px-3 py-1">
+                        {categoryLabel}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hero Section */}
+              <Card className="overflow-hidden">
+                <div className="h-64 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5 flex items-center justify-center relative">
+                  <div className="absolute inset-0 bg-grid-white/10" />
+                  <div className="relative text-center space-y-4">
+                    <div className="text-8xl mb-4">{categoryIcon}</div>
+                    <h2 className="text-2xl font-semibold">{item.name}</h2>
+                    <p className="text-muted-foreground max-w-md">
+                      A {categoryLabel.toLowerCase()} product available for purchase on the marketplace
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Product Information */}
+              <Card>
+                <CardContent className="space-y-6 mt-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">Description</h3>
+                    <div className="prose prose-sm max-w-none text-muted-foreground">
+                      <p>
+                        This is a <span className='font-bold text-primary'>{categoryLabel}</span> product created by{' '}
+                        <code className="text-xs bg-muted-foreground px-1 py-0.5 rounded">
+                          {item.creator.slice(0, 6)}...{item.creator.slice(-4)}
+                        </code>
+                        . It's available for purchase and can be used in your AI applications.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 mt-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <ExternalLink className="size-4" />
+                          Product Address
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <code className="text-sm font-mono">{truncateAddress(item.address)}</code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(item.address, 'Product Address', setCopiedField)}
+                          >
+                            {copiedField === 'Product Address' ? (
+                              <CheckCircle className="size-4 text-green-500" />
+                            ) : (
+                              <Copy className="size-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2">
-                {/* Header */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <img src={getTypeImage(item.type)} alt={item.name} className="size-12 rounded-full" />
-                    <div>
-                      <h1 className="text-3xl font-bold">{item.name}</h1>
-                      <p className="text-lg text-muted-foreground">{getTypeLabel(item.type)}</p>
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Price Card */}
+              <Card className="lg:mt-28">
+                <CardHeader>
+                  <CardTitle className="text-center">Pricing</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-primary mb-2">
+                      {priceInEth.toFixed(6)} USD <span className="text-sm text-muted-foreground">per call</span>
                     </div>
+
                   </div>
 
-                  {/* Badges */}
+                  {organization && (
+                    <AddProductButton productAddress={item.address} orgAddress={organization.address} />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Creator Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Creator</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="flex items-center gap-2 mb-4">
-                    
-                  </div>
-                </div>
-
-                {/* Image */}
-                <div className="relative mb-8">
-                  <img
-                    src={item.image || getTypeImage(item.type)}
-                    alt={item.name}
-                    className="w-full h-80 object-cover rounded-lg"
-                  />
-                </div>
-
-                {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="details">Details</TabsTrigger>
-                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="overview" className="space-y-6">
-                    <div>
-                      <h3 className="text-xl font-semibold mb-3">Description</h3>
-                      <p className="text-muted-foreground leading-relaxed">{item.description}</p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-xl font-semibold mb-3">Tags</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {item.tags.map((tag) => (
-                          <Badge key={tag} variant="outline">
-                            <Tag className="size-3 mr-1" />
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4">Technical Specifications</h3>
-                      <Card className="p-6">
-                        {renderMetadata(item)}
-                      </Card>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="details" className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-medium text-sm text-muted-foreground">Created</h4>
-                        <p className="font-semibold">{new Date(item.created_at).toLocaleDateString()}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm text-muted-foreground">Last Updated</h4>
-                        <p className="font-semibold">{new Date(item.updated_at).toLocaleDateString()}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm text-muted-foreground">Category</h4>
-                        <p className="font-semibold">{item.category}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm text-muted-foreground">Downloads</h4>
-                        <p className="font-semibold">{item.stats.downloads.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="reviews" className="space-y-4">
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground">Reviews coming soon...</p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {/* Sidebar */}
-              <div className="space-y-6 ">
-                {/* Purchase Card */}
-                <Card className="p-6 sticky top-32">
-                  <div className="text-center mb-6">
-                    <p className="text-4xl font-bold">{item.price.amount} {item.price.currency}</p>
-                  </div>
-
-                  <div className="space-y-3 mb-6">
-                    <Button
-                      className="w-full"
-                      size="lg"
-                      onClick={() => handlePurchase(item)}
-                    >
-                      Purchase Now
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleFavorite(item.id)}
-                    >
-                      <Heart className={`size-4 mr-2 ${favorites.has(item.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                      {favorites.has(item.id) ? 'Favorited' : 'Add to Favorites'}
-                    </Button>
-                  </div>
-
-                  <Separator className="my-6" />
-
-                  {/* Stats */}
-                  <div className="space-y-4 text-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Star className="size-4 fill-yellow-400 text-yellow-400" />
-                        <span>Rating</span>
-                      </div>
-                      <span className="font-medium">
-                        {item.rating.average} ({item.rating.count} reviews)
+                    <div className="size-12 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center border">
+                      <span className="text-sm font-mono font-semibold">
+                        {item.creator.slice(2, 4).toUpperCase()}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Download className="size-4" />
-                        <span>Downloads</span>
-                      </div>
-                      <span className="font-medium">{item.stats.downloads.toLocaleString()}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate font-mono">
+                        {item.creator.slice(0, 6)}...{item.creator.slice(-4)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Creator</p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Eye className="size-4" />
-                        <span>Views</span>
-                      </div>
-                      <span className="font-medium">{item.stats.views.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Heart className="size-4" />
-                        <span>Favorites</span>
-                      </div>
-                      <span className="font-medium">{item.stats.favorites.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </Card>
 
-                {/* Creator Card */}
-                <Card className="p-6">
-                  <h3 className="font-semibold mb-4">Creator</h3>
-                  <div className="flex items-center gap-3 mb-4">
-                    <img
-                      src={item.creator.avatar}
-                      alt={item.creator.name}
-                      className="size-12 rounded-full"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{item.creator.name}</p>
-                        {item.creator.verified && (
-                          <CheckCircle className="size-4 text-primary" />
-                        )}
-                      </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(item.creator, 'Creator Address', setCopiedField)}
+                    >
+                      {copiedField === 'Creator Address' ? (
+                        <CheckCircle className="size-4 text-green-500" />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate({ to: `/marketplace/profile/${item.creator}` })}
+                    >
+                      <ExternalLink className="size-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Product Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Quick Info</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Product ID</span>
+                      <span className="text-sm font-medium">{item.id}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Created at</span>
+                      <span className="text-sm font-medium">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Category</span>
+                      <span className="text-sm font-medium">{categoryLabel}</span>
                     </div>
                   </div>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to="/marketplace/profile/$id" params={{ id: item.creator.id }}>
-                      <Users className="size-4 mr-2" />
-                      View Profile
-                      </Link>
-                  </Button>
-                </Card>
-              </div>
+
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

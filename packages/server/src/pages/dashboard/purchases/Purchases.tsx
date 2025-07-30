@@ -10,134 +10,25 @@ import Icon from "@/src/lib/components/custom/Icon";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 
-// Mock data for installed marketplace extensions
-const mockInstalledExtensions = [
-  {
-    id: "ext_1",
-    name: "Customer Support Knowledge Base",
-    description: "Comprehensive knowledge base for customer support queries",
-    category: "knowledge:text",
-    status: "active",
-    icon: "FileText" as const,
-    pricePerCall: "0.001 USDT",
-    features: ["Text-based knowledge", "Searchable content", "Easy updates"],
-    installedAt: "2024-01-15T10:30:00Z",
-    usageCount: 1250,
-    lastUsed: "2024-01-20T14:22:00Z",
-    totalSpent: "1.25 USDT"
-  },
-  {
-    id: "ext_2", 
-    name: "Product Documentation",
-    description: "HTML-based product documentation and guides",
-    category: "knowledge:html",
-    status: "active",
-    icon: "Code" as const,
-    pricePerCall: "0.002 USDT",
-    features: ["HTML formatting", "Rich content", "Structured data"],
-    installedAt: "2024-01-10T09:15:00Z",
-    usageCount: 890,
-    lastUsed: "2024-01-19T16:45:00Z",
-    totalSpent: "1.78 USDT"
-  },
-  {
-    id: "ext_3",
-    name: "Sales Training Manual",
-    description: "PDF-based sales training and best practices",
-    category: "knowledge:pdf",
-    status: "active",
-    icon: "FileText" as const,
-    pricePerCall: "0.003 USDT",
-    features: ["PDF format", "Professional layout", "Print-ready"],
-    installedAt: "2024-01-08T11:20:00Z",
-    usageCount: 567,
-    lastUsed: "2024-01-18T10:30:00Z",
-    totalSpent: "1.701 USDT"
-  },
-  {
-    id: "ext_4",
-    name: "Customer Data Analysis",
-    description: "CSV dataset for customer behavior analysis",
-    category: "knowledge:csv",
-    status: "active",
-    icon: "Database" as const,
-    pricePerCall: "0.0015 USDT",
-    features: ["Structured data", "Analytics ready", "Easy import"],
-    installedAt: "2024-01-12T13:45:00Z",
-    usageCount: 234,
-    lastUsed: "2024-01-17T08:15:00Z",
-    totalSpent: "0.351 USDT"
-  },
-  {
-    id: "ext_5",
-    name: "Web Scraping Tool",
-    description: "RPC tool for scraping website data",
-    category: "tool:rpc",
-    status: "active", 
-    icon: "Code" as const,
-    pricePerCall: "0.005 USDT",
-    features: ["HTTP requests", "Data extraction", "API integration"],
-    installedAt: "2024-01-05T15:30:00Z",
-    usageCount: 1890,
-    lastUsed: "2024-01-20T12:00:00Z",
-    totalSpent: "9.45 USDT"
-  },
-  {
-    id: "ext_6",
-    name: "Conversation Prompts",
-    description: "Optimized prompts for customer interactions",
-    category: "promptset",
-    status: "active",
-    icon: "Code" as const,
-    pricePerCall: "0.002 USDT",
-    features: ["Multiple prompts", "Context-aware", "Customizable"],
-    installedAt: "2024-01-03T14:20:00Z",
-    usageCount: 3456,
-    lastUsed: "2024-01-20T18:30:00Z",
-    totalSpent: "6.912 USDT"
-  },
-  {
-    id: "ext_7",
-    name: "External API Integration",
-    description: "RPC tool for integrating with third-party services",
-    category: "tool:rpc",
-    status: "inactive",
-    icon: "Code" as const,
-    pricePerCall: "0.004 USDT",
-    features: ["REST API", "Authentication", "Error handling"],
-    installedAt: "2024-01-01T10:00:00Z",
-    usageCount: 123,
-    lastUsed: "2024-01-10T09:45:00Z",
-    totalSpent: "0.492 USDT"
-  },
-  {
-    id: "ext_8",
-    name: "Technical Support Guide",
-    description: "Comprehensive technical troubleshooting guide",
-    category: "knowledge:text",
-    status: "active",
-    icon: "FileText" as const,
-    pricePerCall: "0.001 USDT",
-    features: ["Step-by-step guides", "Troubleshooting tips", "FAQ section"],
-    installedAt: "2024-01-14T16:30:00Z",
-    usageCount: 678,
-    lastUsed: "2024-01-20T11:20:00Z",
-    totalSpent: "0.678 USDT"
-  }
-];
-
 export default function PurchasesPage() {
   const api = useHaitheApi();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { mutate: disableProduct, isPending: isDisablingProduct } = api.disableProduct;
 
-  // Get profile data
-  const profileQuery = api.profile();
+  // Get organization data
   const orgId = useStore((s) => s.selectedOrganizationId);
+  const { data: organization } = api.getOrganization(orgId);
+
+  // Get enabled products for the organization
+  const { data: enabledProductAddresses, isLoading: isLoadingEnabledProducts, refetch: refetchEnabledProducts } = api.getEnabledProducts(organization?.address || "");
+
+  // Get all products to match with enabled addresses
+  const { data: allProducts, isLoading: isLoadingAllProducts } = api.getAllProducts();
 
   // Loading state
-  if (profileQuery.isPending) {
+  if (isLoadingEnabledProducts || isLoadingAllProducts || !api.isClientInitialized()) {
     return (
       <div className="min-h-full bg-background p-6 space-y-6">
         <div className="space-y-4">
@@ -160,15 +51,15 @@ export default function PurchasesPage() {
     );
   }
 
-  if (!profileQuery.data) {
+  if (!organization) {
     return (
       <div className="min-h-full bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Icon name="ShoppingBag" className="size-16 text-muted-foreground mx-auto" />
+          <Icon name="Building" className="size-16 text-muted-foreground mx-auto" />
           <div className="space-y-2">
-            <h3 className="text-xl font-medium">Authentication Required</h3>
+            <h3 className="text-xl font-medium">No Organization Selected</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Please log in to view your purchases.
+              Please select an organization to view enabled products.
             </p>
           </div>
         </div>
@@ -176,20 +67,27 @@ export default function PurchasesPage() {
     );
   }
 
+  // Match enabled product addresses with full product data
+  const enabledProducts = allProducts?.filter(product =>
+    enabledProductAddresses?.some(address =>
+      address.toLowerCase() === product.address.toLowerCase()
+    )
+  ) || [];
+
   // Filtered extensions
-  const filteredExtensions = mockInstalledExtensions.filter((extension) => {
-    const matchesSearch = extension.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         extension.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || extension.category === categoryFilter;
-    const matchesStatus = statusFilter === "all" || extension.status === statusFilter;
-    
+  const filteredExtensions = enabledProducts.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+    // For now, all enabled products are considered "active"
+    const matchesStatus = statusFilter === "all" || statusFilter === "active";
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   // Get unique categories with proper labels
   const categoryLabels: Record<string, string> = {
     "knowledge:text": "Text Knowledge",
-    "knowledge:html": "HTML Knowledge", 
+    "knowledge:html": "HTML Knowledge",
     "knowledge:pdf": "PDF Knowledge",
     "knowledge:csv": "CSV Knowledge",
     "knowledge:url": "URL Knowledge",
@@ -200,13 +98,43 @@ export default function PurchasesPage() {
     "tool:js": "JavaScript Tool",
     "tool:py": "Python Tool"
   };
-  
-  const categories = [...new Set(mockInstalledExtensions.map(p => p.category))];
 
-  // Calculate total spent
-  const totalSpent = mockInstalledExtensions.reduce((total, extension) => {
-    return total + parseFloat(extension.totalSpent.split(' ')[0]);
+  const categories = [...new Set(enabledProducts.map(p => p.category))];
+
+  // Calculate total potential cost (price per call * estimated usage)
+  const totalPotentialCost = enabledProducts.reduce((total, product) => {
+    const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USD
+    return total + priceInUsd;
   }, 0);
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'knowledge:text':
+        return 'FileText' as const;
+      case 'knowledge:html':
+        return 'Code' as const;
+      case 'knowledge:pdf':
+        return 'FileText' as const;
+      case 'knowledge:csv':
+        return 'Database' as const;
+      case 'knowledge:url':
+        return 'Link' as const;
+      case 'promptset':
+        return 'MessageSquare' as const;
+      case 'tool:rpc':
+        return 'Code' as const;
+      case 'mcp':
+        return 'Server' as const;
+      case 'tool:rs':
+        return 'Code' as const;
+      case 'tool:js':
+        return 'Code' as const;
+      case 'tool:py':
+        return 'Code' as const;
+      default:
+        return 'Package' as const;
+    }
+  };
 
   return (
     <div className="min-h-full bg-background">
@@ -217,24 +145,17 @@ export default function PurchasesPage() {
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
             <div className="space-y-3 flex items-center w-full justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
+                <div className="size-16 aspect-square rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
                   <Icon name="ShoppingBag" className="size-8 text-primary" />
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                    Extensions
+                    Enabled Products
                   </h1>
                   <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    View your installed marketplace extensions and usage
+                    View your organization's enabled marketplace products
                   </p>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Button variant="outline">
-                  <Icon name="Download" className="mr-2" />
-                  Export
-                </Button>
               </div>
             </div>
           </div>
@@ -247,11 +168,11 @@ export default function PurchasesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Installed Extensions</CardTitle>
+              <CardTitle className="text-sm font-medium">Enabled Products</CardTitle>
               <Icon name="Package" className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockInstalledExtensions.length}</div>
+              <div className="text-2xl font-bold">{enabledProducts.length}</div>
               <p className="text-xs text-muted-foreground">
                 From marketplace
               </p>
@@ -259,27 +180,25 @@ export default function PurchasesPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Usage Cost</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Price per Call</CardTitle>
               <Icon name="Coins" className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalSpent.toFixed(4)} USDT</div>
+              <div className="text-2xl font-bold">{totalPotentialCost.toFixed(6)} USD</div>
               <p className="text-xs text-muted-foreground">
-                From agent calls
+                Combined cost per call
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Items</CardTitle>
-              <Icon name="CircleCheck" className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Organization</CardTitle>
+              <Icon name="Building" className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {mockInstalledExtensions.filter(p => p.status === "active").length}
-              </div>
+              <div className="text-2xl font-bold">{organization.name}</div>
               <p className="text-xs text-muted-foreground">
-                Currently active
+                Currently selected
               </p>
             </CardContent>
           </Card>
@@ -290,7 +209,7 @@ export default function PurchasesPage() {
           <div className="relative flex-1">
             <Icon name="Search" className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search extensions..."
+              placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -316,86 +235,96 @@ export default function PurchasesPage() {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Extensions Grid */}
+        {/* Products Grid */}
         {filteredExtensions.length === 0 ? (
           <div className="text-center py-16">
             <Icon name="Package" className="size-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-medium mb-2">No extensions found</h3>
+            <h3 className="text-xl font-medium mb-2">No products found</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              No installed extensions match your current filters.
+              {enabledProducts.length === 0
+                ? "No products are currently enabled for this organization."
+                : "No enabled products match your current filters."
+              }
             </p>
+            {enabledProducts.length === 0 && (
+              <Button onClick={() => window.location.href = '/marketplace'}>
+                Browse Marketplace
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredExtensions.map((extension) => {
-              const isActive = extension.status === "active";
-              
+            {filteredExtensions.map((product) => {
+              const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USD
+              const categoryIcon = getCategoryIcon(product.category);
+
               return (
-                <Card key={extension.id} className={`relative ${!isActive ? 'opacity-60' : ''}`}>
-                  {!isActive && (
-                    <div className="absolute top-3 right-3">
-                      <Badge variant="secondary">Inactive</Badge>
-                    </div>
-                  )}
+                <Card key={product.id} className="relative">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
-                          <Icon name={extension.icon} className="size-5 text-primary" />
+                          <Icon name={categoryIcon} className="size-5 text-primary" />
                         </div>
-                        <span>{extension.name}</span>
+                        <span>{product.name}</span>
                       </div>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        disableProduct({ product_address: product.address, org_address: organization.address }, {
+                          onSuccess: () => {
+                            refetchEnabledProducts();
+                          }
+                        })
+                      }} disabled={isDisablingProduct} className="flex items-center gap-2">
+                        {isDisablingProduct ? <Icon name="LoaderCircle" className="size-4 animate-spin" /> : "Disable"}
+                      </Button>
                     </CardTitle>
-                    <CardDescription>{extension.description}</CardDescription>
+                    <CardDescription>Product ID: {product.id}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline">{categoryLabels[extension.category] || extension.category}</Badge>
-                      <span className="text-sm font-medium text-primary">{extension.pricePerCall}</span>
+                      <Badge variant="outline">{categoryLabels[product.category] || product.category}</Badge>
+                      <span className="text-sm font-medium text-primary">{priceInUsd.toFixed(6)} USD</span>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Usage Count:</span>
-                        <span className="font-medium">{extension.usageCount.toLocaleString()}</span>
+                        <span className="text-muted-foreground">Product ID:</span>
+                        <span className="font-medium">{product.id}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Last Used:</span>
+                        <span className="text-muted-foreground">Created:</span>
                         <span className="font-medium">
-                          {new Date(extension.lastUsed).toLocaleDateString()}
+                          {new Date(product.created_at).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Installed:</span>
-                        <span className="font-medium">
-                          {new Date(extension.installedAt).toLocaleDateString()}
+                        <span className="text-muted-foreground">Creator:</span>
+                        <span className="font-medium font-mono text-xs">
+                          {product.creator.slice(0, 6)}...{product.creator.slice(-4)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Total Spent:</span>
-                        <span className="font-medium text-primary">{extension.totalSpent}</span>
+                        <span className="text-muted-foreground">Address:</span>
+                        <span className="font-medium font-mono text-xs">
+                          {product.address.slice(0, 6)}...{product.address.slice(-4)}
+                        </span>
                       </div>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Features:</p>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {extension.features.map((feature: string, index: number) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <Icon name="Check" className="size-3 text-green-500" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="text-sm font-medium">Status:</p>
+                      <div className="flex items-center gap-2">
+                        <Icon name="Check" className="size-3 text-green-500" />
+                        <span className="text-sm text-muted-foreground">Enabled for organization</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

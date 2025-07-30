@@ -1,20 +1,19 @@
 import { useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Grid, List } from 'lucide-react';
 import { Button } from '../../lib/components/ui/button';
-import type { MarketplaceItem } from './types';
-import { mockMarketplaceData } from './mockData';
 import MinimalFilters from './components/MinimalFilters';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 import { useMarketplaceStore } from '../../lib/hooks/use-store';
+import type { Product } from '../../../../../services/shared/types';
+import Icon from '@/src/lib/components/custom/Icon';
 
 export default function MarketplacePage() {
   const navigate = useNavigate();
-  const { 
-    filters, 
-    searchQuery, 
-    viewMode, 
+  const {
+    filters,
+    searchQuery,
+    viewMode,
     favorites,
     setFilters,
     setSearchQuery,
@@ -25,51 +24,30 @@ export default function MarketplacePage() {
   const haithe = useHaitheApi();
   const { data: products, isLoading: isLoadingProducts } = haithe.getAllProducts();
 
-  console.log({products});
-
   // Filter and search logic
   const filteredItems = useMemo(() => {
-    let items = [...mockMarketplaceData];
+    let items = [...(products || [])];
 
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       items = items.filter(item =>
         item.name.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.tags.some(tag => tag.toLowerCase().includes(query)) ||
-        item.creator.name.toLowerCase().includes(query) ||
+        item.creator.toLowerCase().includes(query) ||
         item.category.toLowerCase().includes(query)
       );
     }
 
-    // Type filter
-    if (filters.type && filters.type.length > 0) {
-      items = items.filter(item => filters.type!.includes(item.type));
-    }
-
     // Category filter
     if (filters.category && filters.category.length > 0) {
-      items = items.filter(item => filters.category!.includes(item.category));
+      items = items.filter(item => filters.category!.includes(item.category as any));
     }
 
     // Price range filter
     if (filters.priceRange) {
       items = items.filter(item =>
-        item.price.amount >= filters.priceRange!.min &&
-        item.price.amount <= filters.priceRange!.max
-      );
-    }
-
-    // Rating filter
-    if (filters.rating) {
-      items = items.filter(item => item.rating.average >= filters.rating!);
-    }
-
-    // Tags filter
-    if (filters.tags && filters.tags.length > 0) {
-      items = items.filter(item =>
-        filters.tags!.some((tag: string) => item.tags.includes(tag))
+        item.price_per_call >= filters.priceRange!.min &&
+        item.price_per_call <= filters.priceRange!.max
       );
     }
 
@@ -77,14 +55,10 @@ export default function MarketplacePage() {
     const sortBy = filters.sortBy || 'recent';
     items.sort((a, b) => {
       switch (sortBy) {
-        case 'popular':
-          return b.stats.downloads - a.stats.downloads;
         case 'price_low':
-          return a.price.amount - b.price.amount;
+          return a.price_per_call - b.price_per_call;
         case 'price_high':
-          return b.price.amount - a.price.amount;
-        case 'rating':
-          return b.rating.average - a.rating.average;
+          return b.price_per_call - a.price_per_call;
         case 'recent':
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -92,20 +66,21 @@ export default function MarketplacePage() {
     });
 
     return items;
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, products]);
 
-  const handleItemClick = (item: MarketplaceItem) => {
-    navigate({ to: '/marketplace/item/$id', params: { id: item.id } });
+  const handleItemClick = (item: Product) => {
+    navigate({ to: '/marketplace/item/$id', params: { id: item.id.toString() } });
   };
 
-  const handleFavorite = (itemId: string) => {
-    toggleFavorite(itemId);
+  const handleFavorite = (itemId: number) => {
+    toggleFavorite(itemId.toString());
   };
 
-  const handlePurchase = (item: MarketplaceItem) => {
+  const handlePurchase = (item: Product) => {
     // Mock purchase handler - replace with actual payment flow
     console.log('Purchasing item:', item);
-    alert(`Would purchase ${item.name} for ${item.price.amount} ${item.price.currency}`);
+    const priceInEth = item.price_per_call / 1e15; // Convert from wei to ETH
+    alert(`Would purchase ${item.name} for ${priceInEth} ETH`);
   };
 
   const handleSearch = (query: string) => {
@@ -132,11 +107,19 @@ export default function MarketplacePage() {
       </div>
 
       {/* Main content area with responsive padding */}
-      <div className="flex-1 mt-52 overflow-y-auto pt-6 pb-12">
+      <div className="flex-1 mt-52 overflow-y-auto pt-8 pb-12">
         <div className="mx-auto px-8 w-full @container">
 
           {/* Items Grid/List - responsive columns */}
-          {filteredItems.length > 0 ? (
+          {isLoadingProducts ? (
+            <div className="text-center py-16">
+              <Icon name="LoaderCircle" className="size-16 mb-4 w-full animate-spin" />
+              <h3 className="text-lg @md:text-xl font-semibold mb-2">Loading products...</h3>
+              <p className="text-muted-foreground mb-6 text-sm @md:text-base">
+                Please wait while we fetch the latest marketplace items.
+              </p>
+            </div>
+          ) : filteredItems.length > 0 ? (
             <div
               className={
                 viewMode === 'grid'
@@ -150,16 +133,21 @@ export default function MarketplacePage() {
                   item={item}
                   onItemClick={handleItemClick}
                   onFavorite={handleFavorite}
-                  isFavorited={favorites.includes(item.id)}
+                  isFavorited={favorites.includes(item.id.toString())}
                 />
               ))}
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="text-4xl @md:text-6xl mb-4">🤖</div>
-              <h3 className="text-lg @md:text-xl font-semibold mb-2">No items found</h3>
+              <Icon name="Bot" className="size-16 mb-4 w-full" />
+              <h3 className="text-lg @md:text-xl font-semibold mb-1">
+                {products && products.length === 0 ? 'No products available' : 'No items found'}
+              </h3>
               <p className="text-muted-foreground mb-6 text-sm @md:text-base">
-                Try adjusting your filters or search query to find more items.
+                {products && products.length === 0
+                  ? 'There are currently no products in the marketplace.'
+                  : 'Try adjusting your filters or search query to find more items.'
+                }
               </p>
               <Button
                 variant="outline"

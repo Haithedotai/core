@@ -29,7 +29,7 @@ function StatsCard({
   const link = `/dashboard/${title.toLowerCase()}`;
 
   return (
-    <Link to={link} className="relative overflow-hidden shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm rounded-lg">
+    <Link to={link} className="border relative overflow-hidden shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm rounded-lg">
       <div className={`absolute inset-0 bg-gradient-to-br from-primary/[0.08] to-secondary/[0.02]`} />
       <CardHeader className="relative pb-3">
         <div className="flex items-center justify-between">
@@ -71,7 +71,7 @@ function StatsCard({
 
 function QuickActionsSection() {
   return (
-    <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+    <Card className="shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
       <CardHeader className="relative">
         <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ function QuickActionsSection() {
 
 function RecentActivitySection() {
   return (
-    <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+    <Card className="shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
       <CardHeader className="relative">
         <div className="flex items-center gap-3">

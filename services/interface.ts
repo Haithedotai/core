@@ -278,6 +278,18 @@ export class HaitheClient {
   getProductById(id: number): Promise<Product> {
     return this.products.getProductById(id);
   }
+
+  enableProjectProduct(projectId: number, productId: number): Promise<void> {
+    return this.products.enableProjectProduct(projectId, productId);
+  }
+
+  disableProjectProduct(projectId: number, productId: number): Promise<void> {
+    return this.products.disableProjectProduct(projectId, productId);
+  }
+
+  getProjectProducts(projectId: number): Promise<number[]> {
+    return this.projects.getProjectProducts(projectId);
+  }
 }
 
 export * from "./clients";

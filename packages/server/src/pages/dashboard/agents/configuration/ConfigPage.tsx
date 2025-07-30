@@ -14,99 +14,6 @@ import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog";
 
-
-// Mock data for installed marketplace extensions
-const mockInstalledExtensions = [
-  {
-    id: "ext_1",
-    name: "Customer Support Knowledge Base",
-    description: "Comprehensive knowledge base for customer support queries",
-    category: "knowledge:text",
-    status: "active",
-    enabled: true,
-    icon: "FileText" as const,
-    pricePerCall: "0.001 USDT",
-    features: ["Text-based knowledge", "Searchable content", "Easy updates"]
-  },
-  {
-    id: "ext_2",
-    name: "Product Documentation",
-    description: "HTML-based product documentation and guides",
-    category: "knowledge:html",
-    status: "active",
-    enabled: false,
-    icon: "Code" as const,
-    pricePerCall: "0.002 USDT",
-    features: ["HTML formatting", "Rich content", "Structured data"]
-  },
-  {
-    id: "ext_3",
-    name: "Sales Training Manual",
-    description: "PDF-based sales training and best practices",
-    category: "knowledge:pdf",
-    status: "active",
-    enabled: true,
-    icon: "FileText" as const,
-    pricePerCall: "0.003 USDT",
-    features: ["PDF format", "Professional layout", "Print-ready"]
-  },
-  {
-    id: "ext_4",
-    name: "Customer Data Analysis",
-    description: "CSV dataset for customer behavior analysis",
-    category: "knowledge:csv",
-    status: "active",
-    enabled: false,
-    icon: "Database" as const,
-    pricePerCall: "0.0015 USDT",
-    features: ["Structured data", "Analytics ready", "Easy import"]
-  },
-  {
-    id: "ext_5",
-    name: "Web Scraping Tool",
-    description: "RPC tool for scraping website data",
-    category: "tool:rpc",
-    status: "active",
-    enabled: false,
-    icon: "Code" as const,
-    pricePerCall: "0.005 USDT",
-    features: ["HTTP requests", "Data extraction", "API integration"]
-  },
-  {
-    id: "ext_6",
-    name: "Conversation Prompts",
-    description: "Optimized prompts for customer interactions",
-    category: "promptset",
-    status: "active",
-    enabled: true,
-    icon: "Code" as const,
-    pricePerCall: "0.002 USDT",
-    features: ["Multiple prompts", "Context-aware", "Customizable"]
-  },
-  {
-    id: "ext_7",
-    name: "External API Integration",
-    description: "RPC tool for integrating with third-party services",
-    category: "tool:rpc",
-    status: "inactive",
-    enabled: false,
-    icon: "Code" as const,
-    pricePerCall: "0.004 USDT",
-    features: ["REST API", "Authentication", "Error handling"]
-  }
-];
-
-// Mock agent data
-const mockAgent = {
-  id: "agent_123",
-  name: "Customer Support Agent",
-  description: "AI-powered customer support agent for e-commerce",
-  status: "active",
-  created_at: "2024-01-15T10:30:00Z",
-  project_uid: "proj_abc123",
-  enabled_products: ["prod_1", "prod_3"]
-};
-
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
   const api = useHaitheApi();
@@ -114,15 +21,27 @@ export default function AgentsConfigurationPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [enabledExtensions, setEnabledExtensions] = useState<string[]>(mockAgent.enabled_products);
   const [hasChanges, setHasChanges] = useState(false);
 
   // Get profile data
   const profileQuery = api.profile();
   const orgId = useStore((s) => s.selectedOrganizationId);
+  const { data: project, isLoading: isLoadingProject } = api.getProject(parseInt(params.id));
+  
+  // Get organization data
+  const { data: organization } = api.getOrganization(orgId);
+  
+  // Get enabled products for the organization
+  const { data: enabledProductAddresses, isLoading: isLoadingEnabledProducts, refetch: refetchEnabledProducts } = api.getEnabledProducts(organization?.address || "");
+  
+  // Get all products to match with enabled addresses
+  const { data: allProducts, isLoading: isLoadingAllProducts } = api.getAllProducts();
+  
+  // Get project-specific enabled products
+  const { data: projectProductIds, isLoading: isLoadingProjectProducts, refetch: refetchProjectProducts } = api.getProjectProducts(parseInt(params.id));
 
   // Loading state
-  if (profileQuery.isPending) {
+  if (profileQuery.isPending || isLoadingProject || isLoadingEnabledProducts || isLoadingAllProducts || isLoadingProjectProducts || !api.isClientInitialized()) {
     return (
       <div className="min-h-full bg-background p-6 space-y-6">
         <div className="space-y-4">
@@ -158,12 +77,35 @@ export default function AgentsConfigurationPage() {
     );
   }
 
+  if (!project) {
+    return (
+      <div className="min-h-full bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Icon name="Bot" className="size-16 text-muted-foreground mx-auto" />
+          <div className="space-y-2">
+            <h3 className="text-xl font-medium">Project Not Found</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              The requested project could not be found.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Match enabled product addresses with full product data
+  const enabledProducts = allProducts?.filter(product =>
+    enabledProductAddresses?.some(address =>
+      address.toLowerCase() === product.address.toLowerCase()
+    )
+  ) || [];
+
   // Filtered extensions
-  const filteredExtensions = mockInstalledExtensions.filter((extension) => {
-    const matchesSearch = extension.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      extension.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || extension.category === categoryFilter;
-    const matchesStatus = statusFilter === "all" || extension.status === statusFilter;
+  const filteredExtensions = enabledProducts.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+    // For now, all enabled products are considered "active"
+    const matchesStatus = statusFilter === "all" || statusFilter === "active";
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -183,27 +125,63 @@ export default function AgentsConfigurationPage() {
     "tool:py": "Python Tool"
   };
 
-  const categories = [...new Set(mockInstalledExtensions.map(p => p.category))];
+  const categories = [...new Set(enabledProducts.map(p => p.category))];
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'knowledge:text':
+        return 'FileText' as const;
+      case 'knowledge:html':
+        return 'Code' as const;
+      case 'knowledge:pdf':
+        return 'FileText' as const;
+      case 'knowledge:csv':
+        return 'Database' as const;
+      case 'knowledge:url':
+        return 'Link' as const;
+      case 'promptset':
+        return 'MessageSquare' as const;
+      case 'tool:rpc':
+        return 'Code' as const;
+      case 'mcp':
+        return 'Server' as const;
+      case 'tool:rs':
+        return 'Code' as const;
+      case 'tool:js':
+        return 'Code' as const;
+      case 'tool:py':
+        return 'Code' as const;
+      default:
+        return 'Package' as const;
+    }
+  };
 
   // Handle extension toggle
-  const handleExtensionToggle = (extensionId: string, enabled: boolean) => {
-    const newEnabledExtensions = enabled
-      ? [...enabledExtensions, extensionId]
-      : enabledExtensions.filter(id => id !== extensionId);
-
-    setEnabledExtensions(newEnabledExtensions);
-    setHasChanges(true);
+  const handleExtensionToggle = async (productId: number, enabled: boolean) => {
+    try {
+      if (enabled) {
+        await api.enableProjectProduct.mutateAsync({
+          projectId: parseInt(params.id),
+          productId: productId
+        });
+      } else {
+        await api.disableProjectProduct.mutateAsync({
+          projectId: parseInt(params.id),
+          productId: productId
+        });
+      }
+      
+      // Refresh project products
+      refetchProjectProducts();
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Failed to toggle product:', error);
+    }
   };
 
   // Handle save changes
   const handleSaveChanges = async () => {
-    // Mock API call
-    console.log("Saving configuration for agent:", params.id);
-    console.log("Enabled extensions:", enabledExtensions);
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
+    // Changes are already saved when toggling, so just close the dialog
     setHasChanges(false);
     setSaveDialogOpen(false);
   };
@@ -217,20 +195,20 @@ export default function AgentsConfigurationPage() {
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
             <div className="space-y-3 flex items-center w-full justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
+                <div className="aspect-square size-12 md:size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
                   <Icon name="Settings" className="size-8 text-primary" />
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                      {mockAgent.name}
+                    <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                      {project.name}
                     </h1>
-                    <Badge variant={mockAgent.status === "active" ? "default" : "secondary"}>
-                      {mockAgent.status}
+                    <Badge variant="default">
+                      Active
                     </Badge>
                   </div>
-                  <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    Configure products and features for this agent
+                  <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl">
+                    Manage your agent
                   </p>
                 </div>
               </div>
@@ -238,16 +216,16 @@ export default function AgentsConfigurationPage() {
               <div className="flex items-center gap-3">
                 <Button variant="outline" asChild>
                   <Link to="/dashboard/agents">
-                    <Icon name="ArrowLeft" className="mr-2" />
-                    Back to Agents
+                    <Icon name="ArrowLeft" className="" />
+                    <p className="hidden md:block ml-2">Back to Agents</p>
                   </Link>
                 </Button>
                 <Button
                   onClick={() => setSaveDialogOpen(true)}
                   disabled={!hasChanges}
                 >
-                  <Icon name="Save" className="mr-2" />
-                  Save Changes
+                  <Icon name="Save" className="" />
+                  <p className="hidden md:block ml-2">Save Changes</p>
                 </Button>
               </div>
             </div>
@@ -268,16 +246,16 @@ export default function AgentsConfigurationPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Agent ID</p>
-                <p className="text-sm">{mockAgent.project_uid}</p>
+                <p className="text-sm font-medium text-muted-foreground">Project ID</p>
+                <p className="text-sm">{project.id}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Created</p>
-                <p className="text-sm">{new Date(mockAgent.created_at).toLocaleDateString()}</p>
+                <p className="text-sm">{new Date(project.created_at).toLocaleDateString()}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Enabled Extensions</p>
-                <p className="text-sm">{enabledExtensions.length} of {mockInstalledExtensions.length}</p>
+                <p className="text-sm">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
               </div>
             </div>
           </CardContent>
@@ -314,7 +292,6 @@ export default function AgentsConfigurationPage() {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -323,53 +300,98 @@ export default function AgentsConfigurationPage() {
         {filteredExtensions.length === 0 ? (
           <div className="text-center py-16">
             <Icon name="Package" className="size-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-medium mb-2">No extensions found</h3>
+            <h3 className="text-xl font-medium mb-2">No products found</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              No installed extensions match your current filters.
+              {enabledProducts.length === 0
+                ? "No products are currently enabled for this organization."
+                : "No enabled products match your current filters."
+              }
             </p>
+            {enabledProducts.length === 0 && (
+              <Button onClick={() => window.location.href = '/marketplace'}>
+                Browse Marketplace
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredExtensions.map((extension) => {
-              const isEnabled = enabledExtensions.includes(extension.id);
-              const isActive = extension.status === "active";
+            {filteredExtensions.map((product) => {
+              const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USD
+              const categoryIcon = getCategoryIcon(product.category);
+              const isEnabled = projectProductIds?.includes(product.id) || false;
+              const isActive = true; // All enabled products are considered active
 
               return (
-                <Card key={extension.id} className={`relative ${!isActive ? 'opacity-60' : ''}`}>
+                <Card key={product.id} className={`relative ${!isActive ? 'opacity-60' : ''}`}>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
-                          <Icon name={extension.icon} className="size-5 text-primary" />
+                          <Icon name={categoryIcon} className="size-5 text-primary" />
                         </div>
-                        <span>{extension.name}</span>
+                        <span>{product.name}</span>
                       </div>
                       <Switch
                         checked={isEnabled}
-                        onCheckedChange={(checked) => handleExtensionToggle(extension.id, checked)}
-                        disabled={!isActive}
+                        onCheckedChange={(checked) => {
+                          handleExtensionToggle(product.id, checked);
+                          setHasChanges(true);
+                        }}
+                        disabled={!isActive || api.enableProjectProduct.isPending || api.disableProjectProduct.isPending}
                       />
                     </CardTitle>
-                    <CardDescription>{extension.description}</CardDescription>
+                    <CardDescription>Product ID: {product.id}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline">{categoryLabels[extension.category] || extension.category}</Badge>
-                      <span className="text-sm font-medium text-primary">{extension.pricePerCall}</span>
+                      <Badge variant="outline">{categoryLabels[product.category] || product.category}</Badge>
+                      <span className="text-sm font-medium text-primary">{priceInUsd.toFixed(6)} USD</span>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Product ID:</span>
+                        <span className="font-medium">{product.id}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Created:</span>
+                        <span className="font-medium">
+                          {new Date(product.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Creator:</span>
+                        <span className="font-medium font-mono text-xs">
+                          {product.creator.slice(0, 6)}...{product.creator.slice(-4)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Address:</span>
+                        <span className="font-medium font-mono text-xs">
+                          {product.address.slice(0, 6)}...{product.address.slice(-4)}
+                        </span>
+                      </div>
                     </div>
 
                     <Separator />
 
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Features:</p>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {extension.features.map((feature: string, index: number) => (
-                          <li key={index} className="flex items-center gap-2">
+                      <p className="text-sm font-medium">Status:</p>
+                      <div className="flex items-center gap-2">
+                        {isEnabled ? (
+                          <>
                             <Icon name="Check" className="size-3 text-green-500" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
+                            <span className="text-sm text-muted-foreground">Enabled for this agent</span>
+                          </>
+                        ) : (
+                          <>
+                            <Icon name="X" className="size-3 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Not enabled for this agent</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -389,14 +411,14 @@ export default function AgentsConfigurationPage() {
             <div className="flex items-start gap-3 p-4 rounded-lg border bg-muted/50">
               <Icon name="Info" className="size-4 mt-0.5 text-muted-foreground" />
               <div className="text-sm">
-                You're about to update the configuration for <strong>{mockAgent.name}</strong>.
+                You're about to update the configuration for <strong>{project.name}</strong>.
                 This will enable/disable the selected products for this agent.
               </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Changes to be applied:</p>
               <div className="text-sm text-muted-foreground">
-                {enabledExtensions.length} extensions will be enabled
+                {projectProductIds?.length || 0} extensions will be enabled
               </div>
             </div>
           </div>

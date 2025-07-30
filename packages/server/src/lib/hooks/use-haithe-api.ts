@@ -24,7 +24,7 @@ export function useHaitheApi() {
         getAuthToken,
         isWeb3Ready,
         isClientInitialized,
-        
+
         // Direct client access (for testing)
         client,
 
@@ -37,17 +37,17 @@ export function useHaitheApi() {
             },
             onSuccess: async () => {
                 toast.success('Logged in successfully');
-                
+
                 // Invalidate queries to refresh data
                 queryClient.invalidateQueries({ queryKey: ['profile'] });
                 queryClient.invalidateQueries({ queryKey: ['organizations'] });
-                
+
                 // Wait a bit for queries to update, then check organizations
                 setTimeout(async () => {
                     try {
                         // Check if user has any organizations
                         const organizations = await client?.getUserOrganizations();
-                        
+
                         if (!organizations || organizations.length === 0) {
                             // New user - redirect to onboarding
                             navigate({ to: '/onboarding' });
@@ -278,7 +278,9 @@ export function useHaitheApi() {
             mutationKey: ['enableProduct'],
             mutationFn: ({ product_address, org_address }: { product_address: string; org_address: string }) => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.enableProduct(product_address as `0x${string}`, org_address as `0x${string}`);
+                const productAddress = product_address.toLowerCase();
+                const orgAddress = org_address.toLowerCase();
+                return client.enableProduct(productAddress as `0x${string}`, orgAddress as `0x${string}`);
             },
             onSuccess: () => {
                 toast.success('Product enabled successfully');
@@ -479,13 +481,30 @@ export function useHaitheApi() {
             enabled: isLoggedIn() && !!client,
         }),
 
-        getCreator: (id: string) => useQuery({
+        getCreatorByAddress: (id: string) => useQuery({
             queryKey: ['creator', id],
+            queryFn: async () => {
+                if (!client) throw new Error("Wallet not connected");
+                const idToLower = id.toLowerCase();
+                const res = await client.getCreatorByAddress(idToLower);
+                const ipfsData = await fetch(res.uri);
+                const data = await ipfsData.json();
+                return {
+                    ...res,
+                    ...data,
+                };
+            },
+            enabled: !!client && !!id,
+        }),
+
+        getCreatorProducts: (id: string) => useQuery({
+            queryKey: ['creatorProducts', id],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.getCreator(id);
+                const idToLower = id.toLowerCase();
+                return client.getCreatorProducts(idToLower);
             },
-            enabled: isLoggedIn() && !!client && !!id,
+            enabled: !!client && !!id,
         }),
 
         getAllProducts: () => useQuery({
@@ -494,16 +513,58 @@ export function useHaitheApi() {
                 if (!client) throw new Error("Wallet not connected");
                 return client.getAllProducts();
             },
-            enabled: isLoggedIn() && !!client,
+            enabled: !!client,
         }),
 
-            getProductById: (id: number) => useQuery({
+        getProductById: (id: number) => useQuery({
             queryKey: ['product', id],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
                 return client.getProductById(id);
             },
-            enabled: isLoggedIn() && !!client && !!id,
+            enabled: !!client && !!id,
+        }),
+
+        // Project product management
+        enableProjectProduct: useMutation({
+            mutationKey: ['enableProjectProduct'],
+            mutationFn: ({ projectId, productId }: { projectId: number; productId: number }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.enableProjectProduct(projectId, productId);
+            },
+            onSuccess: (_, { projectId }) => {
+                toast.success('Product enabled for project successfully');
+                queryClient.invalidateQueries({ queryKey: ['projectProducts', projectId] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not enable product for project. Please try again.');
+            }
+        }),
+
+        disableProjectProduct: useMutation({
+            mutationKey: ['disableProjectProduct'],
+            mutationFn: ({ projectId, productId }: { projectId: number; productId: number }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.disableProjectProduct(projectId, productId);
+            },
+            onSuccess: (_, { projectId }) => {
+                toast.success('Product disabled for project successfully');
+                queryClient.invalidateQueries({ queryKey: ['projectProducts', projectId] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not disable product for project. Please try again.');
+            }
+        }),
+
+        getProjectProducts: (projectId: number) => useQuery({
+            queryKey: ['projectProducts', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getProjectProducts(projectId);
+            },
+            enabled: !!client && !!projectId,
         }),
     };
 } 

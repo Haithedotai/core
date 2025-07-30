@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import Connect from "../../../lib/components/app/Connect";
 import MarketplaceMobileSidebar from "./MarketplaceMobileSidebar";
 import CreatorSheet from '@/src/lib/components/app/CreatorSheet';
+import OrganizationSelector from "../../dashboard/OrganizationSelector";
 
 export default function MarketplaceNavbar() {
   return (
@@ -26,7 +27,8 @@ export default function MarketplaceNavbar() {
       </div>
 
       {/* Right side - Actions and user */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-3">
+        <OrganizationSelector />
         <CreatorSheet />
         <Connect />
       </div>

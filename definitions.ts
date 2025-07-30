@@ -315,7 +315,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0xf201f1c97d5d163cc64f2a35eee00aa7d81e98ad"
+    "address": "0x7ef8e99980da5bcedcf7c10f41e55f759f6a174b"
   },
   "HaitheOrchestrator": {
     "abi": [
@@ -627,7 +627,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0x7fa8cbea4f069c6ce3d39dd3e2c9457be0f560dd"
+    "address": "0x82b769500e34362a76df81150e12c746093d954f"
   },
   "HaitheOrganization": {
     "abi": [
@@ -1323,7 +1323,7 @@ const definitions = {
         "type": "function"
       }
     ],
-    "address": "0x9E963C07ad7fB7F6b4Af841BE7C3f7669F76DF39"
+    "address": "0xBE6566b6d79dF8EA95b2619478019333aA758BE8"
   },
   "HaitheProduct": {
     "abi": [

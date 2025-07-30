@@ -94,7 +94,7 @@ async fn post_index_handler(
         sqlx::query_as::<_, Product>(
             "INSERT INTO products (address, orchestrator_idx, creator, name, uri, encrypted_key, price_per_call, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *",
         )
-        .bind(&product_address.to_string())
+        .bind(&format!("{:#x}", product_address))
         .bind(idx)
         .bind(&format!("{:#x}", product_creator))
         .bind(&product_name)

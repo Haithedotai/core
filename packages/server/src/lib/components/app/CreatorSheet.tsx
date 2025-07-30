@@ -13,6 +13,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import { Skeleton } from "../ui/skeleton";
+import { useWalletClient } from "wagmi";
 
 export default function CreatorSheet() {
   const [open, setOpen] = useState(false);
@@ -20,6 +21,7 @@ export default function CreatorSheet() {
   const navigate = useNavigate();
   const { isCreator, isLoggedIn } = useHaitheApi();
   const { data: isCreatorData, isFetching: isCreatorLoading } = isCreator();
+  const { data: walletClient } = useWalletClient();
 
   const handleStartCreating = () => {
     if (!authenticated) {
@@ -42,10 +44,10 @@ export default function CreatorSheet() {
     return null;
   }
 
-  if (isCreatorData) {
+  if (isCreatorData && walletClient?.account.address) {
     return (
       <Button asChild variant="outline" className="rounded-sm">
-        <Link to="/marketplace/profile/$id" params={{ id: "1" }} className="flex items-center gap-2">
+        <Link to="/marketplace/profile/$id" params={{ id: walletClient?.account.address }} className="flex items-center gap-2">
           <Icon name="User" className="h-4 w-4" />
           <span className="hidden sm:inline">Profile</span>
         </Link>
