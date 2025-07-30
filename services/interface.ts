@@ -279,7 +279,6 @@ export class HaitheClient {
     return this.products.getProductById(id);
   }
 
-  // Project product management
   enableProjectProduct(projectId: number, productId: number): Promise<void> {
     return this.products.enableProjectProduct(projectId, productId);
   }

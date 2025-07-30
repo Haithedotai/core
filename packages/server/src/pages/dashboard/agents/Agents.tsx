@@ -10,6 +10,17 @@ import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/src/lib/components/ui/alert-dialog";
 
 export default function AgentsPage() {
   const api = useHaitheApi();
@@ -19,6 +30,7 @@ export default function AgentsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [agentName, setAgentName] = useState("");
   const [editAgent, setEditAgent] = useState<any>(null);
+  const [deleteAgent, setDeleteAgent] = useState<any>(null);
 
   // Get profile data
   const profileQuery = api.profile();
@@ -91,7 +103,16 @@ export default function AgentsPage() {
     }
   };
 
-  console.log("Agents:", agents);
+  const handleDelete = async () => {
+    try {
+      if (!deleteAgent) return;
+      await api.deleteProject.mutateAsync(deleteAgent.id);
+      setDeleteAgent(null);
+      agentsQuery.refetch();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="min-h-full bg-background">
@@ -166,7 +187,7 @@ export default function AgentsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>{agent.name}</span>
-                    <div>
+                    <div className="flex items-center gap-1">
                       <Button asChild size="icon" variant="ghost">
                         <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
                           <Icon name="Settings" />
@@ -179,6 +200,35 @@ export default function AgentsPage() {
                       }}>
                         <Icon name="Pencil" />
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            onClick={() => setDeleteAgent(agent)}
+                          >
+                            <Icon name="Trash2" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{agent.name}"? This action cannot be undone and will permanently remove the agent and all its associated data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={handleDelete}
+                              disabled={api.deleteProject.isPending}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              {api.deleteProject.isPending ? "Deleting..." : "Delete"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardTitle>
                   <CardDescription>Created: {new Date(agent.created_at).toLocaleString()}</CardDescription>
@@ -194,7 +244,11 @@ export default function AgentsPage() {
 
       {/* Create Agent Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
+        <DialogContent onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleCreate();
+          }
+        }}>
           <DialogHeader>
             <DialogTitle>Create New Agent</DialogTitle>
           </DialogHeader>
@@ -202,7 +256,6 @@ export default function AgentsPage() {
             placeholder="Agent name"
             value={agentName}
             onChange={e => setAgentName(e.target.value)}
-            className="mb-4"
           />
           <DialogFooter>
             <Button onClick={handleCreate} disabled={!agentName || api.createProject.isPending}>
@@ -214,7 +267,11 @@ export default function AgentsPage() {
 
       {/* Edit Agent Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
+        <DialogContent onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleEdit();
+          }
+        }}>
           <DialogHeader>
             <DialogTitle>Edit Agent</DialogTitle>
           </DialogHeader>
@@ -222,7 +279,6 @@ export default function AgentsPage() {
             placeholder="Agent name"
             value={agentName}
             onChange={e => setAgentName(e.target.value)}
-            className="mb-4"
           />
           <DialogFooter>
             <Button onClick={handleEdit} disabled={!agentName || api.updateProject.isPending}>
