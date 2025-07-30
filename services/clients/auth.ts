@@ -108,6 +108,16 @@ export class HaitheAuthClient extends BaseClient {
     return this.fetch("/v1/me", this.authToken);
   }
 
+  async apiKeyLastIssued(): Promise<{
+    issued_at: number;
+  }> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+
+    return this.fetch("/v1/me/api-key/last-issued", this.authToken);
+  }
+
   async generateApiKey(): Promise<{
     api_key: string;
     message: string;

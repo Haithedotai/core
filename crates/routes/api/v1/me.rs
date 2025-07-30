@@ -138,7 +138,7 @@ async fn get_api_key_handler(
     ))
 }
 
-#[get("/api-key/last")]
+#[get("/api-key/last-issued")]
 async fn get_api_key_last_handler(
     user: AuthUser,
     state: web::Data<AppState>,
@@ -152,7 +152,7 @@ async fn get_api_key_last_handler(
     Ok(respond::ok(
         "Last API key issued at",
         serde_json::json!({
-            "last_issued_at": api_key_last_issued_at
+            "issued_at": api_key_last_issued_at
         }),
     ))
 }
