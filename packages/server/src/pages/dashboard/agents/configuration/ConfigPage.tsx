@@ -7,7 +7,7 @@ import { Input } from "@/src/lib/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import { Separator } from "@/src/lib/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/lib/components/ui/tabs";
+
 import { Label } from "@/src/lib/components/ui/label";
 import { Textarea } from "@/src/lib/components/ui/textarea";
 import Icon from "@/src/lib/components/custom/Icon";
@@ -270,75 +270,65 @@ export default function AgentsConfigurationPage() {
               Use the following endpoint to interact with your agent via API
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="request" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="request">Request</TabsTrigger>
-                <TabsTrigger value="headers">Headers</TabsTrigger>
-                <TabsTrigger value="body">Body</TabsTrigger>
-              </TabsList>
+          <CardContent className="space-y-6">
+            {/* Endpoint */}
+            <div className="space-y-2">
+              <Label>Endpoint</Label>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="font-mono">POST</Badge>
+                <Input
+                  value={`${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`}
+                  readOnly
+                  className="font-mono text-sm"
+                />
+              </div>
+            </div>
 
-              <TabsContent value="request" className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Endpoint</Label>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="font-mono">POST</Badge>
-                    <Input
-                      value={`${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`}
-                      readOnly
-                      className="font-mono text-sm mt-2"
-                    />
-                  </div>
+            {/* Headers */}
+            <div className="space-y-3">
+              <Label>Required Headers</Label>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked readOnly className="rounded" />
+                  <Label className="w-24 text-sm">Authorization</Label>
+                  <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm" />
                 </div>
-              </TabsContent>
-
-              <TabsContent value="headers" className="space-y-4">
-                <div className="space-y-3 mt-2">
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" checked readOnly className="rounded" />
-                    <Label className="w-24 text-sm">Authorization</Label>
-                    <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" checked readOnly className="rounded" />
-                    <Label className="w-24 text-sm">OpenAI-Organization</Label>
-                    <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" checked readOnly className="rounded" />
-                    <Label className="w-24 text-sm">OpenAI-Project</Label>
-                    <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm" />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked readOnly className="rounded" />
+                  <Label className="w-24 text-sm">OpenAI-Organization</Label>
+                  <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm" />
                 </div>
-              </TabsContent>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked readOnly className="rounded" />
+                  <Label className="w-24 text-sm">OpenAI-Project</Label>
+                  <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm" />
+                </div>
+              </div>
+            </div>
 
-              <TabsContent value="body" className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Request Body (JSON)</Label>
-                  <Textarea
-                    value={`{
+            {/* Request Body */}
+            <div className="space-y-2">
+              <Label>Request Body (JSON)</Label>
+              <Textarea
+                value={`{
   "model": "gemini-2.0-flash",
   "messages": [
     {
       "role": "system",
-      "content": "You are a helpful assistant with deep knowledge of weather and atmospheric phenomena."
+      "content": "You are a helpful assistant."
     },
     {
       "role": "user",
-      "content": "Hi, can you tell me what causes thunderstorms?"
-    },
-    {
-      "role": "assistant",
-      "content": "Thunderstorms are caused by the rapid upward movement of warm, moist air. As this air rises, it cools and condenses into cumulonimbus clouds, releasing heat. This fuels the storm. The process creates turbulence, lightning, thunder, and sometimes hail or tornadoes."
+      "content": "Hello, how can you help me today?"
     }
-  ]
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000
 }`}
-                    readOnly
-                    className="font-mono text-sm h-48 mt-2"
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
+                readOnly
+                className="font-mono text-sm h-48"
+              />
+            </div>
           </CardContent>
         </Card>
 

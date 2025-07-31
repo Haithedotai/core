@@ -65,7 +65,7 @@ export default function OrganizationSelector() {
           <div className="flex items-center gap-2">
             <Icon name="Building" className="size-4" />
             <SelectValue placeholder="Select organization">
-              {currentOrganization?.name || "Select organization"}
+              <p className="hidden md:block">{currentOrganization?.name || "Select organization"}</p>
             </SelectValue>
           </div>
         </SelectTrigger>

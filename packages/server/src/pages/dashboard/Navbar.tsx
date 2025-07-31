@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import Connect from "@/src/lib/components/app/Connect";
 import OrganizationSelector from "./OrganizationSelector";
 import MobileNav from "./SidebarMobile";
+import FaucetDialog from "./FaucetDialog";
 
 export default function Navbar() {
   return (
@@ -22,10 +23,10 @@ export default function Navbar() {
         </div>
       </div>
 
-
       {/* Right side - User info and actions */}
       <div className="flex items-center gap-4">
         <OrganizationSelector />
+        <FaucetDialog />
         <Connect />
       </div>
     </nav>

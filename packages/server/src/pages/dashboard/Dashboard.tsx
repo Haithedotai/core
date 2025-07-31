@@ -383,6 +383,11 @@ function FundOrganizationDialog({ organization }: { organization: Organization }
             </div>
           </div>
 
+          <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(false)} className="w-full">
+            <Icon name="Wallet" className="size-4" />
+            Use Connected Wallet
+          </Button>
+
           {/* Instructions */}
           <div className="space-y-3">
             <div className="text-sm font-medium text-foreground">How to fund:</div>
