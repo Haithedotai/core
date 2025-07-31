@@ -56,7 +56,7 @@ pub fn get_models() -> Vec<Model> {
         Model {
             id: 6,
             name: "gpt-o3".to_string(),
-            display_name: "GPT-0.3".to_string(),
+            display_name: "GPT-o3".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
 
@@ -65,7 +65,7 @@ pub fn get_models() -> Vec<Model> {
         Model {
             id: 7,
             name: "gpt-o3-mini".to_string(),
-            display_name: "GPT-0.3 Mini".to_string(),
+            display_name: "GPT-o3 Mini".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
             price_per_call: 0,
@@ -73,7 +73,7 @@ pub fn get_models() -> Vec<Model> {
         Model {
             id: 8,
             name: "gpt-o4-mini".to_string(),
-            display_name: "GPT-0.4 Mini".to_string(),
+            display_name: "GPT-o4 Mini".to_string(),
             provider: "OpenAI".to_string(),
             is_active: false,
             price_per_call: 0,
