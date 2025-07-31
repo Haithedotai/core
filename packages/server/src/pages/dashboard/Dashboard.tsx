@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/lib/components/ui/dialog";
+import { Input } from "@/src/lib/components/ui/input";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
@@ -12,6 +13,7 @@ import QRCode from "qrcode";
 import { useEffect, useRef } from "react";
 import type { Organization } from "../../../../../services/clients";
 import { Image } from "@/src/lib/components/custom/Image";
+import { toast } from "sonner";
 
 interface StatsCardProps {
   title: string;
@@ -304,6 +306,24 @@ function OrganizationDetailsSection({ organization }: { organization: Organizati
 function FundOrganizationDialog({ organization }: { organization: Organization }) {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [amount, setAmount] = useState<string>("1"); // default to 1 USDT
+  const haithe = useHaitheApi();
+  const { mutateAsync: transferUSDT } = haithe.transferUSDT;
+
+  const handleFundWithConnectedWallet = async () => {
+    try {
+      // Convert amount to BigInt (assuming 18 decimals for USDT)
+      const decimals = 18; // Change to 6 if your USDT uses 6 decimals
+      const amountInWei = BigInt(Math.floor(Number(amount) * 10 ** decimals));
+      const tx = await transferUSDT({
+        recipient: organization.address,
+        amount: amountInWei,
+      });
+      console.log({ tx });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (organization?.address && isDialogOpen) {
@@ -383,7 +403,20 @@ function FundOrganizationDialog({ organization }: { organization: Organization }
             </div>
           </div>
 
-          <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(false)} className="w-full">
+          {/* Amount Input */}
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-foreground">Amount to Fund (USDT):</div>
+            <Input
+              type="number"
+              min="0"
+              step="any"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              placeholder="Enter amount"
+            />
+          </div>
+
+          <Button variant="outline" size="sm" onClick={() => handleFundWithConnectedWallet()} className="w-full">
             <Icon name="Wallet" className="size-4" />
             Use Connected Wallet
           </Button>

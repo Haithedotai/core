@@ -12,7 +12,8 @@ export function formatDateTime(date: string | Date, format = "MMM D, YYYY [at] h
 
 // Get relative time (e.g., "2 hours ago", "in 3 days")
 export function getRelativeTime(date: string | Date): string {
-  return moment(date).fromNow();
+  const momentDate = typeof date === 'string' ? moment.utc(date) : moment(date);
+  return momentDate.fromNow();
 }
 
 // Check if date is overdue
@@ -58,4 +59,26 @@ export function createEndOfDay(date?: string | Date): Date {
 // Create date at start of day (00:00:00)
 export function createStartOfDay(date?: string | Date): Date {
   return moment(date).startOf('day').toDate();
+} 
+
+// Get specific relative time (e.g., "5 minutes ago", "2 hours ago", "3 days ago")
+export function getSpecificRelativeTime(date: string | Date): string {
+  const momentDate = typeof date === 'string' ? moment.utc(date) : moment(date);
+  const now = moment();
+  const diffInMinutes = Math.abs(momentDate.diff(now, 'minutes'));
+  const diffInHours = Math.abs(momentDate.diff(now, 'hours'));
+  const diffInDays = Math.abs(momentDate.diff(now, 'days'));
+  
+  if (diffInMinutes < 1) {
+    return 'just now';
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+  } else if (diffInDays < 7) {
+    return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+  } else {
+    // For longer periods, show the actual date
+    return momentDate.format('MMM D, YYYY [at] h:mm A');
+  }
 } 

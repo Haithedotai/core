@@ -204,7 +204,7 @@ export class HaitheAuthClient extends BaseClient {
     });
   }
 
-  async transferUSDT(recipient: viem.Address, amount: bigint) {
+  async transferUSDT(recipient: viem.Address, amount: bigint): Promise<`0x${string}`> {
     if (!this.isLoggedIn()) {
       throw new Error("Not logged in");
     }

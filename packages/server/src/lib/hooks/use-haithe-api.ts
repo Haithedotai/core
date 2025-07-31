@@ -147,7 +147,7 @@ export function useHaitheApi() {
                 return client.getFaucetInfo();
             },
             enabled: isLoggedIn() && !!client,
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 1 * 1000, // 1 second
         }),
 
         requestFaucetTokens: useMutation({
@@ -163,6 +163,33 @@ export function useHaitheApi() {
             onError: (error) => {
                 console.error(error?.toString?.() || error);
                 toast.error('Could not request faucet tokens. Please try again.');
+            }
+        }),
+
+        // USDT methods
+        usdtBalance: () => useQuery({
+            queryKey: ['usdtBalance'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.usdtBalance();
+            },
+            enabled: isLoggedIn() && !!client,
+            staleTime: 1 * 1000, // 1 second
+        }),
+
+        transferUSDT: useMutation({
+            mutationKey: ['transferUSDT'],
+            mutationFn: ({ recipient, amount }: { recipient: string; amount: bigint }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.transferUSDT(recipient as `0x${string}`, amount);
+            },
+            onSuccess: () => {
+                toast.success('USDT transferred successfully');
+                queryClient.invalidateQueries({ queryKey: ['usdtBalance'] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not transfer USDT. Please try again.');
             }
         }),
 

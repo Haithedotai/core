@@ -31,8 +31,6 @@ export default function AgentsConfigurationPage() {
   const orgId = useStore((s) => s.selectedOrganizationId);
   const { data: project, isLoading: isLoadingProject } = api.getProject(parseInt(params.id));
 
-  console.log({ project });
-
   // Get organization data
   const { data: organization } = api.getOrganization(orgId);
 

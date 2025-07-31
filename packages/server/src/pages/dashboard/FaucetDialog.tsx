@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/src/lib/components/ui/card";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Image } from "@/src/lib/components/custom/Image";
 import { cn } from "@/src/lib/utils";
+import { getSpecificRelativeTime } from "@/src/lib/utils/date";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 
 interface FaucetOption {
@@ -48,6 +49,18 @@ export default function FaucetDialog() {
   // Use the faucet API methods
   const { getFaucetInfo, requestFaucetTokens } = useHaitheApi();
   const faucetInfo = getFaucetInfo();
+
+  // Calculate if faucet is available
+  const canRequestTokens = () => {
+    if (!faucetInfo.data?.last_request) return true;
+
+    const lastRequestTime = new Date(faucetInfo.data.last_request.requested_at).getTime();
+    const currentTime = Date.now();
+    const timeElapsed = currentTime - lastRequestTime;
+    const oneHourInMs = 60 * 60 * 1000; // 1 hour in milliseconds
+    
+    return timeElapsed >= oneHourInMs;
+  };
 
   const handleFaucetSelect = (faucet: FaucetOption) => {
     setSelectedFaucet(faucet);
@@ -197,17 +210,17 @@ export default function FaucetDialog() {
                 <div className="space-y-3">
                   <div className="text-sm font-medium text-foreground">Faucet Status:</div>
                   <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-                    {faucetInfo.data.has_requested ? (
+                    {faucetInfo.data.last_request ? (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
-                          <Icon name="Check" className="size-4 text-green-500" />
-                          <span className="text-green-700 dark:text-green-300">Tokens already requested</span>
+                          <Icon name="Clock" className="size-4 text-orange-500" />
+                          <span className="text-orange-700 dark:text-orange-300">
+                            {canRequestTokens() ? "Ready to request" : "Cooldown active"}
+                          </span>
                         </div>
-                        {faucetInfo.data.last_request && (
-                          <div className="text-xs text-muted-foreground">
-                            Last request: {new Date(faucetInfo.data.last_request.requested_at).toLocaleDateString()}
-                          </div>
-                        )}
+                        <div className="text-xs text-muted-foreground">
+                          Last request: {getSpecificRelativeTime(faucetInfo.data.last_request.requested_at)}
+                        </div>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-sm">
@@ -227,7 +240,7 @@ export default function FaucetDialog() {
                     size="sm" 
                     className="w-full"
                     onClick={handleRequestTokens}
-                    disabled={requestFaucetTokens.isPending || (faucetInfo.data?.has_requested ?? false)}
+                    disabled={requestFaucetTokens.isPending || !canRequestTokens()}
                   >
                     {requestFaucetTokens.isPending ? (
                       <>

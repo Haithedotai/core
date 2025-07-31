@@ -100,27 +100,6 @@ export class HaitheClient {
     return this.auth.logout();
   }
 
-  getFaucetInfo(): Promise<{
-    has_requested: boolean;
-    last_request: {
-      id: number;
-      product_id: number;
-      requested_at: string;
-    };
-  }> {
-    return this.auth.getFaucetInfo();
-  }
-
-  requestFaucetTokens(productId?: number): Promise<{
-    amount: string;
-    token: string;
-    product_id: number;
-    transaction_hash: string;
-    recipient: string;
-  }> {
-    return this.auth.requestFaucetTokens(productId);
-  }
-
   // Organization methods
   createOrganization(name: string): Promise<Organization> {
     return this.orgs.createOrganization(name);
@@ -344,7 +323,33 @@ export class HaitheClient {
     return this.orgs.disableModel(orgId, modelId);
   }
 
-  
+  getFaucetInfo(): Promise<{
+    last_request: {
+      id: number;
+      product_id: number;
+      requested_at: string;
+    };
+  }> {
+    return this.auth.getFaucetInfo();
+  }
+
+  requestFaucetTokens(productId?: number): Promise<{
+    amount: string;
+    token: string;
+    product_id: number;
+    transaction_hash: string;
+    recipient: string;
+  }> {
+    return this.auth.requestFaucetTokens(productId);
+  }
+
+  usdtBalance(): Promise<bigint> {
+    return this.auth.usdtBalance();
+  }
+
+  transferUSDT(recipient: viem.Address, amount: bigint): Promise<`0x${string}`> {
+    return this.auth.transferUSDT(recipient, amount);
+  }
 }
 
 export * from "./clients";
