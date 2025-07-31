@@ -129,6 +129,16 @@ export function useHaitheApi() {
             }
         }),
 
+        apiKeyLastIssued: () => useQuery({
+            queryKey: ['apiKeyLastIssued'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.apiKeyLastIssued();
+            },
+            enabled: isLoggedIn() && !!client,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+        }),
+
         // Organization mutations
         createOrganization: useMutation({
             mutationKey: ['createOrganization'],

@@ -89,16 +89,20 @@ async fn get_api_key_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<u64> =
-        sqlx::query_scalar("SELECT api_key_last_issued_at FROM accounts WHERE wallet_address = ?")
+    let api_key_last_issued_at: Option<String> =
+        sqlx::query_scalar("SELECT strftime('%s', api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
             .bind(&user.wallet_address)
             .fetch_optional(&state.db)
             .await?;
 
     match api_key_last_issued_at {
-        Some(ts) => {
-            if ts > 0 {
-                return Err(ApiError::BadRequest("API key already issued".into()));
+        Some(ts_str) => {
+            // Handle case where strftime returns NULL as string
+            if !ts_str.is_empty() && ts_str != "NULL" {
+                let ts = ts_str.parse::<i64>().unwrap_or(0);
+                if ts > 0 {
+                    return Err(ApiError::BadRequest("API key already issued".into()));
+                }
             }
         }
         None => {}
@@ -146,16 +150,28 @@ async fn get_api_key_last_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<u64> =
-        sqlx::query_scalar("SELECT api_key_last_issued_at FROM accounts WHERE wallet_address = ?")
+    let api_key_last_issued_at: Option<String> =
+        sqlx::query_scalar("SELECT strftime('%s', api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
             .bind(&user.wallet_address)
             .fetch_optional(&state.db)
             .await?;
 
+    let issued_at = match api_key_last_issued_at {
+        Some(ts_str) => {
+            // Handle case where strftime returns NULL as string
+            if ts_str.is_empty() || ts_str == "NULL" {
+                0
+            } else {
+                ts_str.parse::<i64>().unwrap_or(0)
+            }
+        }
+        None => 0
+    };
+
     Ok(respond::ok(
         "Last API key issued at",
         serde_json::json!({
-            "issued_at": api_key_last_issued_at
+            "issued_at": issued_at
         }),
     ))
 }
@@ -165,5 +181,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(get_orgs_handler)
         .service(get_projects_handler)
         .service(get_api_key_handler)
-        .service(disable_api_key_handler);
+        .service(disable_api_key_handler)
+        .service(get_api_key_last_handler);
 }
