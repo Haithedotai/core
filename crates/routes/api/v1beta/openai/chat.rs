@@ -46,13 +46,11 @@ async fn get_completions_handler(
 
     let models = models::get_models();
 
-    // Get org_id from org_uid
     let org_id: i64 = sqlx::query_scalar("SELECT id FROM organizations WHERE organization_uid = ?")
         .bind(&api_caller.org_uid)
         .fetch_one(&state.db)
         .await?;
 
-    // Get project_id from project_uid
     let project_id: i64 = sqlx::query_scalar("SELECT id FROM projects WHERE project_uid = ?")
         .bind(&api_caller.project_uid)
         .fetch_one(&state.db)
@@ -209,7 +207,6 @@ async fn get_completions_handler(
                 } else if category == "knowledge:url" {
                     let url_string = String::from_utf8(decrypted_data)?;
 
-                    // Validate URL before making request
                     if url_string.is_empty() {
                         return Err(ApiError::BadRequest("URL string is empty".to_string()));
                     }
@@ -299,7 +296,9 @@ async fn get_completions_handler(
         "model": model,
         "choices": choices,
         "usage": {
-            "total_cost": total_cost
+            "total_cost": total_cost,
+            "expense_till_now": current_expenditure_u64,
+            "prompt_tokens": prompt.len() as u64,
         }
     })))
 }
