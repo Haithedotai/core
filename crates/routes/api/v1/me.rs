@@ -191,7 +191,6 @@ async fn get_faucet_handler(
         Some(request) => Ok(respond::ok(
             "Last faucet request found",
             serde_json::json!({
-                "has_requested": true,
                 "last_request": {
                     "id": request.id,
                     "product_id": request.product_id,
@@ -202,7 +201,6 @@ async fn get_faucet_handler(
         None => Ok(respond::ok(
             "No faucet requests found",
             serde_json::json!({
-                "has_requested": false,
                 "last_request": {
                     "id": 0,
                     "product_id": 0,
@@ -221,8 +219,9 @@ async fn post_faucet_handler(
 ) -> Result<impl Responder, ApiError> {
     let product_id = request.product_id.unwrap_or(1);
 
-    let existing_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
-        "SELECT * FROM faucet_requests WHERE wallet_address = ? AND product_id = ?",
+    // Check if user has made a request in the last hour
+    let recent_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
+        "SELECT * FROM faucet_requests WHERE wallet_address = ? AND product_id = ? AND requested_at > datetime('now', '-1 hour')",
     )
     .bind(&user.wallet_address)
     .bind(product_id)
@@ -230,13 +229,14 @@ async fn post_faucet_handler(
     .await
     .map_err(|_| ApiError::Internal("DB error".into()))?;
 
-    if existing_request.is_some() {
+    if recent_request.is_some() {
         return Err(ApiError::BadRequest(
-            "Faucet already used for this product".into(),
+            "Faucet can only be used once per hour per product".into(),
         ));
     }
 
-    let amount = U256::from(100) * U256::exp10(18);
+    // Amount to send (500 USDT with 18 decimals)
+    let amount = U256::from(500) * U256::exp10(18);
 
     let contract = contracts::get_contract_with_wallet("tUSDT", None)
         .await
@@ -276,7 +276,7 @@ async fn post_faucet_handler(
     Ok(respond::ok(
         "Faucet tokens sent successfully",
         serde_json::json!({
-            "amount": "100",
+            "amount": "500",
             "token": "tUSDT",
             "product_id": product_id,
             "transaction_hash": format!("{:?}", tx_hash),
