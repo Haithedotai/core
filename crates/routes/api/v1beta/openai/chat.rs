@@ -1,7 +1,7 @@
 use crate::lib::extractors::ApiCaller;
 use crate::lib::state::AppState;
 use crate::lib::{contracts, error::ApiError, models};
-use actix_web::{HttpResponse, Responder, get, web};
+use actix_web::{HttpResponse, Responder, post, web};
 use alith::data::crypto::decrypt;
 use alith::{Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge, StructureTool, ToolError};
 use chrono;
@@ -9,6 +9,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::io::Cursor;
+use std::sync::Arc;
 use url::Url;
 use uuid;
 use async_trait::async_trait;
@@ -30,7 +31,7 @@ pub struct GetChatCompletionsBody {
     pub temperature: Option<f32>,
 }
 
-#[get("/completions")]
+#[post("/completions")]
 async fn get_completions_handler(
     api_caller: ApiCaller,
     body: web::Json<GetChatCompletionsBody>,
@@ -76,19 +77,19 @@ async fn get_completions_handler(
         .filter(|p| enabled_products_for_project.contains(p))
         .collect();
 
-    // Alternative: Try lowercase comparison if the above doesn't work
+    
     let enabled_products_lowercase: Vec<String> = enabled_products_for_organization
         .iter()
         .map(|addr| format!("{:#x}", addr).to_lowercase())
         .filter(|p| enabled_products_for_project.iter().any(|proj_p| proj_p.to_lowercase() == *p))
         .collect();
 
-    // Debug: Log the enabled products before assignment
+    
     println!("Enabled products for organization: {:?}", enabled_products_for_organization);
     println!("Enabled products for project: {:?}", enabled_products_for_project);
     println!("Filtered enabled products: {:?}", enabled_products);
 
-    // Use the lowercase version if the original is empty
+    
     let final_enabled_products = if enabled_products.is_empty() && !enabled_products_lowercase.is_empty() {
         println!("Using lowercase address matching");
         enabled_products_lowercase
@@ -128,9 +129,9 @@ async fn get_completions_handler(
         .find(|m| m.name == model)
         .map_or(0, |m| m.price_per_call) as u64;
 
-    // Skip product processing if no enabled products
+    
     if final_enabled_products.is_empty() {
-        // Continue with just the base model cost
+        
     } else {
         for p in final_enabled_products {
         println!("Processing product with address: {}", p);
@@ -145,15 +146,15 @@ async fn get_completions_handler(
 
         total_cost += _price_per_call as u64;
 
-        // Validate URI before making request
+        
         if uri.is_empty() {
             return Err(ApiError::BadRequest("Product URI is empty".to_string()));
         }
 
-        // Debug: Log the URI to see what we're trying to fetch
+        
         println!("Attempting to fetch URI: {}", uri);
 
-        // Try to parse the URI first to catch malformed URLs
+        
         let uri_with_protocol = ensure_protocol(&uri);
         let parsed_uri = url::Url::parse(&uri_with_protocol)
             .map_err(|e| ApiError::BadRequest(format!("Invalid URI format: {} - URI: {}", e, uri)))?;
@@ -220,6 +221,7 @@ async fn get_completions_handler(
     let mut agent = Agent::new("Haithe Agent", llm).preamble(&preamble);
     agent.temperature = Some(temperature);
     agent.max_tokens = Some(1024);
+    agent.knowledges = Arc::new(knowledges);
 
     let prompt = messages
         .iter()
