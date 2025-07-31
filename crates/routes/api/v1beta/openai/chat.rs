@@ -17,7 +17,6 @@ use std::sync::Arc;
 use url::Url;
 use uuid;
 
-/// Ensures a URL string has a protocol, adding https:// if missing
 fn ensure_protocol(url_str: &str) -> String {
     if url_str.starts_with("http://") || url_str.starts_with("https://") {
         url_str.to_string()
@@ -280,7 +279,6 @@ async fn get_completions_handler(
             .fetch_one(&state.db)
             .await?;
 
-    // Convert to u64 for comparison, ensuring no negative values
     let current_expenditure_u64 = current_expenditure.max(0) as u64;
     let total_required = current_expenditure_u64 + total_cost;
 
