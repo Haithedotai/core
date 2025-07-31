@@ -269,6 +269,13 @@ async fn get_completions_handler(
         }));
     }
 
+    // add the total cost to the organization expenditure
+    sqlx::query("UPDATE organizations SET expenditure = expenditure + ? WHERE id = ?")
+        .bind(total_cost as i64)
+        .bind(org_id)
+        .execute(&state.db)
+        .await?;
+
     Ok(HttpResponse::Ok().json(json!({
         "id": format!("chatcmpl-{}", uuid::Uuid::new_v4().to_string()),
         "object": "chat.completion",
