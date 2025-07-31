@@ -397,17 +397,12 @@ async fn get_org_models_handler(
 
     let models = get_models();
 
-    let enabled_models = sqlx::query_scalar::<_, String>(
+    let enabled_model_ids: Vec<u64> = sqlx::query_scalar::<_, u64>(
         "SELECT model_id FROM org_model_enrollments WHERE org_id = ?",
     )
     .bind(org_id)
     .fetch_all(&state.db)
     .await?;
-
-    let enabled_model_ids: Vec<u64> = enabled_models
-        .iter()
-        .filter_map(|id_str| id_str.parse().ok())
-        .collect();
 
     let enabled_models = models
         .into_iter()
@@ -451,16 +446,23 @@ async fn post_org_models_handler(
     Ok(respond::ok("Models enrolled", serde_json::json!(model)))
 }
 
+#[derive(Deserialize)]
+struct DeleteOrgModelsQuery {
+    model_id: u64,
+}
+
 #[delete("/{id}/models")]
 async fn delete_org_models_handler(
     _: AuthUser,
     path: web::Path<i64>,
+    query: web::Query<DeleteOrgModelsQuery>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let org_id = path.into_inner();
 
-    sqlx::query("DELETE FROM org_model_enrollments WHERE org_id = ?")
+    sqlx::query("DELETE FROM org_model_enrollments WHERE org_id = ? AND model_id = ?")
         .bind(org_id)
+        .bind(query.model_id.to_string())
         .execute(&state.db)
         .await?;
 
@@ -481,5 +483,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(patch_org_members_handler)
         .service(delete_org_members_handler)
         .service(get_org_models_handler)
-        .service(post_org_models_handler);
+        .service(post_org_models_handler)
+        .service(delete_org_models_handler);
 }

@@ -297,6 +297,18 @@ export class HaitheClient {
   getProjectProducts(projectId: number): Promise<number[]> {
     return this.projects.getProjectProducts(projectId);
   }
+
+  getEnabledModels(orgId: number): Promise<number[]> {
+    return this.orgs.getEnabledModels(orgId);
+  }
+
+  enableModel(orgId: number, modelId: number): Promise<void> {
+    return this.orgs.enableModel(orgId, modelId);
+  }
+
+  disableModel(orgId: number, modelId: number): Promise<void> {
+    return this.orgs.disableModel(orgId, modelId);
+  }
 }
 
 export * from "./clients";

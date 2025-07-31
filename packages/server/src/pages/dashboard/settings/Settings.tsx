@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
 import { Switch } from "@/src/lib/components/ui/switch";
 import { Badge } from "@/src/lib/components/ui/badge";
-import { Separator } from "@/src/lib/components/ui/separator";
 import Icon from "@/src/lib/components/custom/Icon";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
+import { useStore } from "@/src/lib/hooks/use-store";
+import { toast } from "sonner";
 
 interface LLMModel {
   id: number;
@@ -19,29 +18,34 @@ interface LLMModel {
 
 export default function SettingsPage() {
   const haithe = useHaitheApi();
-  const { data: availableModels } = haithe.getAvailableModels();
+  const { data: availableModels, isLoading: isLoadingAvailable } = haithe.getAvailableModels();
+  const { selectedOrganizationId } = useStore();
+  const { data: enabledModels, isLoading: isLoadingEnabled, refetch: refetchEnabled } = haithe.getEnabledModels(selectedOrganizationId);
 
-  // Initialize enabled models based on is_active status from API
-  const [enabledModels, setEnabledModels] = useState<Set<number>>(new Set());
+  // Helper function to check if a model is enabled
+  const isModelEnabled = (modelId: number) => {
+    return enabledModels?.some((model: any) => model.id === modelId) || false;
+  };
 
-  // Update enabled models when API data is available
-  useEffect(() => {
-    if (availableModels) {
-      const activeModelIds = availableModels
-        .filter((model: LLMModel) => model.is_active)
-        .map((model: LLMModel) => model.id);
-      setEnabledModels(new Set(activeModelIds));
+  const toggleModel = async (modelId: number) => {
+    if (!selectedOrganizationId) {
+      toast.error('No organization selected');
+      return;
     }
-  }, [availableModels]);
 
-  const toggleModel = (modelId: number) => {
-    const newEnabledModels = new Set(enabledModels);
-    if (newEnabledModels.has(modelId)) {
-      newEnabledModels.delete(modelId);
-    } else {
-      newEnabledModels.add(modelId);
+    try {
+      if (isModelEnabled(modelId)) {
+        await haithe.disableModel.mutateAsync({ orgId: selectedOrganizationId, modelId });
+      } else {
+        await haithe.enableModel.mutateAsync({ orgId: selectedOrganizationId, modelId });
+      }
+
+      // Refetch enabled models after successful operation
+      await refetchEnabled();
+    } catch (error) {
+      console.error('Failed to toggle model:', error);
+      // Error handling is already done in the mutation hooks
     }
-    setEnabledModels(newEnabledModels);
   };
 
   // Process API data to add recommended flag
@@ -54,7 +58,7 @@ export default function SettingsPage() {
   const otherModels = processedModels.filter((model: LLMModel) => !model.recommended);
 
   // Show loading state if data is not yet available
-  if (!availableModels) {
+  if (isLoadingAvailable || isLoadingEnabled) {
     return (
       <div className="min-h-full bg-background">
         <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
@@ -70,7 +74,7 @@ export default function SettingsPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <Icon name="LoaderCircle" className="size-8 animate-spin mx-auto mb-2" />
               <p className="text-muted-foreground">Loading available models...</p>
             </div>
           </div>
@@ -171,8 +175,9 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <Switch
-                      checked={enabledModels.has(featuredModel.id)}
+                      checked={isModelEnabled(featuredModel.id)}
                       onCheckedChange={() => toggleModel(featuredModel.id)}
+                      disabled={haithe.enableModel.isPending || haithe.disableModel.isPending}
                     />
                   </div>
                 </CardContent>
@@ -193,8 +198,8 @@ export default function SettingsPage() {
                     <div key={model.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 rounded-md bg-muted flex items-center justify-center min-w-[28px] min-h-[28px]">
-                          {renderProviderLogo(model.provider, "size-3.5", enabledModels.has(model.id))}
-                          <Icon name={getProviderIcon(model.provider)} className={`size-3.5 text-muted-foreground transition-all duration-300 hidden ${enabledModels.has(model.id) ? '' : 'grayscale opacity-60'}`} />
+                          {renderProviderLogo(model.provider, "size-3.5", isModelEnabled(model.id))}
+                          <Icon name={getProviderIcon(model.provider)} className={`size-3.5 text-muted-foreground transition-all duration-300 hidden ${isModelEnabled(model.id) ? '' : 'grayscale opacity-60'}`} />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
@@ -204,8 +209,9 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       <Switch
-                        checked={enabledModels.has(model.id)}
+                        checked={isModelEnabled(model.id)}
                         onCheckedChange={() => toggleModel(model.id)}
+                        disabled={haithe.enableModel.isPending || haithe.disableModel.isPending}
                         className="scale-75"
                       />
                     </div>
@@ -224,17 +230,13 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <p className="font-medium text-sm text-foreground">
-                        {enabledModels.size} model{enabledModels.size !== 1 ? 's' : ''} enabled
+                        {enabledModels?.length || 0} model{enabledModels?.length !== 1 ? 's' : ''} enabled
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Available to all organization members
                       </p>
                     </div>
                   </div>
-                  <Button size="sm">
-                    <Icon name="Save" className="size-3.5 mr-1.5" />
-                    Save Changes
-                  </Button>
                 </div>
               </CardContent>
             </Card>

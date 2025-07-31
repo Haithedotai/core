@@ -78,6 +78,12 @@ export default function GenerateAPIKeyPage() {
         Back to Dashboard
       </Link>
 
+      <Button className="mt-4" onClick={() => {
+        haithe.disableApiKey.mutateAsync();
+      }}>
+        Disable API Key
+      </Button>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

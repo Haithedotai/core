@@ -179,6 +179,8 @@ export default function DashboardPage() {
   const { data: organization } = api.getOrganization(selectedOrganizationId);
   const { data: agents } = api.getProjects(selectedOrganizationId);
 
+  console.log({ organization });
+
   return (
     <div className="min-h-full bg-background">
       {/* Header */}

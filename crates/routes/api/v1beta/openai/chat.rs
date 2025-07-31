@@ -45,20 +45,25 @@ async fn get_completions_handler(
         .fetch_one(&state.db)
         .await?;
 
-    let enabled_products_for_organization: Vec<String> =
-        contracts::get_contract("HaitheOrganization", Some(&org_address))?
-            .method::<_, Vec<String>>("getEnabledProducts", ())?
+    let enabled_products_for_organization: Vec<ethers::types::Address> =
+        contracts::get_contract("HaitheOrganization", Some(org_address.as_str()))?
+            .method::<_, Vec<ethers::types::Address>>("getEnabledProducts", ())?
             .call()
             .await?;
 
     let enabled_products_for_project: Vec<String> =
-        sqlx::query_scalar::<_, String>("SELECT address FROM products WHERE project_id = ?")
+        sqlx::query_scalar::<_, String>(
+            "SELECT p.address FROM products p 
+             JOIN project_products_enabled ppe ON p.id = ppe.product_id 
+             WHERE ppe.project_id = ?"
+        )
             .bind(api_caller.project_id)
             .fetch_all(&state.db)
             .await?;
 
     let enabled_products: Vec<String> = enabled_products_for_organization
         .into_iter()
+        .map(|addr| format!("{:?}", addr))
         .filter(|p| enabled_products_for_project.contains(p))
         .collect();
 
