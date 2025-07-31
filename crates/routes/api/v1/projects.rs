@@ -82,7 +82,6 @@ async fn can_manage_project(
     project_id: i64,
     db: &sqlx::SqlitePool,
 ) -> Result<bool, sqlx::Error> {
-    // Get the org_id for this project
     let org_id: Option<i64> = sqlx::query_scalar("SELECT org_id FROM projects WHERE id = ?")
         .bind(project_id)
         .fetch_optional(db)
@@ -93,12 +92,10 @@ async fn can_manage_project(
         None => return Ok(false),
     };
 
-    // Check if user can manage the organization
     if can_manage_org(user_wallet, org_id, db).await? {
         return Ok(true);
     }
 
-    // Check if user is a project admin
     let project_admin_check = sqlx::query_scalar::<_, i64>(
         "SELECT COUNT(*) FROM project_members WHERE project_id = ? AND wallet_address = ? AND role = 'admin'"
     )
@@ -152,13 +149,11 @@ async fn get_project_handler(
 ) -> Result<impl Responder, ApiError> {
     let project_id = path.into_inner();
 
-    let project = sqlx::query_as::<_, Project>(
-        "SELECT * FROM projects WHERE id = ?",
-    )
-    .bind(project_id)
-    .fetch_one(&state.db)
-    .await
-    .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
+    let project = sqlx::query_as::<_, Project>("SELECT * FROM projects WHERE id = ?")
+        .bind(project_id)
+        .fetch_one(&state.db)
+        .await
+        .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
 
     Ok(respond::ok("Project retrieved", project))
 }
@@ -176,14 +171,13 @@ async fn update_project_handler(
         return Err(ApiError::Forbidden);
     }
 
-    let project = sqlx::query_as::<_, Project>(
-        "UPDATE projects SET name = ? WHERE id = ? RETURNING *",
-    )
-    .bind(&query.name)
-    .bind(project_id)
-    .fetch_one(&state.db)
-    .await
-    .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
+    let project =
+        sqlx::query_as::<_, Project>("UPDATE projects SET name = ? WHERE id = ? RETURNING *")
+            .bind(&query.name)
+            .bind(project_id)
+            .fetch_one(&state.db)
+            .await
+            .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
 
     Ok(respond::ok("Project updated", project))
 }
@@ -200,13 +194,11 @@ async fn delete_project_handler(
         return Err(ApiError::Forbidden);
     }
 
-    let project = sqlx::query_as::<_, Project>(
-        "DELETE FROM projects WHERE id = ? RETURNING *",
-    )
-    .bind(project_id)
-    .fetch_one(&state.db)
-    .await
-    .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
+    let project = sqlx::query_as::<_, Project>("DELETE FROM projects WHERE id = ? RETURNING *")
+        .bind(project_id)
+        .fetch_one(&state.db)
+        .await
+        .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
 
     Ok(respond::ok("Project deleted", project))
 }
@@ -219,7 +211,6 @@ async fn get_project_members_handler(
 ) -> Result<impl Responder, ApiError> {
     let project_id = path.into_inner();
 
-    // Check if project exists
     let project_exists = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM projects WHERE id = ?")
         .bind(project_id)
         .fetch_one(&state.db)
@@ -249,7 +240,6 @@ async fn add_project_member_handler(
     let project_id = path.into_inner();
     let wallet_address = query.wallet_address.to_lowercase();
 
-    // Check if project exists
     let project_exists = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM projects WHERE id = ?")
         .bind(project_id)
         .fetch_one(&state.db)
@@ -259,7 +249,6 @@ async fn add_project_member_handler(
         return Err(ApiError::NotFound("Project not found".to_string()));
     }
 
-    // Check if user can manage this project
     if !can_manage_project(&user.wallet_address, project_id, &state.db).await? {
         return Err(ApiError::Forbidden);
     }
@@ -350,18 +339,51 @@ async fn get_project_products_handler(
     let project_id = path.into_inner();
 
     let product_ids = sqlx::query_scalar::<_, i64>(
-        "SELECT product_id FROM project_products_enabled WHERE project_id = ?"
+        "SELECT product_id FROM project_products_enabled WHERE project_id = ?",
     )
     .bind(project_id)
     .fetch_all(&state.db)
     .await
-    .map_err(|e| {
-        ApiError::Internal("Failed to fetch project products".into())
-    })?;
+    .map_err(|e| ApiError::Internal("Failed to fetch project products".into()))?;
 
     Ok(respond::ok(
         "Project products fetched successfully",
         serde_json::json!({ "product_ids": product_ids }),
+    ))
+}
+
+#[get("/{id}/price-per-call")]
+async fn get_project_price_per_call_handler(
+    _: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = path.into_inner();
+
+    let project_exists = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM projects WHERE id = ?")
+        .bind(project_id)
+        .fetch_one(&state.db)
+        .await?;
+
+    if project_exists == 0 {
+        return Err(ApiError::NotFound("Project not found".to_string()));
+    }
+
+    let total_price: Option<i64> = sqlx::query_scalar(
+        "SELECT SUM(p.price_per_call) 
+         FROM products p 
+         INNER JOIN project_products_enabled ppe ON p.id = ppe.product_id 
+         WHERE ppe.project_id = ?",
+    )
+    .bind(project_id)
+    .fetch_one(&state.db)
+    .await?;
+
+    let total_price = total_price.unwrap_or(0);
+
+    Ok(respond::ok(
+        "Total price per call calculated",
+        serde_json::json!({ "total_price_per_call": total_price }),
     ))
 }
 
@@ -374,5 +396,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(add_project_member_handler)
         .service(update_project_member_handler)
         .service(remove_project_member_handler)
-        .service(get_project_products_handler);
+        .service(get_project_products_handler)
+        .service(get_project_price_per_call_handler);
 }
