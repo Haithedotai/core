@@ -31,11 +31,9 @@ export class HaitheProjectsClient extends BaseClient {
   }
 
   deleteProject(id: number): Promise<Project> {
-    return this.fetch(
-      `/v1/projects/${id}`,
-      this.authClient.getAuthToken(),
-      { method: "DELETE" }
-    );
+    return this.fetch(`/v1/projects/${id}`, this.authClient.getAuthToken(), {
+      method: "DELETE",
+    });
   }
 
   getProjectMembers(projectId: number): Promise<ProjectMember[]> {
@@ -93,11 +91,19 @@ export class HaitheProjectsClient extends BaseClient {
     );
   }
 
-  // Project product management
   getProjectProducts(projectId: number): Promise<number[]> {
     return this.fetch<{ product_ids: number[] }>(
       `/v1/projects/${projectId}/products`,
       this.authClient.getAuthToken()
-    ).then(response => response.product_ids);
+    ).then((response) => response.product_ids);
+  }
+
+  pricePerCall(projectId: number): Promise<{
+    total_price_per_call: number;
+  }> {
+    return this.fetch(
+      `/v1/projects/${projectId}/price_per_call`,
+      this.authClient.getAuthToken()
+    );
   }
 }
