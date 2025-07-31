@@ -32,12 +32,14 @@ export const getMimeType = (filePath: string): string => {
   return mimeTypes[ext] || 'application/octet-stream';
 };
 
-export const copyToClipboard = async (text: string, field: string, setCopiedField: (field: string | null) => void) => {
+export const copyToClipboard = async (text: string, field: string, setCopiedField?: (field: string | null) => void) => {
   try {
     await navigator.clipboard.writeText(text);
     toast.success(`${field} copied to clipboard`);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
+    if (setCopiedField) {
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
   } catch (err) {
     toast.error('Failed to copy to clipboard');
   }

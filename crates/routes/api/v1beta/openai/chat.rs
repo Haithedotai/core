@@ -271,7 +271,7 @@ async fn get_completions_handler(
         .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
 
     let balance = contracts::get_contract("tUSDT", None)?
-        .method::<_, u64>("balanceOf", (org_address))?
+        .method::<_, u64>("balanceOf", (formatted_organization_address))?
         .call()
         .await?;
 
