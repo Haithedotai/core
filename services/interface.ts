@@ -78,13 +78,6 @@ export class HaitheClient {
     return this.auth.profile();
   }
 
-  getApiStatus(): Promise<{
-    address: string;
-    registered: string;
-  }> {
-    return this.auth.getApiStatus();
-  }
-
   generateApiKey(): Promise<{
     api_key: string;
     message: string;
