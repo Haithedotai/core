@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/lib/components/ui/dialog";
 import { Button } from "@/src/lib/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
+import { Card, CardContent } from "@/src/lib/components/ui/card";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Image } from "@/src/lib/components/custom/Image";
-import { copyToClipboard } from "@/utils";
-import QRCode from "qrcode";
 import { cn } from "@/src/lib/utils";
+import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 
 interface FaucetOption {
   id: string;
@@ -25,7 +24,7 @@ const faucetOptions: FaucetOption[] = [
     name: "USDT Faucet",
     symbol: "USDT",
     icon: "/static/tether.svg",
-    address: "0x1234567890123456789012345678901234567890", // Replace with actual faucet address
+    address: "",
     description: "Get test USDT tokens for development and testing",
     network: "Metis Andromeda",
     color: "from-green-500/10 to-green-600/10"
@@ -34,9 +33,9 @@ const faucetOptions: FaucetOption[] = [
     id: "metis",
     name: "METIS Faucet",
     symbol: "METIS",
-    icon: "/static/metis.svg", // You'll need to add this icon
-    address: "0x0987654321098765432109876543210987654321", // Replace with actual faucet address
-    description: "Get test METIS tokens for gas fees and testing",
+    icon: "/static/metis.svg",
+    address: "https://t.me/hyperion_testnet_bot",
+    description: "Get test METIS tokens for gas fees via Telegram",
     network: "Metis Andromeda",
     color: "from-blue-500/10 to-blue-600/10"
   }
@@ -45,27 +44,10 @@ const faucetOptions: FaucetOption[] = [
 export default function FaucetDialog() {
   const [selectedFaucet, setSelectedFaucet] = useState<FaucetOption | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
-
-  useEffect(() => {
-    if (selectedFaucet?.address && isDialogOpen) {
-      const paymentUri = `ethereum:${selectedFaucet.address}`;
-      QRCode.toDataURL(paymentUri, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      }, (error, dataUrl) => {
-        if (error) {
-          console.error('Error generating QR code:', error);
-        } else {
-          setQrCodeDataUrl(dataUrl);
-        }
-      });
-    }
-  }, [selectedFaucet?.address, isDialogOpen]);
+  
+  // Use the faucet API methods
+  const { getFaucetInfo, requestFaucetTokens } = useHaitheApi();
+  const faucetInfo = getFaucetInfo();
 
   const handleFaucetSelect = (faucet: FaucetOption) => {
     setSelectedFaucet(faucet);
@@ -74,7 +56,10 @@ export default function FaucetDialog() {
   const handleDialogClose = () => {
     setIsDialogOpen(false);
     setSelectedFaucet(null);
-    setQrCodeDataUrl("");
+  };
+
+  const handleRequestTokens = () => {
+    requestFaucetTokens.mutate(undefined); // Request tokens without specifying product ID
   };
 
   return (
@@ -138,11 +123,10 @@ export default function FaucetDialog() {
               {/* Back Button */}
               <Button 
                 variant="ghost" 
-                size="sm" 
                 onClick={() => setSelectedFaucet(null)}
-                className="justify-start p-0 h-auto"
+                className="justify-start h-auto"
               >
-                <Icon name="ArrowLeft" className="size-4 mr-2" />
+                <Icon name="ArrowLeft" className="size-4" />
                 Back to faucets
               </Button>
 
@@ -164,93 +148,113 @@ export default function FaucetDialog() {
                 </div>
               </div>
 
-              {/* QR Code */}
-              <div className="flex justify-center">
-                <div className="p-1 bg-white rounded-lg border border-border/50">
-                  {qrCodeDataUrl ? (
-                    <img
-                      src={qrCodeDataUrl}
-                      alt={`QR Code for ${selectedFaucet.name}`}
-                      className="w-48 h-48"
-                    />
-                  ) : (
-                    <div className="w-48 h-48 flex items-center justify-center">
-                      <Icon name="LoaderCircle" className="size-8 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
+              {/* Faucet Link (for Metis) */}
+              {selectedFaucet.id === "metis" && (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium text-foreground">Telegram Bot:</div>
+                  <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <code className="text-sm font-mono text-foreground flex-1 break-all">
+                      {selectedFaucet.address}
+                    </code>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => window.open(selectedFaucet.address, '_blank')}
+                      className="size-8"
+                    >
+                      <Icon name="ExternalLink" className="size-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Faucet Address */}
-              <div className="space-y-3">
-                <div className="text-sm font-medium text-foreground">Faucet Address:</div>
-                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
-                  <code className="text-sm font-mono text-foreground flex-1 break-all">
-                    {selectedFaucet.address}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => copyToClipboard(selectedFaucet.address, `${selectedFaucet.name} Address`)}
-                    className="size-8"
-                  >
-                    <Icon name="Copy" className="size-4" />
-                  </Button>
+              {/* Faucet Status (USDT only) */}
+              {selectedFaucet.id === "usdt" && faucetInfo.isLoading && (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium text-foreground">Faucet Status:</div>
+                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icon name="LoaderCircle" className="size-4 animate-spin text-muted-foreground" />
+                      <span className="text-muted-foreground">Loading faucet status...</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+              
+              {selectedFaucet.id === "usdt" && faucetInfo.error && (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium text-foreground">Faucet Status:</div>
+                  <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icon name="X" className="size-4 text-red-500" />
+                      <span className="text-red-700 dark:text-red-300">Failed to load faucet status</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {selectedFaucet.id === "usdt" && faucetInfo.data && (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium text-foreground">Faucet Status:</div>
+                  <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                    {faucetInfo.data.has_requested ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Icon name="Check" className="size-4 text-green-500" />
+                          <span className="text-green-700 dark:text-green-300">Tokens already requested</span>
+                        </div>
+                        {faucetInfo.data.last_request && (
+                          <div className="text-xs text-muted-foreground">
+                            Last request: {new Date(faucetInfo.data.last_request.requested_at).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Icon name="Circle" className="size-4 text-blue-500" />
+                        <span className="text-blue-700 dark:text-blue-300">No tokens requested yet</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                <Button variant="outline" size="sm" className="w-full">
-                  <Icon name="ExternalLink" className="size-4 mr-2" />
-                  Open in Wallet
-                </Button>
-                <Button variant="outline" size="sm" className="w-full">
-                  <Icon name="Globe" className="size-4 mr-2" />
-                  Visit Faucet Website
-                </Button>
+                {selectedFaucet.id === "usdt" && (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={handleRequestTokens}
+                    disabled={requestFaucetTokens.isPending || (faucetInfo.data?.has_requested ?? false)}
+                  >
+                    {requestFaucetTokens.isPending ? (
+                      <>
+                        <Icon name="LoaderCircle" className="size-4 mr-2 animate-spin" />
+                        Requesting Tokens...
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="Droplets" className="size-4 mr-2" />
+                        Request USDT Tokens
+                      </>
+                    )}
+                  </Button>
+                )}
+                
+                {selectedFaucet.id === "metis" && (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => window.open(selectedFaucet.address, '_blank')}
+                  >
+                    <Icon name="MessageCircle" className="size-4 mr-2" />
+                    Open Telegram Bot
+                  </Button>
+                )}
               </div>
-
-              {/* Instructions */}
-              <div className="space-y-3">
-                <div className="text-sm font-medium text-foreground">How to use the faucet:</div>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-medium text-primary">1</span>
-                    </div>
-                    <p>Connect your wallet to the Metis Andromeda network</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-medium text-primary">2</span>
-                    </div>
-                    <p>Visit the faucet website or use the QR code above</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-medium text-primary">3</span>
-                    </div>
-                    <p>Request test tokens to your wallet address</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Note */}
-              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-2">
-                  <Icon name="Info" className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-800 dark:text-blue-200">
-                    <p>These are testnet tokens with no real value. They are used for development and testing purposes only.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Close Button */}
-              <Button variant="outline" size="sm" onClick={handleDialogClose} className="w-full">
-                <Icon name="X" className="size-4 mr-2" />
-                Close
-              </Button>
             </div>
           )}
         </div>
