@@ -219,10 +219,8 @@ async fn post_faucet_handler(
     request: web::Json<FaucetPostRequest>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    // Use product_id from request or default to 1
     let product_id = request.product_id.unwrap_or(1);
 
-    // Check if user already has a faucet request for this product
     let existing_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
         "SELECT * FROM faucet_requests WHERE wallet_address = ? AND product_id = ?",
     )
@@ -238,34 +236,30 @@ async fn post_faucet_handler(
         ));
     }
 
-    // Amount to send (100 USDT with 18 decimals)
     let amount = U256::from(100) * U256::exp10(18);
 
-    // Get tUSDT contract with wallet
     let contract = contracts::get_contract_with_wallet("tUSDT", None)
         .await
         .map_err(|e| ApiError::Internal(format!("Failed to get contract: {}", e)))?;
 
-    // Parse user's wallet address
     let user_address: ethers::types::Address = user
         .wallet_address
         .parse()
         .map_err(|_| ApiError::BadRequest("Invalid wallet address".into()))?;
 
-    // Call transfer function
-    let tx = contract
+    let pending_tx = contract
         .method::<_, bool>("transfer", (user_address, amount))
         .map_err(|e| ApiError::Internal(format!("Failed to prepare transfer: {}", e)))?
         .send()
         .await
         .map_err(|e| ApiError::Internal(format!("Failed to send transfer: {}", e)))?;
 
-    // Wait for confirmation
-    let _receipt = tx
+    let tx_hash = pending_tx.tx_hash();
+
+    let _receipt = pending_tx
         .await
         .map_err(|e| ApiError::Internal(format!("Transfer failed: {}", e)))?;
 
-    // Record the faucet request in database
     sqlx::query("INSERT INTO faucet_requests (wallet_address, product_id) VALUES (?, ?)")
         .bind(&user.wallet_address)
         .bind(product_id)
@@ -279,7 +273,7 @@ async fn post_faucet_handler(
             "amount": "100",
             "token": "tUSDT",
             "product_id": product_id,
-            "transaction_hash": format!("{:?}", tx.tx_hash()),
+            "transaction_hash": format!("{:?}", tx_hash),
             "recipient": user.wallet_address
         }),
     ))
