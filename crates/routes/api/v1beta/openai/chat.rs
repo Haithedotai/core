@@ -9,6 +9,7 @@ use alith::{
 };
 use async_trait::async_trait;
 use chrono;
+use ethers::abi::Address;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -265,8 +266,12 @@ async fn get_completions_handler(
         }));
     }
 
+    let formatted_organization_address: Address = org_address
+        .parse()
+        .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
+
     let balance = contracts::get_contract("tUSDT", None)?
-        .method::<_, u64>("balanceOf", (org_address,))?
+        .method::<_, u64>("balanceOf", (org_address))?
         .call()
         .await?;
 
