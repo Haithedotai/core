@@ -178,7 +178,6 @@ async fn get_faucet_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    // Get the last faucet request for this user
     let last_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
         "SELECT * FROM faucet_requests WHERE wallet_address = ? ORDER BY requested_at DESC LIMIT 1",
     )
@@ -219,7 +218,6 @@ async fn post_faucet_handler(
 ) -> Result<impl Responder, ApiError> {
     let product_id = request.product_id.unwrap_or(1);
 
-    // Check if user has made a request in the last hour
     let recent_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
         "SELECT * FROM faucet_requests WHERE wallet_address = ? AND product_id = ? AND requested_at > datetime('now', '-1 hour')",
     )
@@ -235,7 +233,6 @@ async fn post_faucet_handler(
         ));
     }
 
-    // Amount to send (500 USDT with 18 decimals)
     let amount = U256::from(500) * U256::exp10(18);
 
     let contract = contracts::get_contract_with_wallet("tUSDT", None)
@@ -247,21 +244,17 @@ async fn post_faucet_handler(
         .parse()
         .map_err(|_| ApiError::BadRequest("Invalid wallet address".into()))?;
 
-    // Prepare the contract call
     let contract_call = contract
         .method::<_, bool>("transfer", (user_address, amount))
         .map_err(|e| ApiError::Internal(format!("Failed to prepare transfer: {}", e)))?;
 
-    // Send the transaction
     let pending_tx = contract_call
         .send()
         .await
         .map_err(|e| ApiError::Internal(format!("Failed to send transfer: {}", e)))?;
 
-    // Get transaction hash before awaiting
     let tx_hash = pending_tx.tx_hash();
 
-    // Wait for confirmation
     let _receipt = pending_tx
         .await
         .map_err(|e| ApiError::Internal(format!("Transfer failed: {}", e)))?;
