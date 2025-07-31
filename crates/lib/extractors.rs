@@ -150,9 +150,9 @@ impl FromRequest for ApiCaller {
             println!("Debug: project_uid = {}", proj_uid_header);
             println!("Debug: signature = {}", parsed_api_key.signature);
 
-            let api_key_timestamp: Option<String> = sqlx
+            let api_key_timestamp: Option<i64> = sqlx
                 ::query_scalar(
-                    "SELECT strftime('%s', api_key_last_issued_at) FROM accounts WHERE wallet_address = ?"
+                    "SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?"
                 )
                 .bind(&wallet_address)
                 .fetch_optional(&db).await
@@ -162,11 +162,7 @@ impl FromRequest for ApiCaller {
                 })?;
 
             let timestamp = match api_key_timestamp {
-                Some(ts_str) => {
-                    let ts = ts_str.parse::<i64>().map_err(|e| {
-                        println!("Debug: Failed to parse timestamp '{}': {:?}", ts_str, e);
-                        ApiError::Internal("Invalid timestamp format".into())
-                    })?;
+                Some(ts) => {
                     println!("Debug: Found timestamp = {}", ts);
                     ts
                 }

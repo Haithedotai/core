@@ -269,7 +269,7 @@ async fn get_completions_handler(
     }
 
     let balance = contracts::get_contract("tUSDT", None)?
-        .method::<_, u64>("balanceOf", (org_address,))?
+        .method::<_, u64>("balanceOf", (org_address))?
         .call()
         .await?;
 
