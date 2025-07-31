@@ -151,6 +151,7 @@ impl FromRequest for ApiCaller {
             println!("Debug: wallet_address = {}", wallet_address);
             println!("Debug: org_id = {}", org_uid_header);
             println!("Debug: project_id = {}", proj_uid_header);
+            println!("Debug: signature = {}", parsed_api_key.signature);
 
             // Step 1: Check if account exists and get timestamp
             let api_key_timestamp: Option<String> = sqlx

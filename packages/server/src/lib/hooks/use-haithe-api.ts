@@ -577,5 +577,45 @@ export function useHaitheApi() {
             },
             enabled: !!client && !!projectId,
         }),
+
+        getEnabledModels: (orgId: number) => useQuery({
+            queryKey: ['enabledModels', orgId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                console.log('getEnabledModels', orgId);
+                return client.getEnabledModels(orgId);
+            },
+            enabled: !!client && !!orgId,
+        }),
+
+        enableModel: useMutation({
+            mutationKey: ['enableModel'],
+            mutationFn: ({ orgId, modelId }: { orgId: number; modelId: number }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.enableModel(orgId, modelId);
+            },
+            onSuccess: () => {
+                toast.success('Model enabled successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not enable model. Please try again.');
+            }
+        }),
+
+        disableModel: useMutation({
+            mutationKey: ['disableModel'],
+            mutationFn: ({ orgId, modelId }: { orgId: number; modelId: number }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.disableModel(orgId, modelId);
+            },
+            onSuccess: () => {
+                toast.success('Model disabled successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not disable model. Please try again.');
+            }
+        }),
     };
 } 

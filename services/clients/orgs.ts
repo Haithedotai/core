@@ -112,6 +112,22 @@ export class HaitheOrgsClient extends BaseClient {
     return this.fetch(`/v1/models`, this.authClient.getAuthToken());
   }
 
+  getEnabledModels(orgId: number): Promise<number[]> {
+    return this.fetch(`/v1/orgs/${orgId}/models`, this.authClient.getAuthToken());
+  }
+
+  enableModel(orgId: number, modelId: number): Promise<void> {
+    return this.fetch(`/v1/orgs/${orgId}/models?model_id=${modelId}`, this.authClient.getAuthToken(), {
+      method: "POST",
+    });
+  }
+
+  disableModel(orgId: number, modelId: number): Promise<void> {
+    return this.fetch(`/v1/orgs/${orgId}/models?model_id=${modelId}`, this.authClient.getAuthToken(), {
+      method: "DELETE",
+    });
+  }
+
   async enableProduct(
     product_address: Address,
     org_address: Address

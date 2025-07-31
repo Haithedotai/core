@@ -7,6 +7,9 @@ import { Input } from "@/src/lib/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import { Separator } from "@/src/lib/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/lib/components/ui/tabs";
+import { Label } from "@/src/lib/components/ui/label";
+import { Textarea } from "@/src/lib/components/ui/textarea";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useParams } from "@tanstack/react-router";
@@ -27,16 +30,18 @@ export default function AgentsConfigurationPage() {
   const profileQuery = api.profile();
   const orgId = useStore((s) => s.selectedOrganizationId);
   const { data: project, isLoading: isLoadingProject } = api.getProject(parseInt(params.id));
-  
+
+  console.log({ project });
+
   // Get organization data
   const { data: organization } = api.getOrganization(orgId);
-  
+
   // Get enabled products for the organization
   const { data: enabledProductAddresses, isLoading: isLoadingEnabledProducts, refetch: refetchEnabledProducts } = api.getEnabledProducts(organization?.address || "");
-  
+
   // Get all products to match with enabled addresses
   const { data: allProducts, isLoading: isLoadingAllProducts } = api.getAllProducts();
-  
+
   // Get project-specific enabled products
   const { data: projectProductIds, isLoading: isLoadingProjectProducts, refetch: refetchProjectProducts } = api.getProjectProducts(parseInt(params.id));
 
@@ -170,7 +175,7 @@ export default function AgentsConfigurationPage() {
           productId: productId
         });
       }
-      
+
       // Refresh project products
       refetchProjectProducts();
       setHasChanges(false);
@@ -251,6 +256,146 @@ export default function AgentsConfigurationPage() {
                 <p className="text-sm">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* API Documentation Card */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Code" className="size-5" />
+              API Documentation
+            </CardTitle>
+            <CardDescription>
+              Use the following endpoint to interact with your agent via API
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="request" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="request">Request</TabsTrigger>
+                <TabsTrigger value="headers">Headers</TabsTrigger>
+                <TabsTrigger value="body">Body</TabsTrigger>
+                <TabsTrigger value="example">Example</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="request" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Endpoint</Label>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="font-mono">GET</Badge>
+                    <Input
+                      value={`http://localhost:9090/api/v1beta/openai/chat/completions`}
+                      readOnly
+                      className="font-mono text-sm mt-2"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="headers" className="space-y-4">
+                <div className="space-y-3 mt-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" checked readOnly className="rounded" />
+                    <Label className="w-24 text-sm">Authorization</Label>
+                    <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" checked readOnly className="rounded" />
+                    <Label className="w-24 text-sm">OpenAI-Organization</Label>
+                    <Input value={orgId} readOnly className="font-mono text-sm" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" checked readOnly className="rounded" />
+                    <Label className="w-24 text-sm">OpenAI-Project</Label>
+                    <Input value={project.id} readOnly className="font-mono text-sm" />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="body" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Request Body (JSON)</Label>
+                  <Textarea
+                    value={`{
+  "model": "gemini-2.0-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant with deep knowledge of weather and atmospheric phenomena."
+    },
+    {
+      "role": "user",
+      "content": "Hi, can you tell me what causes thunderstorms?"
+    },
+    {
+      "role": "assistant",
+      "content": "Thunderstorms are caused by the rapid upward movement of warm, moist air. As this air rises, it cools and condenses into cumulonimbus clouds, releasing heat. This fuels the storm. The process creates turbulence, lightning, thunder, and sometimes hail or tornadoes."
+    }
+  ]
+}`}
+                    readOnly
+                    className="font-mono text-sm h-48 mt-2"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="example" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg border bg-muted/50">
+                    <h4 className="font-medium mb-2">cURL Example</h4>
+                    <pre className="text-sm font-mono overflow-x-auto">
+                      {`curl -X POST http://localhost:9090/api/v1beta/openai/chat/completions \\
+  -H "Accept: */*" \\
+  -H "Authorization: Bearer sk-70997970c51812dc3a010c7d01b50e0d17dc79c8.17c095c6" \\
+  -H "OpenAI-Organization: 1" \\
+  -H "OpenAI-Project: 1" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello, how can you help me?"
+      }
+    ],
+    "max_tokens": 1000,
+    "temperature": 0.7
+  }'`}
+                    </pre>
+                  </div>
+
+                  <div className="p-4 rounded-lg border bg-muted/50">
+                    <h4 className="font-medium mb-2">JavaScript Example</h4>
+                    <pre className="text-sm font-mono overflow-x-auto">
+                      {`fetch('http://localhost:9090/api/v1beta/openai/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Accept': '*/*',
+    'Authorization': 'Bearer sk-70997970c51812dc3a010c7d01b50e0d17dc79c8.17c095c6',
+    'OpenAI-Organization': '1',
+    'OpenAI-Project': '1',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'gpt-4',
+    messages: [
+      {
+        role: 'user',
+        content: 'Hello, how can you help me?'
+      }
+    ],
+    max_tokens: 1000,
+    temperature: 0.7
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));`}
+                    </pre>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
