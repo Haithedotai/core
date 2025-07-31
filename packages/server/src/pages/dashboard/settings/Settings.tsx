@@ -18,8 +18,8 @@ interface LLMModel {
 
 export default function SettingsPage() {
   const haithe = useHaitheApi();
-  const { data: availableModels, isLoading: isLoadingAvailable } = haithe.getAvailableModels();
   const { selectedOrganizationId } = useStore();
+  const { data: availableModels, isLoading: isLoadingAvailable } = haithe.getAvailableModels();
   const { data: enabledModels, isLoading: isLoadingEnabled, refetch: refetchEnabled } = haithe.getEnabledModels(selectedOrganizationId);
 
   // Helper function to check if a model is enabled
@@ -170,15 +170,26 @@ export default function SettingsPage() {
                           <Badge variant="secondary" className="text-xs bg-gradient-to-r from-orange-400/20 via-red-500/20 to-sky-400/20 border-orange-400/30">
                             Recommended
                           </Badge>
+                          {!featuredModel.is_active && (
+                            <Badge variant="destructive" className="text-xs">
+                              Temporarily Unavailable
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground">Model ID: {featuredModel.name}</p>
                       </div>
                     </div>
-                    <Switch
-                      checked={isModelEnabled(featuredModel.id)}
-                      onCheckedChange={() => toggleModel(featuredModel.id)}
-                      disabled={haithe.enableModel.isPending || haithe.disableModel.isPending}
-                    />
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-foreground">${featuredModel.price_per_call.toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">per call</p>
+                      </div>
+                      <Switch
+                        checked={isModelEnabled(featuredModel.id)}
+                        onCheckedChange={() => toggleModel(featuredModel.id)}
+                        disabled={haithe.enableModel.isPending || haithe.disableModel.isPending}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -205,15 +216,26 @@ export default function SettingsPage() {
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm text-foreground truncate">{model.display_name}</span>
                             <span className="text-xs text-muted-foreground">({model.provider})</span>
+                            {!model.is_active && (
+                              <Badge variant="outline" className="text-xs bg-amber-500/20 border-muted/50">
+                                Temporarily Unavailable
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
-                      <Switch
-                        checked={isModelEnabled(model.id)}
-                        onCheckedChange={() => toggleModel(model.id)}
-                        disabled={haithe.enableModel.isPending || haithe.disableModel.isPending}
-                        className="scale-75"
-                      />
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-foreground">${model.price_per_call.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">per call</p>
+                        </div>
+                        <Switch
+                          checked={isModelEnabled(model.id)}
+                          onCheckedChange={() => toggleModel(model.id)}
+                          disabled={haithe.enableModel.isPending || haithe.disableModel.isPending || !model.is_active}
+                          className="scale-75"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
