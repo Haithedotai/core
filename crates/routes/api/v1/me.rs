@@ -89,23 +89,16 @@ async fn get_api_key_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<String> =
-        sqlx::query_scalar("SELECT strftime('%s', api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
+    let api_key_last_issued_at: Option<i64> =
+        sqlx::query_scalar("SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
             .bind(&user.wallet_address)
             .fetch_optional(&state.db)
             .await?;
 
-    match api_key_last_issued_at {
-        Some(ts_str) => {
-            // Handle case where strftime returns NULL as string
-            if !ts_str.is_empty() && ts_str != "NULL" {
-                let ts = ts_str.parse::<i64>().unwrap_or(0);
-                if ts > 0 {
-                    return Err(ApiError::BadRequest("API key already issued".into()));
-                }
-            }
+    if let Some(ts) = api_key_last_issued_at {
+        if ts > 0 {
+            return Err(ApiError::BadRequest("API key already issued".into()));
         }
-        None => {}
     }
 
     let tee_private_key = std::env::var("MOCK_TEE_PVT_KEY")
@@ -150,23 +143,13 @@ async fn get_api_key_last_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<String> =
-        sqlx::query_scalar("SELECT strftime('%s', api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
+    let api_key_last_issued_at: Option<i64> =
+        sqlx::query_scalar("SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
             .bind(&user.wallet_address)
             .fetch_optional(&state.db)
             .await?;
 
-    let issued_at = match api_key_last_issued_at {
-        Some(ts_str) => {
-            // Handle case where strftime returns NULL as string
-            if ts_str.is_empty() || ts_str == "NULL" {
-                0
-            } else {
-                ts_str.parse::<i64>().unwrap_or(0)
-            }
-        }
-        None => 0
-    };
+    let issued_at = api_key_last_issued_at.unwrap_or(0);
 
     Ok(respond::ok(
         "Last API key issued at",

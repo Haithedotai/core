@@ -272,20 +272,19 @@ export default function AgentsConfigurationPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="request" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="request">Request</TabsTrigger>
                 <TabsTrigger value="headers">Headers</TabsTrigger>
                 <TabsTrigger value="body">Body</TabsTrigger>
-                <TabsTrigger value="example">Example</TabsTrigger>
               </TabsList>
 
               <TabsContent value="request" className="space-y-4">
                 <div className="space-y-2">
                   <Label>Endpoint</Label>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="font-mono">GET</Badge>
+                    <Badge variant="secondary" className="font-mono">POST</Badge>
                     <Input
-                      value={`http://localhost:9090/api/v1beta/openai/chat/completions`}
+                      value={`${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`}
                       readOnly
                       className="font-mono text-sm mt-2"
                     />
@@ -303,12 +302,12 @@ export default function AgentsConfigurationPage() {
                   <div className="flex items-center gap-2">
                     <input type="checkbox" checked readOnly className="rounded" />
                     <Label className="w-24 text-sm">OpenAI-Organization</Label>
-                    <Input value={orgId} readOnly className="font-mono text-sm" />
+                    <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm" />
                   </div>
                   <div className="flex items-center gap-2">
                     <input type="checkbox" checked readOnly className="rounded" />
                     <Label className="w-24 text-sm">OpenAI-Project</Label>
-                    <Input value={project.id} readOnly className="font-mono text-sm" />
+                    <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm" />
                   </div>
                 </div>
               </TabsContent>
@@ -337,62 +336,6 @@ export default function AgentsConfigurationPage() {
                     readOnly
                     className="font-mono text-sm h-48 mt-2"
                   />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="example" className="space-y-4">
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg border bg-muted/50">
-                    <h4 className="font-medium mb-2">cURL Example</h4>
-                    <pre className="text-sm font-mono overflow-x-auto">
-                      {`curl -X POST http://localhost:9090/api/v1beta/openai/chat/completions \\
-  -H "Accept: */*" \\
-  -H "Authorization: Bearer sk-70997970c51812dc3a010c7d01b50e0d17dc79c8.17c095c6" \\
-  -H "OpenAI-Organization: 1" \\
-  -H "OpenAI-Project: 1" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "gpt-4",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Hello, how can you help me?"
-      }
-    ],
-    "max_tokens": 1000,
-    "temperature": 0.7
-  }'`}
-                    </pre>
-                  </div>
-
-                  <div className="p-4 rounded-lg border bg-muted/50">
-                    <h4 className="font-medium mb-2">JavaScript Example</h4>
-                    <pre className="text-sm font-mono overflow-x-auto">
-                      {`fetch('http://localhost:9090/api/v1beta/openai/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Accept': '*/*',
-    'Authorization': 'Bearer sk-70997970c51812dc3a010c7d01b50e0d17dc79c8.17c095c6',
-    'OpenAI-Organization': '1',
-    'OpenAI-Project': '1',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    model: 'gpt-4',
-    messages: [
-      {
-        role: 'user',
-        content: 'Hello, how can you help me?'
-      }
-    ],
-    max_tokens: 1000,
-    temperature: 0.7
-  })
-})
-.then(response => response.json())
-.then(data => console.log(data));`}
-                    </pre>
-                  </div>
                 </div>
               </TabsContent>
             </Tabs>

@@ -5,6 +5,7 @@ import Icon from "@/src/lib/components/custom/Icon";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { toast } from "sonner";
+import { formatEther } from "viem";
 
 interface LLMModel {
   id: number;
@@ -21,6 +22,8 @@ export default function SettingsPage() {
   const { selectedOrganizationId } = useStore();
   const { data: availableModels, isLoading: isLoadingAvailable } = haithe.getAvailableModels();
   const { data: enabledModels, isLoading: isLoadingEnabled, refetch: refetchEnabled } = haithe.getEnabledModels(selectedOrganizationId);
+
+  console.log({ availableModels });
 
   // Helper function to check if a model is enabled
   const isModelEnabled = (modelId: number) => {
@@ -226,7 +229,7 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="text-sm font-medium text-foreground">${model.price_per_call.toFixed(2)}</p>
+                          <p className="text-sm font-medium text-foreground">${formatEther(BigInt(model.price_per_call))}</p>
                           <p className="text-xs text-muted-foreground">per call</p>
                         </div>
                         <Switch
