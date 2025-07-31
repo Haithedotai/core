@@ -6,18 +6,22 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import Icon from "@/src/lib/components/custom/Icon";
 import { copyToClipboard } from "@/utils";
 import { Link } from "@tanstack/react-router";
+import { formatDateTime } from "@/src/lib/utils/date";
 
 export default function GenerateAPIKeyPage() {
   const haithe = useHaitheApi();
   const generateApiKeyMutation = haithe.generateApiKey;
+  const disableApiKeyMutation = haithe.disableApiKey;
   const [generatedApiKey, setGeneratedApiKey] = useState<{ api_key: string; message: string; issued_at: number } | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const { data: apiKeyLastIssued, refetch: refetchApiKeyLastIssued, isSuccess: isApiKeyLastIssuedSuccess } = haithe.apiKeyLastIssued();
 
   const handleGenerateApiKey = async () => {
     try {
       const apiKey = await generateApiKeyMutation.mutateAsync();
       setGeneratedApiKey(apiKey);
+      refetchApiKeyLastIssued();
       setIsDialogOpen(true);
     } catch (error) {
       console.error("Failed to generate API key:", error);
@@ -30,6 +34,16 @@ export default function GenerateAPIKeyPage() {
     }
   };
 
+  const handleDisableApiKey = async () => {
+    try {
+      await disableApiKeyMutation.mutateAsync();
+      refetchApiKeyLastIssued();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to disable API key:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -37,39 +51,79 @@ export default function GenerateAPIKeyPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Icon name="Key" className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-xl font-semibold">Generate API Key</CardTitle>
+          <CardTitle className="text-xl font-semibold">Haithe API Key</CardTitle>
           <CardDescription>
-            Create a new API key for accessing the Haithe API. This key will only be shown once.
+            Manage your Haithe API key. This key will only be shown once.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-muted/50 p-4">
-            <div className="flex items-start space-x-3">
-              <Icon name="TriangleAlert" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">Important</p>
-                <p>We do not store your API key. Save it securely or you'll need to generate a new one.</p>
+            {isApiKeyLastIssuedSuccess && apiKeyLastIssued?.issued_at !== 0 ? (
+              <div>
+                <div className="flex items-start space-x-3">
+                  <Icon name="CircleCheck" className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground mb-1">API Key Enabled</p>
+                    <p>You have already generated an API key. You need to disable it to generate a new one.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 mt-4">
+                  <Icon name="Clock" className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground mb-1">Last Issued At</p>
+                    <p>{formatDateTime(new Date(apiKeyLastIssued?.issued_at * 1000 || 0))}</p>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-start space-x-3">
+                <Icon name="TriangleAlert" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">No API Key Generated</p>
+                  <p>You can generate a new API key to start using the Haithe API.</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          <Button
-            onClick={handleGenerateApiKey}
-            className="w-full"
-            disabled={generateApiKeyMutation.isPending}
-          >
-            {generateApiKeyMutation.isPending ? (
-              <>
-                <Icon name="LoaderCircle" className="h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Icon name="Plus" className="h-4 w-4" />
-                Generate API Key
-              </>
-            )}
-          </Button>
+          {isApiKeyLastIssuedSuccess && apiKeyLastIssued?.issued_at !== 0 ? (
+            <Button
+              onClick={handleDisableApiKey}
+              className="w-full"
+              disabled={disableApiKeyMutation.isPending}
+            >
+              {disableApiKeyMutation.isPending ? (
+                <>
+                  <Icon name="LoaderCircle" className="h-4 w-4 animate-spin" />
+                  Disabling...
+                </>
+              ) : (
+                <>
+                  <Icon name="Trash" className="h-4 w-4 text-red-500" />
+                  Disable API Key
+                </>
+              )}
+            </Button>) : (
+            <Button
+              onClick={handleGenerateApiKey}
+              className="w-full"
+              disabled={generateApiKeyMutation.isPending}
+            >
+              {generateApiKeyMutation.isPending ? (
+                <>
+                  <Icon name="LoaderCircle" className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Icon name="Plus" className="h-4 w-4" />
+                  Generate API Key
+                </>
+              )}
+            </Button>
+
+          )}
         </CardContent>
       </Card>
 
@@ -77,12 +131,6 @@ export default function GenerateAPIKeyPage() {
       <Link to="/dashboard" className="mt-4 text-sm underline underline-offset-2 hover:text-muted-foreground transition-colors" >
         Back to Dashboard
       </Link>
-
-      <Button className="mt-4" onClick={() => {
-        haithe.disableApiKey.mutateAsync();
-      }}>
-        Disable API Key
-      </Button>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -127,7 +175,7 @@ export default function GenerateAPIKeyPage() {
               </div>
               <div className="mt-1">
                 <p className="text-sm text-foreground">
-                  {generatedApiKey?.issued_at ? new Date(generatedApiKey.issued_at).toLocaleString() : ''}
+                  {generatedApiKey?.issued_at ? formatDateTime(new Date(generatedApiKey.issued_at * 1000)) : ''}
                 </p>
               </div>
             </div>
@@ -144,6 +192,10 @@ export default function GenerateAPIKeyPage() {
               </div>
             </div>
           </div>
+
+          <Button className="" onClick={() => setIsDialogOpen(false)}>
+            Close
+          </Button>
         </DialogContent>
       </Dialog>
     </div>

@@ -78,6 +78,12 @@ export class HaitheClient {
     return this.auth.profile();
   }
 
+  apiKeyLastIssued(): Promise<{
+    issued_at: number;
+  }> {
+    return this.auth.apiKeyLastIssued();
+  }
+
   generateApiKey(): Promise<{
     api_key: string;
     message: string;

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
-import { formatDate } from "@/src/lib/utils";
+import { cn, formatDate } from "@/src/lib/utils";
 import { useStore } from "@/src/lib/hooks/use-store";
 
 interface StatsCardProps {
@@ -178,8 +178,8 @@ export default function DashboardPage() {
   const { selectedOrganizationId } = useStore();
   const { data: organization } = api.getOrganization(selectedOrganizationId);
   const { data: agents } = api.getProjects(selectedOrganizationId);
+  const { data: apiKeyLastIssued } = api.apiKeyLastIssued();
 
-  console.log({ organization });
 
   return (
     <div className="min-h-full bg-background">
@@ -205,8 +205,12 @@ export default function DashboardPage() {
 
               <Button variant="outline" asChild>
                 <Link to="/dashboard/generate-api-key">
-                  <Icon name="Key" className="size-4 mr-2" />
-                  Generate API Key
+                  <Icon name="Key" className={cn(
+                    "size-4 text-orange-400",
+                  )} />
+                  <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">
+                    {apiKeyLastIssued?.issued_at && apiKeyLastIssued?.issued_at !== 0 ? <span className="">API Key Enabled</span> : <span className="">Generate API Key</span>}
+                  </span>
                 </Link>
               </Button>
             </div>
