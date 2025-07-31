@@ -385,7 +385,7 @@ export default function AgentsConfigurationPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExtensions.map((product) => {
-              const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USD
+              const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USDT
               const categoryIcon = getCategoryIcon(product.category);
               const isEnabled = projectProductIds?.includes(product.id) || false;
               const isActive = true; // All enabled products are considered active
@@ -414,7 +414,7 @@ export default function AgentsConfigurationPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline">{categoryLabels[product.category] || product.category}</Badge>
-                      <span className="text-sm font-medium text-primary">{priceInUsd.toFixed(6)} USD</span>
+                      <span className="text-sm font-medium text-primary">{priceInUsd.toFixed(6)} USDT</span>
                     </div>
 
                     <Separator />

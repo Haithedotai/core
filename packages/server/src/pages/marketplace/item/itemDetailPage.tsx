@@ -111,7 +111,7 @@ export default function ItemDetailPage() {
     );
   }
 
-  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USD 18 decimals
+  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USDT 18 decimals
   const categoryIcon = getCategoryIcon(item.category);
   const categoryLabel = getCategoryLabel(item.category);
 
@@ -221,7 +221,7 @@ export default function ItemDetailPage() {
                 <CardContent className="space-y-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-primary mb-2">
-                      {priceInEth.toFixed(6)} USD <span className="text-sm text-muted-foreground">per call</span>
+                      {priceInEth.toFixed(6)} USDT <span className="text-sm text-muted-foreground">per call</span>
                     </div>
 
                   </div>

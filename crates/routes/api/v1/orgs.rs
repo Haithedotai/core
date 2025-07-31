@@ -560,7 +560,7 @@ async fn get_org_balance_handler(
         .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
 
     let balance = contracts::get_contract("tUSDT", None)?
-        .method::<_, u64>("balanceOf", (org_address.clone(),))?
+        .method::<_, u64>("balanceOf", (formatted_organization_address,))?
         .call()
         .await?;
 
@@ -594,5 +594,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(delete_org_members_handler)
         .service(get_org_models_handler)
         .service(post_org_models_handler)
-        .service(delete_org_models_handler);
+        .service(delete_org_models_handler)
+        .service(get_org_expenditure_handler)
+        .service(get_org_balance_handler);
 }

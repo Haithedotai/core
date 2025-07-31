@@ -123,7 +123,7 @@ export default function AgentsPage() {
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
             <div className="space-y-3 flex items-center w-full justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
+                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20 aspect-square">
                   <Icon name="Bot" className="size-8 text-primary" />
                 </div>
                 <div>
@@ -137,7 +137,8 @@ export default function AgentsPage() {
               </div>
 
               <Button onClick={() => setCreateOpen(true)}>
-                <Icon name="Plus" className="mr-2" /> New Agent
+                <Icon name="Plus" />
+                <span className="hidden sm:block">New Agent</span>
               </Button>
             </div>
 

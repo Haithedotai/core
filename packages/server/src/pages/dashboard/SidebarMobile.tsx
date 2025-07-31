@@ -160,7 +160,7 @@ export default function MobileNav() {
           >
             <Link to="/dashboard/purchases">
               <Icon name="ShoppingBag" className="size-4 mr-3" />
-              Purchases
+              My Products
             </Link>
           </Button>
         </div>

@@ -90,7 +90,7 @@ export default function MarketplaceItemCard({
   const Icon = getCategoryIcon(item.category);
   const categoryLabel = getCategoryLabel(item.category);
   const categoryEmoji = getCategoryEmoji(item.category);
-  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USD 18 decimals
+  const priceInEth = item.price_per_call / 1e18; // Convert from wei to USDT 18 decimals
 
   const haithe = useHaitheApi();
   const { selectedOrganizationId } = useStore();

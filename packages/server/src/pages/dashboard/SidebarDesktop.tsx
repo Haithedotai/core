@@ -106,7 +106,7 @@ export default function Sidebar() {
                     <Button variant={isActive("/dashboard/purchases") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
                         <Link to="/dashboard/purchases">
                             <Icon name="ShoppingBag" className="size-4 mr-3" />
-                            Purchases
+                            My Products
                         </Link>
                     </Button>
                 </div>

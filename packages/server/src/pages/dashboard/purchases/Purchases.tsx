@@ -27,8 +27,12 @@ export default function PurchasesPage() {
   // Get all products to match with enabled addresses
   const { data: allProducts, isLoading: isLoadingAllProducts } = api.getAllProducts();
 
+  // Get organization balance and expenditure
+  const { data: organizationBalance, isLoading: isLoadingBalance } = api.balance(orgId);
+  const { data: organizationExpenditure, isLoading: isLoadingExpenditure } = api.getOrganizationExpenditure(orgId);
+
   // Loading state
-  if (isLoadingEnabledProducts || isLoadingAllProducts || !api.isClientInitialized()) {
+  if (isLoadingEnabledProducts || isLoadingAllProducts || isLoadingBalance || isLoadingExpenditure || !api.isClientInitialized()) {
     return (
       <div className="min-h-full bg-background p-6 space-y-6">
         <div className="space-y-4">
@@ -101,11 +105,16 @@ export default function PurchasesPage() {
 
   const categories = [...new Set(enabledProducts.map(p => p.category))];
 
-  // Calculate total potential cost (price per call * estimated usage)
-  const totalPotentialCost = enabledProducts.reduce((total, product) => {
-    const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USD
-    return total + priceInUsd;
-  }, 0);
+  // Format balance and expenditure values
+  const formatBalance = (balanceData: { balance: number } | undefined) => {
+    if (!balanceData) return "0.00";
+    return (balanceData.balance / 1e18).toFixed(6);
+  };
+
+  const formatExpenditure = (expenditureData: { expenditure: number } | undefined) => {
+    if (!expenditureData) return "0.00";
+    return (expenditureData.expenditure / 1e18).toFixed(6);
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -168,6 +177,30 @@ export default function PurchasesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Organization Balance</CardTitle>
+              <Icon name="Wallet" className="size-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatBalance(organizationBalance)} USDT</div>
+              <p className="text-xs text-muted-foreground">
+                Available funds
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Expenditure</CardTitle>
+              <Icon name="TrendingDown" className="size-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatExpenditure(organizationExpenditure)} USDT</div>
+              <p className="text-xs text-muted-foreground">
+                Total spent to date
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Enabled Products</CardTitle>
               <Icon name="Package" className="size-4 text-muted-foreground" />
             </CardHeader>
@@ -175,30 +208,6 @@ export default function PurchasesPage() {
               <div className="text-2xl font-bold">{enabledProducts.length}</div>
               <p className="text-xs text-muted-foreground">
                 From marketplace
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Price per Call</CardTitle>
-              <Icon name="Coins" className="size-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalPotentialCost.toFixed(6)} USD</div>
-              <p className="text-xs text-muted-foreground">
-                Combined cost per call
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Organization</CardTitle>
-              <Icon name="Building" className="size-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{organization.name}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently selected
               </p>
             </CardContent>
           </Card>
@@ -259,7 +268,7 @@ export default function PurchasesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExtensions.map((product) => {
-              const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USD
+              const priceInUsd = product.price_per_call / 1e18; // Convert from wei to USDT
               const categoryIcon = getCategoryIcon(product.category);
 
               return (
@@ -287,7 +296,7 @@ export default function PurchasesPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline">{categoryLabels[product.category] || product.category}</Badge>
-                      <span className="text-sm font-medium text-primary">{priceInUsd.toFixed(6)} USD</span>
+                      <span className="text-sm font-medium text-primary">{priceInUsd.toFixed(6)} USDT</span>
                     </div>
 
                     <Separator />

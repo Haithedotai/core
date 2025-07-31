@@ -79,8 +79,8 @@ export default function MarketplacePage() {
   const handlePurchase = (item: Product) => {
     // Mock purchase handler - replace with actual payment flow
     console.log('Purchasing item:', item);
-    const priceInEth = item.price_per_call / 1e15; // Convert from wei to ETH
-    alert(`Would purchase ${item.name} for ${priceInEth} ETH`);
+    const priceInEth = item.price_per_call / 1e15; // Convert from wei to USDT
+    alert(`Would purchase ${item.name} for ${priceInEth} USDT`);
   };
 
   const handleSearch = (query: string) => {
