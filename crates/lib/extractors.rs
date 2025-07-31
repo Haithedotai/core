@@ -1,7 +1,7 @@
-use crate::lib::{ error::ApiError, state::AppState };
+use crate::lib::{error::ApiError, state::AppState};
 use crate::utils;
-use actix_web::{ FromRequest, HttpRequest, web };
-use futures_util::future::{ Ready, ready };
+use actix_web::{FromRequest, HttpRequest, web};
+use futures_util::future::{Ready, ready};
 use sqlx::FromRow;
 
 #[derive(Debug, Clone, FromRow)]
@@ -13,8 +13,8 @@ pub struct AuthUser {
 #[derive(Debug, Clone, FromRow)]
 pub struct ApiCaller {
     pub wallet_address: String,
-    pub org_id: i64,
-    pub project_id: i64,
+    pub org_uid: String,
+    pub project_uid: String,
 }
 
 impl FromRequest for AuthUser {
@@ -45,22 +45,23 @@ impl FromRequest for AuthUser {
 
         let result = futures_executor::block_on(async move {
             // Check that the token matches the one stored in DB
-            let token_from_db: Option<String> = sqlx
-                ::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
-                .bind(&wallet_address)
-                .fetch_optional(&db).await
-                .map_err(|_| ApiError::Internal("DB error".into()))?;
+            let token_from_db: Option<String> =
+                sqlx::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
+                    .bind(&wallet_address)
+                    .fetch_optional(&db)
+                    .await
+                    .map_err(|_| ApiError::Internal("DB error".into()))?;
 
             match token_from_db {
                 Some(token) if token == token_header => {
                     // Token matches, proceed
-                    let user = sqlx
-                        ::query_as::<_, AuthUser>(
-                            "SELECT wallet_address, created_at FROM accounts WHERE wallet_address = ?"
-                        )
-                        .bind(&wallet_address)
-                        .fetch_optional(&db).await
-                        .map_err(|_| ApiError::Internal("DB error".into()))?;
+                    let user = sqlx::query_as::<_, AuthUser>(
+                        "SELECT wallet_address, created_at FROM accounts WHERE wallet_address = ?",
+                    )
+                    .bind(&wallet_address)
+                    .fetch_optional(&db)
+                    .await
+                    .map_err(|_| ApiError::Internal("DB error".into()))?;
 
                     user.ok_or(ApiError::Unauthorized)
                 }
@@ -99,43 +100,41 @@ impl FromRequest for ApiCaller {
             }
         };
 
-        let org_uid_header = match
-            req
-                .headers()
-                .get("Haithe-Organization")
-                .and_then(|v| v.to_str().ok())
-                .and_then(|s| s.parse::<i64>().ok())
-                .or_else(|| {
-                    req.headers()
-                        .get("OpenAI-Organization")
-                        .and_then(|v| v.to_str().ok())
-                        .and_then(|s| s.parse::<i64>().ok())
-                })
-        {
-            Some(org_id) => org_id,
+        let org_uid_header = match req
+            .headers()
+            .get("Haithe-Organization")
+            .and_then(|v| v.to_str().ok())
+            .map(|s| s.strip_prefix("org-").unwrap_or(s))
+            .or_else(|| {
+                req.headers()
+                    .get("OpenAI-Organization")
+                    .and_then(|v| v.to_str().ok())
+                    .map(|s| s.strip_prefix("org-").unwrap_or(s))
+            }) {
+            Some(org_uid) => org_uid.to_string(),
             None => {
-                return ready(
-                    Err(ApiError::BadRequest("Missing or invalid Organization header".into()))
-                );
+                return ready(Err(ApiError::BadRequest(
+                    "Missing or invalid Organization header".into(),
+                )));
             }
         };
 
-        let proj_uid_header = match
-            req
-                .headers()
-                .get("Haithe-Project")
-                .and_then(|v| v.to_str().ok())
-                .and_then(|s| s.parse::<i64>().ok())
-                .or_else(|| {
-                    req.headers()
-                        .get("OpenAI-Project")
-                        .and_then(|v| v.to_str().ok())
-                        .and_then(|s| s.parse::<i64>().ok())
-                })
-        {
-            Some(proj_id) => proj_id,
+        let proj_uid_header = match req
+            .headers()
+            .get("Haithe-Project")
+            .and_then(|v| v.to_str().ok())
+            .map(|s| s.strip_prefix("proj-").unwrap_or(s))
+            .or_else(|| {
+                req.headers()
+                    .get("OpenAI-Project")
+                    .and_then(|v| v.to_str().ok())
+                    .map(|s| s.strip_prefix("proj-").unwrap_or(s))
+            }) {
+            Some(proj_uid) => proj_uid.to_string(),
             None => {
-                return ready(Err(ApiError::BadRequest("Missing or invalid Project header".into())));
+                return ready(Err(ApiError::BadRequest(
+                    "Missing or invalid Project header".into(),
+                )));
             }
         };
 
@@ -149,8 +148,8 @@ impl FromRequest for ApiCaller {
 
         let result = futures_executor::block_on(async move {
             println!("Debug: wallet_address = {}", wallet_address);
-            println!("Debug: org_id = {}", org_uid_header);
-            println!("Debug: project_id = {}", proj_uid_header);
+            println!("Debug: org_uid = {}", org_uid_header);
+            println!("Debug: project_uid = {}", proj_uid_header);
             println!("Debug: signature = {}", parsed_api_key.signature);
 
             // Step 1: Check if account exists and get timestamp
@@ -175,22 +174,22 @@ impl FromRequest for ApiCaller {
                     ts
                 }
                 None => {
-                    println!("Debug: No API key timestamp found for address: {}", wallet_address);
+                    println!(
+                        "Debug: No API key timestamp found for address: {}",
+                        wallet_address
+                    );
                     return Err(ApiError::Unauthorized);
                 }
             };
 
             // Step 2: Verify API key signature
-            let private_key = std::env
-                ::var("MOCK_TEE_PVT_KEY")
+            let private_key = std::env::var("MOCK_TEE_PVT_KEY")
                 .map_err(|_| ApiError::Internal("TEE private key not configured".into()))?;
 
-            let public_key = utils
-                ::derive_public_key_from_private(&private_key)
+            let public_key = utils::derive_public_key_from_private(&private_key)
                 .map_err(|_| ApiError::Internal("Failed to derive public key".into()))?;
 
-            let is_valid = utils
-                ::verify_api_key(&public_key, &api_key, timestamp)
+            let is_valid = utils::verify_api_key(&public_key, &api_key, timestamp)
                 .map_err(|_| ApiError::Internal("Failed to verify API key".into()))?;
 
             if !is_valid {
@@ -207,12 +206,12 @@ impl FromRequest for ApiCaller {
                  END as role
                  FROM organizations 
                  LEFT JOIN org_members ON organizations.id = org_members.org_id AND org_members.wallet_address = ?
-                 WHERE organizations.id = ? 
+                 WHERE organizations.organization_uid = ? 
                  AND (organizations.owner = ? OR org_members.wallet_address = ?)"
                 )
                 .bind(&wallet_address)
                 .bind(&wallet_address)
-                .bind(org_uid_header)
+                .bind(&org_uid_header)
                 .bind(&wallet_address)
                 .bind(&wallet_address)
                 .fetch_optional(&db).await
@@ -224,17 +223,20 @@ impl FromRequest for ApiCaller {
             println!("Debug: org_role = {:?}", org_role);
 
             // Step 4: Check project role
-            let project_role: Option<String> = sqlx
-                ::query_scalar(
-                    "SELECT role FROM project_members WHERE wallet_address = ? AND project_id = ?"
-                )
-                .bind(&wallet_address)
-                .bind(proj_uid_header)
-                .fetch_optional(&db).await
-                .map_err(|e| {
-                    println!("DB Error 3 - Project role query: {:?}", e);
-                    ApiError::Internal("Failed to fetch project role".into())
-                })?;
+            let project_role: Option<String> = sqlx::query_scalar(
+                "SELECT pm.role 
+                     FROM project_members pm
+                     JOIN projects p ON pm.project_id = p.id
+                     WHERE pm.wallet_address = ? AND p.project_uid = ?",
+            )
+            .bind(&wallet_address)
+            .bind(&proj_uid_header)
+            .fetch_optional(&db)
+            .await
+            .map_err(|e| {
+                println!("DB Error 3 - Project role query: {:?}", e);
+                ApiError::Internal("Failed to fetch project role".into())
+            })?;
 
             println!("Debug: project_role = {:?}", project_role);
 
@@ -251,8 +253,7 @@ impl FromRequest for ApiCaller {
 
             println!(
                 "Debug: has_org_permission = {}, has_project_permission = {}",
-                has_org_permission,
-                has_project_permission
+                has_org_permission, has_project_permission
             );
 
             if !has_org_permission && !has_project_permission {
@@ -260,31 +261,37 @@ impl FromRequest for ApiCaller {
             }
 
             // Step 6: Verify project exists and belongs to organization
-            let project_exists: Option<bool> = sqlx
-                ::query_scalar("SELECT 1 FROM projects WHERE id = ? AND org_id = ?")
-                .bind(proj_uid_header)
-                .bind(org_uid_header)
-                .fetch_optional(&db).await
-                .map_err(|e| {
-                    println!("DB Error 4 - Project exists query: {:?}", e);
-                    ApiError::Internal("Failed to verify project existence".into())
-                })?;
+            let project_exists: Option<bool> = sqlx::query_scalar(
+                "SELECT 1 
+                     FROM projects p
+                     JOIN organizations o ON p.org_id = o.id
+                     WHERE p.project_uid = ? AND o.organization_uid = ?",
+            )
+            .bind(&proj_uid_header)
+            .bind(&org_uid_header)
+            .fetch_optional(&db)
+            .await
+            .map_err(|e| {
+                println!("DB Error 4 - Project exists query: {:?}", e);
+                ApiError::Internal("Failed to verify project existence".into())
+            })?;
 
             if project_exists.is_none() {
-                println!("Debug: Project {} not found in org {}", proj_uid_header, org_uid_header);
-                return Err(
-                    ApiError::BadRequest(
-                        "Project not found or does not belong to organization".into()
-                    )
+                println!(
+                    "Debug: Project {} not found in org {}",
+                    proj_uid_header, org_uid_header
                 );
+                return Err(ApiError::BadRequest(
+                    "Project not found or does not belong to organization".into(),
+                ));
             }
 
             println!("Debug: Authentication successful!");
 
             Ok(ApiCaller {
                 wallet_address,
-                org_id: org_uid_header,
-                project_id: proj_uid_header,
+                org_uid: org_uid_header,
+                project_uid: proj_uid_header,
             })
         });
 
