@@ -27,7 +27,8 @@ CREATE TABLE
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name),
         UNIQUE (organization_uid),
-        UNIQUE (address)
+        UNIQUE (address),
+        expenditure INTEGER NOT NULL DEFAULT 0 CHECK (expenditure >= 0)
     );
 
 CREATE TABLE
