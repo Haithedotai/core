@@ -1,7 +1,8 @@
 use crate::lib::extractors::AuthUser;
-use crate::lib::{error::ApiError, respond, state::AppState};
+use crate::lib::{contracts, error::ApiError, respond, state::AppState};
 use actix_web::{Responder, get, post, web};
-use serde::Serialize;
+use ethers::types::U256;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -20,6 +21,19 @@ pub struct Project {
     pub org_id: String,
     pub name: String,
     pub created_at: String,
+}
+
+#[derive(Debug, Clone, FromRow, Serialize)]
+pub struct FaucetRequest {
+    pub id: i64,
+    pub wallet_address: String,
+    pub product_id: i64,
+    pub requested_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FaucetPostRequest {
+    pub product_id: Option<i64>,
 }
 
 #[get("")]
@@ -89,11 +103,12 @@ async fn get_api_key_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<i64> =
-        sqlx::query_scalar("SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
-            .bind(&user.wallet_address)
-            .fetch_optional(&state.db)
-            .await?;
+    let api_key_last_issued_at: Option<i64> = sqlx::query_scalar(
+        "SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?",
+    )
+    .bind(&user.wallet_address)
+    .fetch_optional(&state.db)
+    .await?;
 
     if let Some(ts) = api_key_last_issued_at {
         if ts > 0 {
@@ -115,9 +130,7 @@ async fn get_api_key_handler(
 
     let signed_message = crate::utils::sign_message(&tee_private_key, &message)
         .map_err(|_| ApiError::Internal("Failed to sign API key".into()))?;
-    let signature = signed_message
-        .strip_prefix("0x")
-        .unwrap_or("");
+    let signature = signed_message.strip_prefix("0x").unwrap_or("");
 
     let api_key = format!("sk-{}.{}.{}", address, nonce, signature);
 
@@ -143,11 +156,12 @@ async fn get_api_key_last_handler(
     user: AuthUser,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let api_key_last_issued_at: Option<i64> =
-        sqlx::query_scalar("SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?")
-            .bind(&user.wallet_address)
-            .fetch_optional(&state.db)
-            .await?;
+    let api_key_last_issued_at: Option<i64> = sqlx::query_scalar(
+        "SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?",
+    )
+    .bind(&user.wallet_address)
+    .fetch_optional(&state.db)
+    .await?;
 
     let issued_at = api_key_last_issued_at.unwrap_or(0);
 
@@ -159,11 +173,125 @@ async fn get_api_key_last_handler(
     ))
 }
 
+#[get("/faucet")]
+async fn get_faucet_handler(
+    user: AuthUser,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    // Get the last faucet request for this user
+    let last_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
+        "SELECT * FROM faucet_requests WHERE wallet_address = ? ORDER BY requested_at DESC LIMIT 1",
+    )
+    .bind(&user.wallet_address)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|_| ApiError::Internal("DB error".into()))?;
+
+    match last_request {
+        Some(request) => Ok(respond::ok(
+            "Last faucet request found",
+            serde_json::json!({
+                "has_requested": true,
+                "last_request": {
+                    "id": request.id,
+                    "product_id": request.product_id,
+                    "requested_at": request.requested_at
+                }
+            }),
+        )),
+        None => Ok(respond::ok(
+            "No faucet requests found",
+            serde_json::json!({
+                "has_requested": false,
+                "last_request": {
+                    "id": 0,
+                    "product_id": 0,
+                    "requested_at": ""
+                }
+            }),
+        )),
+    }
+}
+
+#[post("/faucet")]
+async fn post_faucet_handler(
+    user: AuthUser,
+    request: web::Json<FaucetPostRequest>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    // Use product_id from request or default to 1
+    let product_id = request.product_id.unwrap_or(1);
+
+    // Check if user already has a faucet request for this product
+    let existing_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
+        "SELECT * FROM faucet_requests WHERE wallet_address = ? AND product_id = ?",
+    )
+    .bind(&user.wallet_address)
+    .bind(product_id)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|_| ApiError::Internal("DB error".into()))?;
+
+    if existing_request.is_some() {
+        return Err(ApiError::BadRequest(
+            "Faucet already used for this product".into(),
+        ));
+    }
+
+    // Amount to send (100 USDT with 18 decimals)
+    let amount = U256::from(100) * U256::exp10(18);
+
+    // Get tUSDT contract with wallet
+    let contract = contracts::get_contract_with_wallet("tUSDT", None)
+        .await
+        .map_err(|e| ApiError::Internal(format!("Failed to get contract: {}", e)))?;
+
+    // Parse user's wallet address
+    let user_address: ethers::types::Address = user
+        .wallet_address
+        .parse()
+        .map_err(|_| ApiError::BadRequest("Invalid wallet address".into()))?;
+
+    // Call transfer function
+    let tx = contract
+        .method::<_, bool>("transfer", (user_address, amount))
+        .map_err(|e| ApiError::Internal(format!("Failed to prepare transfer: {}", e)))?
+        .send()
+        .await
+        .map_err(|e| ApiError::Internal(format!("Failed to send transfer: {}", e)))?;
+
+    // Wait for confirmation
+    let _receipt = tx
+        .await
+        .map_err(|e| ApiError::Internal(format!("Transfer failed: {}", e)))?;
+
+    // Record the faucet request in database
+    sqlx::query("INSERT INTO faucet_requests (wallet_address, product_id) VALUES (?, ?)")
+        .bind(&user.wallet_address)
+        .bind(product_id)
+        .execute(&state.db)
+        .await
+        .map_err(|_| ApiError::Internal("Failed to record faucet request".into()))?;
+
+    Ok(respond::ok(
+        "Faucet tokens sent successfully",
+        serde_json::json!({
+            "amount": "100",
+            "token": "tUSDT",
+            "product_id": product_id,
+            "transaction_hash": format!("{:?}", tx.tx_hash()),
+            "recipient": user.wallet_address
+        }),
+    ))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_index_handler)
         .service(get_orgs_handler)
         .service(get_projects_handler)
         .service(get_api_key_handler)
         .service(disable_api_key_handler)
-        .service(get_api_key_last_handler);
+        .service(get_api_key_last_handler)
+        .service(get_faucet_handler)
+        .service(post_faucet_handler);
 }
