@@ -247,15 +247,21 @@ async fn post_faucet_handler(
         .parse()
         .map_err(|_| ApiError::BadRequest("Invalid wallet address".into()))?;
 
-    let pending_tx = contract
+    // Prepare the contract call
+    let contract_call = contract
         .method::<_, bool>("transfer", (user_address, amount))
-        .map_err(|e| ApiError::Internal(format!("Failed to prepare transfer: {}", e)))?
+        .map_err(|e| ApiError::Internal(format!("Failed to prepare transfer: {}", e)))?;
+
+    // Send the transaction
+    let pending_tx = contract_call
         .send()
         .await
         .map_err(|e| ApiError::Internal(format!("Failed to send transfer: {}", e)))?;
 
+    // Get transaction hash before awaiting
     let tx_hash = pending_tx.tx_hash();
 
+    // Wait for confirmation
     let _receipt = pending_tx
         .await
         .map_err(|e| ApiError::Internal(format!("Transfer failed: {}", e)))?;
