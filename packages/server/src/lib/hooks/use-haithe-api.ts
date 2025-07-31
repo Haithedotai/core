@@ -139,6 +139,33 @@ export function useHaitheApi() {
             staleTime: 5 * 60 * 1000, // 5 minutes
         }),
 
+        // Faucet methods
+        getFaucetInfo: () => useQuery({
+            queryKey: ['faucetInfo'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getFaucetInfo();
+            },
+            enabled: isLoggedIn() && !!client,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+        }),
+
+        requestFaucetTokens: useMutation({
+            mutationKey: ['requestFaucetTokens'],
+            mutationFn: (productId?: number) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.requestFaucetTokens(productId);
+            },
+            onSuccess: () => {
+                toast.success('Faucet tokens requested successfully');
+                queryClient.invalidateQueries({ queryKey: ['faucetInfo'] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not request faucet tokens. Please try again.');
+            }
+        }),
+
         // Organization mutations
         createOrganization: useMutation({
             mutationKey: ['createOrganization'],
@@ -325,6 +352,27 @@ export function useHaitheApi() {
             enabled: isLoggedIn() && !!client && !!org_address,
         }),
 
+        // Organization balance and expenditure
+        balance: (orgId: number) => useQuery({
+            queryKey: ['organizationBalance', orgId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.balance(orgId);
+            },
+            enabled: !!orgId && !!client,
+            staleTime: 30 * 1000, // 30 seconds
+        }),
+
+        getOrganizationExpenditure: (orgId: number) => useQuery({
+            queryKey: ['organizationExpenditure', orgId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getOrganizationExpenditure(orgId);
+            },
+            enabled: !!orgId && !!client,
+            staleTime: 30 * 1000, // 30 seconds
+        }),
+
         // Project mutations and queries
         createProject: useMutation({
             mutationKey: ['createProject'],
@@ -457,6 +505,17 @@ export function useHaitheApi() {
                 return client.getProjects(orgId);
             },
             enabled: !!orgId && !!client,
+        }),
+
+        // Project price per call
+        pricePerCall: (projectId: number) => useQuery({
+            queryKey: ['projectPricePerCall', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.pricePerCall(projectId);
+            },
+            enabled: !!projectId && !!client,
+            staleTime: 30 * 1000, // 30 seconds
         }),
 
         becomeCreator: useMutation({

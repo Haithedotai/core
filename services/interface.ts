@@ -100,6 +100,27 @@ export class HaitheClient {
     return this.auth.logout();
   }
 
+  getFaucetInfo(): Promise<{
+    has_requested: boolean;
+    last_request: {
+      id: number;
+      product_id: number;
+      requested_at: string;
+    };
+  }> {
+    return this.auth.getFaucetInfo();
+  }
+
+  requestFaucetTokens(productId?: number): Promise<{
+    amount: string;
+    token: string;
+    product_id: number;
+    transaction_hash: string;
+    recipient: string;
+  }> {
+    return this.auth.requestFaucetTokens(productId);
+  }
+
   // Organization methods
   createOrganization(name: string): Promise<Organization> {
     return this.orgs.createOrganization(name);
@@ -179,6 +200,14 @@ export class HaitheClient {
     return this.orgs.getEnabledProducts(orgAddress);
   }
 
+  balance(orgId: number): Promise<{ balance: number }> {
+    return this.orgs.balance(orgId);
+  }
+
+  getOrganizationExpenditure(orgId: number): Promise<{ expenditure: number }> {
+    return this.orgs.getOrganizationExpenditure(orgId);
+  }
+
   // Project methods
   createProject(orgId: number, name: string): Promise<Project> {
     return this.projects.createProject(orgId, name);
@@ -229,6 +258,12 @@ export class HaitheClient {
     walletAddress: string
   ): Promise<ProjectMember> {
     return this.projects.removeProjectMember(projectId, walletAddress);
+  }
+
+  pricePerCall(projectId: number): Promise<{
+    total_price_per_call: number;
+  }> {
+    return this.projects.pricePerCall(projectId);
   }
 
   // Creator methods
@@ -308,6 +343,8 @@ export class HaitheClient {
   disableModel(orgId: number, modelId: number): Promise<void> {
     return this.orgs.disableModel(orgId, modelId);
   }
+
+  
 }
 
 export * from "./clients";
