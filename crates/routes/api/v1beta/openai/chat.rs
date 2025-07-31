@@ -13,6 +13,15 @@ use url::Url;
 use uuid;
 use async_trait::async_trait;
 
+/// Ensures a URL string has a protocol, adding https:// if missing
+fn ensure_protocol(url_str: &str) -> String {
+    if url_str.starts_with("http://") || url_str.starts_with("https://") {
+        url_str.to_string()
+    } else {
+        format!("https://{}", url_str)
+    }
+}
+
 #[derive(Deserialize)]
 pub struct GetChatCompletionsBody {
     pub model: String,
@@ -33,7 +42,7 @@ async fn get_completions_handler(
     let messages = body.messages.clone();
 
     let models = models::get_models();
-    let enabled_models = sqlx::query_scalar::<_, String>(
+    let enabled_models: Vec<u64> = sqlx::query_scalar::<_, u64>(
         "SELECT model_id FROM org_model_enrollments WHERE org_id = ?",
     )
     .bind(api_caller.org_id)
@@ -62,15 +71,37 @@ async fn get_completions_handler(
             .await?;
 
     let enabled_products: Vec<String> = enabled_products_for_organization
-        .into_iter()
-        .map(|addr| format!("{:?}", addr))
+        .iter()
+        .map(|addr| format!("{:#x}", addr))
         .filter(|p| enabled_products_for_project.contains(p))
         .collect();
+
+    // Alternative: Try lowercase comparison if the above doesn't work
+    let enabled_products_lowercase: Vec<String> = enabled_products_for_organization
+        .iter()
+        .map(|addr| format!("{:#x}", addr).to_lowercase())
+        .filter(|p| enabled_products_for_project.iter().any(|proj_p| proj_p.to_lowercase() == *p))
+        .collect();
+
+    // Debug: Log the enabled products before assignment
+    println!("Enabled products for organization: {:?}", enabled_products_for_organization);
+    println!("Enabled products for project: {:?}", enabled_products_for_project);
+    println!("Filtered enabled products: {:?}", enabled_products);
+
+    // Use the lowercase version if the original is empty
+    let final_enabled_products = if enabled_products.is_empty() && !enabled_products_lowercase.is_empty() {
+        println!("Using lowercase address matching");
+        enabled_products_lowercase
+    } else {
+        enabled_products
+    };
+
+    println!("Final enabled products: {:?}", final_enabled_products);
 
     let model_info = models.iter().find(|m| m.name == model);
 
     let model_id = match model_info {
-        Some(model) => model.id.to_string(),
+        Some(model) => model.id,
         None => return Err(ApiError::BadRequest("Invalid model".to_string())),
     };
 
@@ -97,17 +128,43 @@ async fn get_completions_handler(
         .find(|m| m.name == model)
         .map_or(0, |m| m.price_per_call) as u64;
 
-    for p in enabled_products {
+    // Skip product processing if no enabled products
+    if final_enabled_products.is_empty() {
+        // Continue with just the base model cost
+    } else {
+        for p in final_enabled_products {
+        println!("Processing product with address: {}", p);
+        
         let (uri, _encrypted_key, _price_per_call, category): (String, String, i64, String) =
             sqlx::query_as::<_, (String, String, i64, String)>("SELECT uri, encrypted_key, price_per_call, category FROM products WHERE address = ?")
                 .bind(p)
                 .fetch_one(&state.db)
                 .await?;
 
+        println!("Found product - URI: {}, Category: {}", uri, category);
+
         total_cost += _price_per_call as u64;
 
-        let response = reqwest::get(&uri).await?;
-        let encrypted_data = response.bytes().await?;
+        // Validate URI before making request
+        if uri.is_empty() {
+            return Err(ApiError::BadRequest("Product URI is empty".to_string()));
+        }
+
+        // Debug: Log the URI to see what we're trying to fetch
+        println!("Attempting to fetch URI: {}", uri);
+
+        // Try to parse the URI first to catch malformed URLs
+        let uri_with_protocol = ensure_protocol(&uri);
+        let parsed_uri = url::Url::parse(&uri_with_protocol)
+            .map_err(|e| ApiError::BadRequest(format!("Invalid URI format: {} - URI: {}", e, uri)))?;
+
+        let response = reqwest::get(parsed_uri)
+            .await
+            .map_err(|e| ApiError::BadRequest(format!("Failed to fetch product data: {} - URI: {}", e, uri)))?;
+        
+        let encrypted_data = response.bytes()
+            .await
+            .map_err(|e| ApiError::BadRequest(format!("Failed to read response bytes: {}", e)))?;
         let encrypted_bytes: Vec<u8> = encrypted_data.to_vec();
 
         let decrypted_data = decrypt(&encrypted_bytes, std::env::var("TEE_SECRET")?)?;
@@ -130,14 +187,23 @@ async fn get_completions_handler(
                 knowledges.push(Box::new(PdfFileKnowledge::new(pdf_content)));
             } else if category == "knowledge:url" {
                 let url_string = String::from_utf8(decrypted_data)?;
-                let url = Url::parse(&url_string)
+                
+                // Validate URL before making request
+                if url_string.is_empty() {
+                    return Err(ApiError::BadRequest("URL string is empty".to_string()));
+                }
+                
+                let url_with_protocol = ensure_protocol(&url_string);
+                let url = Url::parse(&url_with_protocol)
                     .map_err(|e| ApiError::BadRequest(format!("Invalid URL: {}", e)))?;
-                let html = reqwest::get(&url_string)
+                
+                let html = reqwest::get(&url_with_protocol)
                     .await
-                    .unwrap()
+                    .map_err(|e| ApiError::BadRequest(format!("Failed to fetch URL content: {}", e)))?
                     .text()
                     .await
-                    .unwrap();
+                    .map_err(|e| ApiError::BadRequest(format!("Failed to read URL response: {}", e)))?;
+                    
                 knowledges.push(Box::new(HtmlKnowledge::new(Cursor::new(html), url, false)));
             }
         } else if category == "promptset" {
@@ -147,6 +213,7 @@ async fn get_completions_handler(
                 preamble.push_str(&prompt);
                 preamble.push('\n');
             }
+        }
         }
     }
 
