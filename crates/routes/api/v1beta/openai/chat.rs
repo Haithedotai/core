@@ -269,7 +269,25 @@ async fn get_completions_handler(
         }));
     }
 
-    // add the total cost to the organization expenditure
+    let balance = contracts::get_contract("tUSDT", None)?
+        .method::<_, u64>("balanceOf", (org_address,))?
+        .call()
+        .await?;
+
+    let current_expenditure: i64 =
+        sqlx::query_scalar("SELECT expenditure FROM organizations WHERE id = ?")
+            .bind(org_id)
+            .fetch_one(&state.db)
+            .await?;
+
+    // Convert to u64 for comparison, ensuring no negative values
+    let current_expenditure_u64 = current_expenditure.max(0) as u64;
+    let total_required = current_expenditure_u64 + total_cost;
+
+    if balance < total_required {
+        return Err(ApiError::BadRequest("Insufficient funds".to_string()));
+    }
+
     sqlx::query("UPDATE organizations SET expenditure = expenditure + ? WHERE id = ?")
         .bind(total_cost as i64)
         .bind(org_id)
