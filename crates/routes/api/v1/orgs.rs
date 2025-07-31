@@ -1,3 +1,5 @@
+use std::path;
+
 use crate::lib::extractors::AuthUser;
 use crate::lib::{contracts, error::ApiError, models::get_models, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, web};
@@ -469,6 +471,49 @@ async fn delete_org_models_handler(
     Ok(respond::ok(
         "Models unregistered",
         serde_json::json!({"id" : org_id}),
+    ))
+}
+
+#[get("/{id}/expenditure")]
+async fn get_org_expenditure_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let org_id = path.into_inner();
+
+    let owner_check = sqlx::query_scalar::<_, i64>(
+        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?",
+    )
+    .bind(org_id)
+    .bind(&user.wallet_address)
+    .fetch_one(&state.db)
+    .await?;
+
+    let admin_check = if owner_check == 0 {
+        sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM org_members WHERE org_id = ? AND wallet_address = ? AND role = 'admin'"
+        )
+        .bind(org_id)
+        .bind(&user.wallet_address)
+        .fetch_one(&state.db)
+        .await?
+    } else {
+        0
+    };
+
+    if owner_check == 0 && admin_check == 0 {
+        return Err(ApiError::Forbidden);
+    }
+
+    let expenditure: i64 = sqlx::query_scalar("SELECT expenditure FROM organizations WHERE id = ?")
+        .bind(org_id)
+        .fetch_one(&state.db)
+        .await?;
+
+    Ok(respond::ok(
+        "Organization expenditure fetched",
+        serde_json::json!({"expenditure": expenditure}),
     ))
 }
 
