@@ -3,7 +3,11 @@ use crate::lib::state::AppState;
 use crate::lib::{contracts, error::ApiError, models};
 use actix_web::{HttpResponse, Responder, post, web};
 use alith::data::crypto::decrypt;
-use alith::{Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge, StructureTool, ToolError};
+use alith::{
+    Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge, StructureTool,
+    ToolError,
+};
+use async_trait::async_trait;
 use chrono;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -12,7 +16,6 @@ use std::io::Cursor;
 use std::sync::Arc;
 use url::Url;
 use uuid;
-use async_trait::async_trait;
 
 /// Ensures a URL string has a protocol, adding https:// if missing
 fn ensure_protocol(url_str: &str) -> String {
@@ -43,15 +46,27 @@ async fn get_completions_handler(
     let messages = body.messages.clone();
 
     let models = models::get_models();
-    let enabled_models: Vec<u64> = sqlx::query_scalar::<_, u64>(
-        "SELECT model_id FROM org_model_enrollments WHERE org_id = ?",
-    )
-    .bind(api_caller.org_id)
-    .fetch_all(&state.db)
-    .await?;
+
+    // Get org_id from org_uid
+    let org_id: i64 = sqlx::query_scalar("SELECT id FROM organizations WHERE organization_uid = ?")
+        .bind(&api_caller.org_uid)
+        .fetch_one(&state.db)
+        .await?;
+
+    // Get project_id from project_uid
+    let project_id: i64 = sqlx::query_scalar("SELECT id FROM projects WHERE project_uid = ?")
+        .bind(&api_caller.project_uid)
+        .fetch_one(&state.db)
+        .await?;
+
+    let enabled_models: Vec<u64> =
+        sqlx::query_scalar::<_, u64>("SELECT model_id FROM org_model_enrollments WHERE org_id = ?")
+            .bind(org_id)
+            .fetch_all(&state.db)
+            .await?;
 
     let org_address: String = sqlx::query_scalar("SELECT address FROM organizations WHERE id = ?")
-        .bind(api_caller.org_id)
+        .bind(org_id)
         .fetch_one(&state.db)
         .await?;
 
@@ -61,15 +76,14 @@ async fn get_completions_handler(
             .call()
             .await?;
 
-    let enabled_products_for_project: Vec<String> =
-        sqlx::query_scalar::<_, String>(
-            "SELECT p.address FROM products p 
+    let enabled_products_for_project: Vec<String> = sqlx::query_scalar::<_, String>(
+        "SELECT p.address FROM products p 
              JOIN project_products_enabled ppe ON p.id = ppe.product_id 
-             WHERE ppe.project_id = ?"
-        )
-            .bind(api_caller.project_id)
-            .fetch_all(&state.db)
-            .await?;
+             WHERE ppe.project_id = ?",
+    )
+    .bind(project_id)
+    .fetch_all(&state.db)
+    .await?;
 
     let enabled_products: Vec<String> = enabled_products_for_organization
         .iter()
@@ -77,25 +91,33 @@ async fn get_completions_handler(
         .filter(|p| enabled_products_for_project.contains(p))
         .collect();
 
-    
     let enabled_products_lowercase: Vec<String> = enabled_products_for_organization
         .iter()
         .map(|addr| format!("{:#x}", addr).to_lowercase())
-        .filter(|p| enabled_products_for_project.iter().any(|proj_p| proj_p.to_lowercase() == *p))
+        .filter(|p| {
+            enabled_products_for_project
+                .iter()
+                .any(|proj_p| proj_p.to_lowercase() == *p)
+        })
         .collect();
 
-    
-    println!("Enabled products for organization: {:?}", enabled_products_for_organization);
-    println!("Enabled products for project: {:?}", enabled_products_for_project);
+    println!(
+        "Enabled products for organization: {:?}",
+        enabled_products_for_organization
+    );
+    println!(
+        "Enabled products for project: {:?}",
+        enabled_products_for_project
+    );
     println!("Filtered enabled products: {:?}", enabled_products);
 
-    
-    let final_enabled_products = if enabled_products.is_empty() && !enabled_products_lowercase.is_empty() {
-        println!("Using lowercase address matching");
-        enabled_products_lowercase
-    } else {
-        enabled_products
-    };
+    let final_enabled_products =
+        if enabled_products.is_empty() && !enabled_products_lowercase.is_empty() {
+            println!("Using lowercase address matching");
+            enabled_products_lowercase
+        } else {
+            enabled_products
+        };
 
     println!("Final enabled products: {:?}", final_enabled_products);
 
@@ -129,92 +151,95 @@ async fn get_completions_handler(
         .find(|m| m.name == model)
         .map_or(0, |m| m.price_per_call) as u64;
 
-    
     if final_enabled_products.is_empty() {
-        
     } else {
         for p in final_enabled_products {
-        println!("Processing product with address: {}", p);
-        
-        let (uri, _encrypted_key, _price_per_call, category): (String, String, i64, String) =
+            println!("Processing product with address: {}", p);
+
+            let (uri, _encrypted_key, _price_per_call, category): (String, String, i64, String) =
             sqlx::query_as::<_, (String, String, i64, String)>("SELECT uri, encrypted_key, price_per_call, category FROM products WHERE address = ?")
                 .bind(p)
                 .fetch_one(&state.db)
                 .await?;
 
-        println!("Found product - URI: {}, Category: {}", uri, category);
+            println!("Found product - URI: {}, Category: {}", uri, category);
 
-        total_cost += _price_per_call as u64;
+            total_cost += _price_per_call as u64;
 
-        
-        if uri.is_empty() {
-            return Err(ApiError::BadRequest("Product URI is empty".to_string()));
-        }
+            if uri.is_empty() {
+                return Err(ApiError::BadRequest("Product URI is empty".to_string()));
+            }
 
-        
-        println!("Attempting to fetch URI: {}", uri);
+            println!("Attempting to fetch URI: {}", uri);
 
-        
-        let uri_with_protocol = ensure_protocol(&uri);
-        let parsed_uri = url::Url::parse(&uri_with_protocol)
-            .map_err(|e| ApiError::BadRequest(format!("Invalid URI format: {} - URI: {}", e, uri)))?;
+            let uri_with_protocol = ensure_protocol(&uri);
+            let parsed_uri = url::Url::parse(&uri_with_protocol).map_err(|e| {
+                ApiError::BadRequest(format!("Invalid URI format: {} - URI: {}", e, uri))
+            })?;
 
-        let response = reqwest::get(parsed_uri)
-            .await
-            .map_err(|e| ApiError::BadRequest(format!("Failed to fetch product data: {} - URI: {}", e, uri)))?;
-        
-        let encrypted_data = response.bytes()
-            .await
-            .map_err(|e| ApiError::BadRequest(format!("Failed to read response bytes: {}", e)))?;
-        let encrypted_bytes: Vec<u8> = encrypted_data.to_vec();
+            let response = reqwest::get(parsed_uri).await.map_err(|e| {
+                ApiError::BadRequest(format!(
+                    "Failed to fetch product data: {} - URI: {}",
+                    e, uri
+                ))
+            })?;
 
-        let decrypted_data = decrypt(&encrypted_bytes, std::env::var("TEE_SECRET")?)?;
+            let encrypted_data = response.bytes().await.map_err(|e| {
+                ApiError::BadRequest(format!("Failed to read response bytes: {}", e))
+            })?;
+            let encrypted_bytes: Vec<u8> = encrypted_data.to_vec();
 
-        if category.starts_with("knowledge") {
-            if category == "knowledge:text" {
-                knowledges.push(Box::new(StringKnowledge::new(String::from_utf8(
-                    decrypted_data,
-                )?)));
-            } else if category == "knowledge:html" {
-                let html = String::from_utf8(decrypted_data)?;
-                let default_url = Url::parse("https://haithe.ai").unwrap();
-                knowledges.push(Box::new(HtmlKnowledge::new(
-                    Cursor::new(html),
-                    default_url,
-                    false,
-                )));
-            } else if category == "knowledge:pdf" {
-                let pdf_content = String::from_utf8(decrypted_data)?;
-                knowledges.push(Box::new(PdfFileKnowledge::new(pdf_content)));
-            } else if category == "knowledge:url" {
-                let url_string = String::from_utf8(decrypted_data)?;
-                
-                // Validate URL before making request
-                if url_string.is_empty() {
-                    return Err(ApiError::BadRequest("URL string is empty".to_string()));
+            let decrypted_data = decrypt(&encrypted_bytes, std::env::var("TEE_SECRET")?)?;
+
+            if category.starts_with("knowledge") {
+                if category == "knowledge:text" {
+                    knowledges.push(Box::new(StringKnowledge::new(String::from_utf8(
+                        decrypted_data,
+                    )?)));
+                } else if category == "knowledge:html" {
+                    let html = String::from_utf8(decrypted_data)?;
+                    let default_url = Url::parse("https://haithe.ai").unwrap();
+                    knowledges.push(Box::new(HtmlKnowledge::new(
+                        Cursor::new(html),
+                        default_url,
+                        false,
+                    )));
+                } else if category == "knowledge:pdf" {
+                    let pdf_content = String::from_utf8(decrypted_data)?;
+                    knowledges.push(Box::new(PdfFileKnowledge::new(pdf_content)));
+                } else if category == "knowledge:url" {
+                    let url_string = String::from_utf8(decrypted_data)?;
+
+                    // Validate URL before making request
+                    if url_string.is_empty() {
+                        return Err(ApiError::BadRequest("URL string is empty".to_string()));
+                    }
+
+                    let url_with_protocol = ensure_protocol(&url_string);
+                    let url = Url::parse(&url_with_protocol)
+                        .map_err(|e| ApiError::BadRequest(format!("Invalid URL: {}", e)))?;
+
+                    let html = reqwest::get(&url_with_protocol)
+                        .await
+                        .map_err(|e| {
+                            ApiError::BadRequest(format!("Failed to fetch URL content: {}", e))
+                        })?
+                        .text()
+                        .await
+                        .map_err(|e| {
+                            ApiError::BadRequest(format!("Failed to read URL response: {}", e))
+                        })?;
+
+                    knowledges.push(Box::new(HtmlKnowledge::new(Cursor::new(html), url, false)));
                 }
-                
-                let url_with_protocol = ensure_protocol(&url_string);
-                let url = Url::parse(&url_with_protocol)
-                    .map_err(|e| ApiError::BadRequest(format!("Invalid URL: {}", e)))?;
-                
-                let html = reqwest::get(&url_with_protocol)
-                    .await
-                    .map_err(|e| ApiError::BadRequest(format!("Failed to fetch URL content: {}", e)))?
-                    .text()
-                    .await
-                    .map_err(|e| ApiError::BadRequest(format!("Failed to read URL response: {}", e)))?;
-                    
-                knowledges.push(Box::new(HtmlKnowledge::new(Cursor::new(html), url, false)));
+            } else if category == "promptset" {
+                let prompts: Vec<String> = serde_json::from_slice(&decrypted_data)
+                    .map_err(|e| ApiError::BadRequest(format!("Failed to parse prompts: {}", e)))?;
+                for prompt in prompts {
+                    preamble.push_str(&prompt);
+                    preamble.push('\n');
+                }
             }
-        } else if category == "promptset" {
-            let prompts: Vec<String> = serde_json::from_slice(&decrypted_data)
-                .map_err(|e| ApiError::BadRequest(format!("Failed to parse prompts: {}", e)))?;
-            for prompt in prompts {
-                preamble.push_str(&prompt);
-                preamble.push('\n');
-            }
-        }
         }
     }
 
@@ -259,9 +284,9 @@ async fn get_completions_handler(
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct RpcToolInput {
     pub url: String,
-    pub method: String,                 // GET, POST, etc.
-    pub param_position: Option<String>, // "query" or "body"
-    pub params: Option<serde_json::Value>,          // dynamic JSON input
+    pub method: String,                    // GET, POST, etc.
+    pub param_position: Option<String>,    // "query" or "body"
+    pub params: Option<serde_json::Value>, // dynamic JSON input
 }
 
 pub struct RpcTool;
