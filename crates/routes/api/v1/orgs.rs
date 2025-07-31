@@ -1,6 +1,7 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{contracts, error::ApiError, models::get_models, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, web};
+use ethers::types::Address;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -397,12 +398,11 @@ async fn get_org_models_handler(
 
     let models = get_models();
 
-    let enabled_model_ids: Vec<u64> = sqlx::query_scalar::<_, u64>(
-        "SELECT model_id FROM org_model_enrollments WHERE org_id = ?",
-    )
-    .bind(org_id)
-    .fetch_all(&state.db)
-    .await?;
+    let enabled_model_ids: Vec<u64> =
+        sqlx::query_scalar::<_, u64>("SELECT model_id FROM org_model_enrollments WHERE org_id = ?")
+            .bind(org_id)
+            .fetch_all(&state.db)
+            .await?;
 
     let enabled_models = models
         .into_iter()
@@ -469,6 +469,47 @@ async fn delete_org_models_handler(
     Ok(respond::ok(
         "Models unregistered",
         serde_json::json!({"id" : org_id}),
+    ))
+}
+
+#[get("/{id}/balance")]
+async fn get_org_balance_handler(
+    _: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let org_id = path.into_inner();
+
+    let org_address =
+        sqlx::query_scalar::<_, String>("SELECT address FROM organizations WHERE id = ?")
+            .bind(org_id)
+            .fetch_one(&state.db)
+            .await?;
+
+    let formatted_organization_address: Address = org_address
+        .parse()
+        .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
+
+    let balance = contracts::get_contract("tUSDT", None)?
+        .method::<_, u64>("balanceOf", (org_address,))?
+        .call()
+        .await?;
+
+    let current_expenditure: i64 =
+        sqlx::query_scalar("SELECT expenditure FROM organizations WHERE id = ?")
+            .bind(org_id)
+            .fetch_one(&state.db)
+            .await?;
+
+    let remaining_balance = if current_expenditure < 0 {
+        balance + ((-current_expenditure) as u64)
+    } else {
+        balance.saturating_sub(current_expenditure as u64)
+    };
+
+    Ok(respond::ok(
+        "Organization balance fetched",
+        serde_json::json!({"balance": remaining_balance}),
     ))
 }
 
