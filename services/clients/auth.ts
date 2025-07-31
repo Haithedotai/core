@@ -1,6 +1,7 @@
 import * as viem from "viem";
 import type { MinimalPersistentStorage, UserProfile } from "../shared/types";
 import { BaseClient } from "../shared/baseClient";
+import definitions from "definitions";
 
 export class HaitheAuthClient extends BaseClient {
   public walletClient: viem.WalletClient;
@@ -153,7 +154,6 @@ export class HaitheAuthClient extends BaseClient {
   }
 
   async getFaucetInfo(): Promise<{
-    has_requested: boolean;
     last_request: {
       id: number;
       product_id: number;
@@ -186,6 +186,36 @@ export class HaitheAuthClient extends BaseClient {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+    });
+  }
+
+  async usdtBalance(): Promise<bigint> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+    if (!HaitheAuthClient.ensureWeb3Ready(this.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    return this.publicClient.readContract({
+      ...definitions.tUSDT,
+      functionName: "balanceOf",
+      args: [this.walletClient.account.address],
+    });
+  }
+
+  async transferUSDT(recipient: viem.Address, amount: bigint) {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+    if (!HaitheAuthClient.ensureWeb3Ready(this.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    return this.walletClient.writeContract({
+      ...definitions.tUSDT,
+      functionName: "transfer",
+      args: [recipient, amount],
     });
   }
 }
