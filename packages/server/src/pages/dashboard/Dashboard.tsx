@@ -10,6 +10,8 @@ import { useStore } from "@/src/lib/hooks/use-store";
 import { copyToClipboard } from "@/utils";
 import QRCode from "qrcode";
 import { useEffect, useRef } from "react";
+import type { Organization } from "../../../../../services/clients";
+import { Image } from "@/src/lib/components/custom/Image";
 
 interface StatsCardProps {
   title: string;
@@ -173,7 +175,7 @@ function RecentActivitySection() {
   );
 }
 
-function OrganizationDetailsSection({ organization }: { organization: any }) {
+function OrganizationDetailsSection({ organization }: { organization: Organization }) {
   if (!organization) {
     return (
       <Card className="shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
@@ -255,68 +257,42 @@ function OrganizationDetailsSection({ organization }: { organization: any }) {
           </div>
 
           {/* Organization Details Grid */}
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div>
             {/* Basic Information */}
             <div className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Name</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {organization.name || 'Not set'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Description</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {organization.description || 'No description'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Created</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {organization.created_at ? formatDate(organization.created_at, "MMM D, YYYY") : 'Unknown'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
                   <span className="text-sm text-muted-foreground">Address</span>
-                  <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">
                     {truncateAddress(organization.address)} <Button variant="ghost" size="icon" onClick={() => copyToClipboard(organization.address, "Organization Address")} className="size-4 ml-2">
                       <Icon name="Copy" className="size-4" />
                     </Button>
                   </span>
                 </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">UID</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {truncateAddress(organization.organization_uid)} <Button variant="ghost" size="icon" onClick={() => copyToClipboard(organization.organization_uid, "Organization UID")} className="size-4 ml-2">
+                      <Icon name="Copy" className="size-4" />
+                    </Button>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">Owner</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {truncateAddress(organization.owner)} <Button variant="ghost" size="icon" onClick={() => copyToClipboard(organization.owner, "Organization Owner")} className="size-4 ml-2">
+                      <Icon name="Copy" className="size-4" />
+                    </Button>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">Created at</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {organization.created_at ? formatDate(organization.created_at, "MMM D, YYYY") : 'Unknown'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Status & Settings */}
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-sm font-medium text-foreground">Active</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Plan</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {organization.plan || 'Free'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Members</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {organization.member_count || 1}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-sm text-muted-foreground">Agents</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {organization.project_count || 0}
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -325,7 +301,7 @@ function OrganizationDetailsSection({ organization }: { organization: any }) {
   );
 }
 
-function FundOrganizationDialog({ organization }: { organization: any }) {
+function FundOrganizationDialog({ organization }: { organization: Organization }) {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -365,7 +341,7 @@ function FundOrganizationDialog({ organization }: { organization: any }) {
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Icon name="Wallet" className="size-5 text-primary" />
+            <Image src="/static/tether.svg" alt="USDT" className="size-5" />
             Fund Organization
           </DialogTitle>
           <DialogDescription>
@@ -516,7 +492,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Organization Details Section */}
-          <OrganizationDetailsSection organization={organization} />
+          {organization && <OrganizationDetailsSection organization={organization} />}
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
