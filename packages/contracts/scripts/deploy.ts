@@ -2,7 +2,7 @@ import * as viem from "viem";
 import { hardhat } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
-import tusdt from "../artifacts/src/tUSDT.sol/tusdt.json";
+import tusdt from "../artifacts/src/tUSDT.sol/tUSDT.json";
 import HaitheOrchestrator from "../artifacts/src/HaitheOrchestrator.sol/HaitheOrchestrator.json";
 import HaitheOrganization from "../artifacts/src/HaitheOrganization.sol/HaitheOrganization.json";
 import HaitheCreatorIdentity from "../artifacts/src/HaitheCreatorIdentity.sol/HaitheCreatorIdentity.json";
