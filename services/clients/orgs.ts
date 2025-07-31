@@ -99,6 +99,13 @@ export class HaitheOrgsClient extends BaseClient {
     );
   }
 
+  balance(orgId: number): Promise<{ balance: number }> {
+    return this.fetch(
+      `/v1/orgs/${orgId}/balance`,
+      this.authClient.getAuthToken()
+    );
+  }
+
   getAvailableModels(): Promise<
     {
       id: number;
@@ -113,19 +120,30 @@ export class HaitheOrgsClient extends BaseClient {
   }
 
   getEnabledModels(orgId: number): Promise<number[]> {
-    return this.fetch(`/v1/orgs/${orgId}/models`, this.authClient.getAuthToken());
+    return this.fetch(
+      `/v1/orgs/${orgId}/models`,
+      this.authClient.getAuthToken()
+    );
   }
 
   enableModel(orgId: number, modelId: number): Promise<void> {
-    return this.fetch(`/v1/orgs/${orgId}/models?model_id=${modelId}`, this.authClient.getAuthToken(), {
-      method: "POST",
-    });
+    return this.fetch(
+      `/v1/orgs/${orgId}/models?model_id=${modelId}`,
+      this.authClient.getAuthToken(),
+      {
+        method: "POST",
+      }
+    );
   }
 
   disableModel(orgId: number, modelId: number): Promise<void> {
-    return this.fetch(`/v1/orgs/${orgId}/models?model_id=${modelId}`, this.authClient.getAuthToken(), {
-      method: "DELETE",
-    });
+    return this.fetch(
+      `/v1/orgs/${orgId}/models?model_id=${modelId}`,
+      this.authClient.getAuthToken(),
+      {
+        method: "DELETE",
+      }
+    );
   }
 
   async enableProduct(
