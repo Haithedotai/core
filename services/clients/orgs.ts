@@ -106,6 +106,13 @@ export class HaitheOrgsClient extends BaseClient {
     );
   }
 
+  getOrganizationExpenditure(orgId: number): Promise<{ expenditure: number }> {
+    return this.fetch(
+      `/v1/orgs/${orgId}/expenditure`,
+      this.authClient.getAuthToken()
+    );
+  }
+
   getAvailableModels(): Promise<
     {
       id: number;
