@@ -474,11 +474,35 @@ async fn delete_org_models_handler(
 
 #[get("/{id}/balance")]
 async fn get_org_balance_handler(
-    _: AuthUser,
+    user: AuthUser,
     path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let org_id = path.into_inner();
+
+    let owner_check = sqlx::query_scalar::<_, i64>(
+        "SELECT COUNT(*) FROM organizations WHERE id = ? AND owner = ?",
+    )
+    .bind(org_id)
+    .bind(&user.wallet_address)
+    .fetch_one(&state.db)
+    .await?;
+
+    let admin_check = if owner_check == 0 {
+        sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM org_members WHERE org_id = ? AND wallet_address = ? AND role = 'admin'"
+        )
+        .bind(org_id)
+        .bind(&user.wallet_address)
+        .fetch_one(&state.db)
+        .await?
+    } else {
+        0
+    };
+
+    if owner_check == 0 && admin_check == 0 {
+        return Err(ApiError::Forbidden);
+    }
 
     let org_address =
         sqlx::query_scalar::<_, String>("SELECT address FROM organizations WHERE id = ?")
@@ -491,7 +515,7 @@ async fn get_org_balance_handler(
         .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
 
     let balance = contracts::get_contract("tUSDT", None)?
-        .method::<_, u64>("balanceOf", (org_address,))?
+        .method::<_, u64>("balanceOf", (org_address.clone(),))?
         .call()
         .await?;
 
