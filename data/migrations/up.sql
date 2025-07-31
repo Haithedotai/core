@@ -101,3 +101,12 @@ CREATE TABLE
         enabled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (project_id, product_id)
     );
+
+CREATE TABLE
+    IF NOT EXISTS faucet_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
+        product_id INTEGER NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (wallet_address, product_id)
+    );

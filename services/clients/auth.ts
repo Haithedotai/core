@@ -151,4 +151,41 @@ export class HaitheAuthClient extends BaseClient {
       this._persistentStorage.removeItem("authToken");
     }
   }
+
+  async getFaucetInfo(): Promise<{
+    has_requested: boolean;
+    last_request: {
+      id: number;
+      product_id: number;
+      requested_at: string;
+    };
+  }> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+
+    return this.fetch("/v1/me/faucet", this.authToken);
+  }
+
+  async requestFaucetTokens(productId?: number): Promise<{
+    amount: string;
+    token: string;
+    product_id: number;
+    transaction_hash: string;
+    recipient: string;
+  }> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+
+    const body = productId ? { product_id: productId } : {};
+
+    return this.fetch("/v1/me/faucet", this.authToken, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  }
 }
