@@ -26,6 +26,7 @@ import MarketplaceProfilePage from './marketplace/profile';
 import { useHaitheApi } from '../lib/hooks/use-haithe-api';
 import Loader from '../lib/components/app/Loader';
 import AgentsConfiguration from './dashboard/agents/configuration';
+import GenerateAPIKey from './dashboard/generateAPIKey';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -257,6 +258,20 @@ const marketplaceProfileRoute = createRoute({
   },
 })
 
+const generateAPIKeyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/generate-api-key',
+  component: function GenerateAPIKeyRoute() {
+    return withPageErrorBoundary(
+      withProtectedRoute(GenerateAPIKey, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   onboardingRoute,
@@ -274,7 +289,8 @@ const routeTree = rootRoute.addChildren([
   becomeCreatorRoute,
   createItemsRoute,
   itemDetailRoute,
-  marketplaceProfileRoute 
+  marketplaceProfileRoute,
+  generateAPIKeyRoute
 ])
 
 const router = createRouter({

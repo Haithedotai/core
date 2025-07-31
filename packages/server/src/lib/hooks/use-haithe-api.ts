@@ -98,6 +98,17 @@ export function useHaitheApi() {
             staleTime: 5 * 60 * 1000, // 5 minutes
         }),
 
+        // API Status query - returns account status
+        getApiStatus: () => useQuery({
+            queryKey: ['apiStatus'],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getApiStatus();
+            },
+            enabled: isLoggedIn() && !!client,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+        }),
+
         // API Key management
         generateApiKey: useMutation({
             mutationKey: ['generateApiKey'],

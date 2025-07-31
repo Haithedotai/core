@@ -220,13 +220,6 @@ export default function AgentsConfigurationPage() {
                     <p className="hidden md:block ml-2">Back to Agents</p>
                   </Link>
                 </Button>
-                <Button
-                  onClick={() => setSaveDialogOpen(true)}
-                  disabled={!hasChanges}
-                >
-                  <Icon name="Save" className="" />
-                  <p className="hidden md:block ml-2">Save Changes</p>
-                </Button>
               </div>
             </div>
           </div>
