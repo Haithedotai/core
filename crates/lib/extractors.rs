@@ -41,10 +41,9 @@ impl FromRequest for AuthUser {
 
         let db = state.db.clone();
         let wallet_address = claims.sub.clone();
-        let token_header = token_header.to_string(); // clone for async
+        let token_header = token_header.to_string();
 
         let result = futures_executor::block_on(async move {
-            // Check that the token matches the one stored in DB
             let token_from_db: Option<String> =
                 sqlx::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
                     .bind(&wallet_address)
@@ -54,7 +53,6 @@ impl FromRequest for AuthUser {
 
             match token_from_db {
                 Some(token) if token == token_header => {
-                    // Token matches, proceed
                     let user = sqlx::query_as::<_, AuthUser>(
                         "SELECT wallet_address, created_at FROM accounts WHERE wallet_address = ?",
                     )
@@ -152,7 +150,6 @@ impl FromRequest for ApiCaller {
             println!("Debug: project_uid = {}", proj_uid_header);
             println!("Debug: signature = {}", parsed_api_key.signature);
 
-            // Step 1: Check if account exists and get timestamp
             let api_key_timestamp: Option<String> = sqlx
                 ::query_scalar(
                     "SELECT strftime('%s', api_key_last_issued_at) FROM accounts WHERE wallet_address = ?"
@@ -182,7 +179,6 @@ impl FromRequest for ApiCaller {
                 }
             };
 
-            // Step 2: Verify API key signature
             let private_key = std::env::var("MOCK_TEE_PVT_KEY")
                 .map_err(|_| ApiError::Internal("TEE private key not configured".into()))?;
 
@@ -197,7 +193,6 @@ impl FromRequest for ApiCaller {
                 return Err(ApiError::Unauthorized);
             }
 
-            // Step 3: Check organization role
             let org_role: Option<String> = sqlx
                 ::query_scalar(
                     "SELECT CASE 
@@ -222,7 +217,6 @@ impl FromRequest for ApiCaller {
 
             println!("Debug: org_role = {:?}", org_role);
 
-            // Step 4: Check project role
             let project_role: Option<String> = sqlx::query_scalar(
                 "SELECT pm.role 
                      FROM project_members pm
@@ -240,7 +234,6 @@ impl FromRequest for ApiCaller {
 
             println!("Debug: project_role = {:?}", project_role);
 
-            // Step 5: Check permissions
             let has_org_permission = match org_role.as_ref().map(|s| s.as_str()) {
                 Some("owner") | Some("admin") => true,
                 _ => false,
@@ -260,7 +253,6 @@ impl FromRequest for ApiCaller {
                 return Err(ApiError::Forbidden);
             }
 
-            // Step 6: Verify project exists and belongs to organization
             let project_exists: Option<bool> = sqlx::query_scalar(
                 "SELECT 1 
                      FROM projects p
