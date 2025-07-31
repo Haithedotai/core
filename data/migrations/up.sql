@@ -25,10 +25,10 @@ CREATE TABLE
         name TEXT NOT NULL,
         owner TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expenditure INTEGER NOT NULL DEFAULT 0 CHECK (expenditure >= 0),
         UNIQUE (name),
         UNIQUE (organization_uid),
-        UNIQUE (address),
-        expenditure INTEGER NOT NULL DEFAULT 0 CHECK (expenditure >= 0)
+        UNIQUE (address)
     );
 
 CREATE TABLE
