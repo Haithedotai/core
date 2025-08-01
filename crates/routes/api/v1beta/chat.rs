@@ -11,6 +11,14 @@ struct Conversation {
     updated_at: String,
 }
 
+#[derive(Debug, Clone, FromRow, Serialize)]
+struct Message {
+    id: i32,
+    message: String,
+    sender: String,
+    created_at: String,
+}
+
 #[get("/conversations")]
 pub async fn get_conversations_handlers(
     auth_user: AuthUser,
@@ -108,6 +116,23 @@ pub async fn delete_conversation_handler(
     }
 
     Ok(respond::ok("conversation deleted", web::Json(result)))
+}
+
+#[get("/conversations/{id}/messages")]
+pub async fn get_conversation_messages_handler(
+    auth_user: AuthUser,
+    state: web::Data<AppState>,
+    web::Path(id): web::Path<i32>,
+) -> Result<impl Responder, ApiError> {
+    let messages = sqlx::query_as::<_, Message>(
+        "SELECT id, content, created_at, updated_at FROM messages WHERE conversation_id = ?",
+    )
+    .bind(id)
+    .fetch_all(&state.db)
+    .await
+    .map_err(|_| ApiError::Internal("DB error".into()))?;
+
+    Ok(respond::ok("messages fetched", web::Json(messages)))
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
