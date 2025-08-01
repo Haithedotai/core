@@ -75,7 +75,7 @@ impl FromRequest for ApiCaller {
     type Error = ApiError;
     type Future = Ready<Result<Self, Self::Error>>;
 
-    fn from_request(req: &HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, payload: &mut actix_web::dev::Payload) -> Self::Future {
         let auth_header = req
             .headers()
             .get("Authorization")
@@ -85,6 +85,171 @@ impl FromRequest for ApiCaller {
             return ready(Err(ApiError::Unauthorized));
         };
 
+        // First, try to authenticate as AuthUser (JWT token)
+        if let Some(claims) = utils::decode_auth_header(auth_header) {
+            let Some(state) = req.app_data::<web::Data<AppState>>() else {
+                return ready(Err(ApiError::Internal("Missing app state".into())));
+            };
+
+            let db = state.db.clone();
+            let wallet_address = claims.sub.clone();
+            let token_header = auth_header.to_string();
+
+            // Check if this is a valid JWT session
+            let jwt_result = futures_executor::block_on(async move {
+                let token_from_db: Option<String> =
+                    sqlx::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
+                        .bind(&wallet_address)
+                        .fetch_optional(&db)
+                        .await
+                        .map_err(|_| ApiError::Internal("DB error".into()))?;
+
+                match token_from_db {
+                    Some(token) if token == token_header => {
+                        let user = sqlx::query_as::<_, AuthUser>(
+                            "SELECT wallet_address, created_at FROM accounts WHERE wallet_address = ?",
+                        )
+                        .bind(&wallet_address)
+                        .fetch_optional(&db)
+                        .await
+                        .map_err(|_| ApiError::Internal("DB error".into()))?;
+
+                        user.ok_or(ApiError::Unauthorized)
+                    }
+                    _ => Err(ApiError::Unauthorized),
+                }
+            });
+
+            // If JWT authentication succeeded, we need org and project headers
+            if let Ok(_auth_user) = jwt_result {
+                let org_uid_header = match req
+                    .headers()
+                    .get("Haithe-Organization")
+                    .and_then(|v| v.to_str().ok())
+                    .map(|s| s.strip_prefix("org-").unwrap_or(s))
+                    .or_else(|| {
+                        req.headers()
+                            .get("OpenAI-Organization")
+                            .and_then(|v| v.to_str().ok())
+                            .map(|s| s.strip_prefix("org-").unwrap_or(s))
+                    }) {
+                    Some(org_uid) => org_uid.to_string(),
+                    None => {
+                        return ready(Err(ApiError::BadRequest(
+                            "Missing or invalid Organization header".into(),
+                        )));
+                    }
+                };
+
+                let proj_uid_header = match req
+                    .headers()
+                    .get("Haithe-Project")
+                    .and_then(|v| v.to_str().ok())
+                    .map(|s| s.strip_prefix("proj-").unwrap_or(s))
+                    .or_else(|| {
+                        req.headers()
+                            .get("OpenAI-Project")
+                            .and_then(|v| v.to_str().ok())
+                            .map(|s| s.strip_prefix("proj-").unwrap_or(s))
+                    }) {
+                    Some(proj_uid) => proj_uid.to_string(),
+                    None => {
+                        return ready(Err(ApiError::BadRequest(
+                            "Missing or invalid Project header".into(),
+                        )));
+                    }
+                };
+
+                // Verify the user has permissions for the org/project
+                let permission_result = futures_executor::block_on(async move {
+                    println!("Debug: JWT auth - wallet_address = {}", wallet_address);
+                    println!("Debug: JWT auth - org_uid = {}", org_uid_header);
+                    println!("Debug: JWT auth - project_uid = {}", proj_uid_header);
+                    let org_role: Option<String> = sqlx
+                        ::query_scalar(
+                            "SELECT CASE 
+                            WHEN organizations.owner = ? THEN 'owner'
+                            ELSE org_members.role
+                         END as role
+                         FROM organizations 
+                         LEFT JOIN org_members ON organizations.id = org_members.org_id AND org_members.wallet_address = ?
+                         WHERE organizations.organization_uid = ? 
+                         AND (organizations.owner = ? OR org_members.wallet_address = ?)"
+                        )
+                        .bind(&wallet_address)
+                        .bind(&wallet_address)
+                        .bind(&org_uid_header)
+                        .bind(&wallet_address)
+                        .bind(&wallet_address)
+                        .fetch_optional(&db).await
+                        .map_err(|e| {
+                            println!("DB Error - Organization role query: {:?}", e);
+                            ApiError::Internal("Failed to fetch organization role".into())
+                        })?;
+
+                    let project_role: Option<String> = sqlx::query_scalar(
+                        "SELECT pm.role 
+                             FROM project_members pm
+                             JOIN projects p ON pm.project_id = p.id
+                             WHERE pm.wallet_address = ? AND p.project_uid = ?",
+                    )
+                    .bind(&wallet_address)
+                    .bind(&proj_uid_header)
+                    .fetch_optional(&db)
+                    .await
+                    .map_err(|e| {
+                        println!("DB Error - Project role query: {:?}", e);
+                        ApiError::Internal("Failed to fetch project role".into())
+                    })?;
+
+                    let has_org_permission = matches!(
+                        org_role.as_ref().map(|s| s.as_str()),
+                        Some("owner") | Some("admin")
+                    );
+                    let has_project_permission = matches!(
+                        project_role.as_ref().map(|s| s.as_str()),
+                        Some("admin") | Some("developer")
+                    );
+
+                    if !has_org_permission && !has_project_permission {
+                        return Err(ApiError::Forbidden);
+                    }
+
+                    let project_exists: Option<bool> = sqlx::query_scalar(
+                        "SELECT 1 
+                             FROM projects p
+                             JOIN organizations o ON p.org_id = o.id
+                             WHERE p.project_uid = ? AND o.organization_uid = ?",
+                    )
+                    .bind(&proj_uid_header)
+                    .bind(&org_uid_header)
+                    .fetch_optional(&db)
+                    .await
+                    .map_err(|e| {
+                        println!("DB Error - Project exists query: {:?}", e);
+                        ApiError::Internal("Failed to verify project existence".into())
+                    })?;
+
+                    if project_exists.is_none() {
+                        return Err(ApiError::BadRequest(
+                            "Project not found or does not belong to organization".into(),
+                        ));
+                    }
+
+                    println!("Debug: JWT authentication successful!");
+
+                    Ok(ApiCaller {
+                        wallet_address,
+                        org_uid: org_uid_header,
+                        project_uid: proj_uid_header,
+                    })
+                });
+
+                return ready(permission_result);
+            }
+        }
+
+        // If JWT authentication failed, fall back to API key authentication
         let api_key = if let Some(key) = auth_header.strip_prefix("Bearer ") {
             key
         } else {
@@ -145,21 +310,24 @@ impl FromRequest for ApiCaller {
         let api_key = api_key.to_string();
 
         let result = futures_executor::block_on(async move {
-            println!("Debug: wallet_address = {}", wallet_address);
-            println!("Debug: org_uid = {}", org_uid_header);
-            println!("Debug: project_uid = {}", proj_uid_header);
-            println!("Debug: signature = {}", parsed_api_key.signature);
+            println!("Debug: API Key auth - wallet_address = {}", wallet_address);
+            println!("Debug: API Key auth - org_uid = {}", org_uid_header);
+            println!("Debug: API Key auth - project_uid = {}", proj_uid_header);
+            println!(
+                "Debug: API Key auth - signature = {}",
+                parsed_api_key.signature
+            );
 
-            let api_key_timestamp: Option<i64> = sqlx
-                ::query_scalar(
-                    "SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?"
-                )
-                .bind(&wallet_address)
-                .fetch_optional(&db).await
-                .map_err(|e| {
-                    println!("DB Error 1 - API key timestamp query: {:?}", e);
-                    ApiError::Internal("Failed to fetch API key timestamp".into())
-                })?;
+            let api_key_timestamp: Option<i64> = sqlx::query_scalar(
+                "SELECT unixepoch(api_key_last_issued_at) FROM accounts WHERE wallet_address = ?",
+            )
+            .bind(&wallet_address)
+            .fetch_optional(&db)
+            .await
+            .map_err(|e| {
+                println!("DB Error 1 - API key timestamp query: {:?}", e);
+                ApiError::Internal("Failed to fetch API key timestamp".into())
+            })?;
 
             let timestamp = match api_key_timestamp {
                 Some(ts) => {
@@ -274,7 +442,7 @@ impl FromRequest for ApiCaller {
                 ));
             }
 
-            println!("Debug: Authentication successful!");
+            println!("Debug: API key authentication successful!");
 
             Ok(ApiCaller {
                 wallet_address,
