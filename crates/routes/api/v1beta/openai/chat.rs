@@ -285,19 +285,17 @@ async fn get_completions_handler(
                 continue;
             }
 
-            let tx = orchestrator_contract
-                .method::<_, ()>(
-                    "collectPaymentForCall",
-                    (
-                        formatted_organization_address,
-                        creator_id,
-                        formatted_organization_address,
-                        cost,
-                    ),
-                )?
-                .send()
-                .await?;
+            let contract_call = orchestrator_contract.method::<_, ()>(
+                "collectPaymentForCall",
+                (
+                    formatted_organization_address,
+                    creator_id,
+                    formatted_organization_address,
+                    cost,
+                ),
+            )?;
 
+            let tx = contract_call.send().await?;
             let tx_hash = tx.tx_hash();
             println!(
                 "Payment collected for product {} - Transaction: {:?}",
