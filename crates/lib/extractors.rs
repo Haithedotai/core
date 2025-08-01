@@ -75,7 +75,7 @@ impl FromRequest for ApiCaller {
     type Error = ApiError;
     type Future = Ready<Result<Self, Self::Error>>;
 
-    fn from_request(req: &HttpRequest, payload: &mut actix_web::dev::Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, _payload: &mut actix_web::dev::Payload) -> Self::Future {
         let auth_header = req
             .headers()
             .get("Authorization")
@@ -95,7 +95,7 @@ impl FromRequest for ApiCaller {
             let wallet_address = claims.sub.clone();
             let token_header = auth_header.to_string();
 
-            // Check if this is a valid JWT session
+            // Check if this is a valid JWT session and get org/project permissions
             let jwt_result = futures_executor::block_on(async move {
                 let token_from_db: Option<String> =
                     sqlx::query_scalar("SELECT token FROM sessions WHERE wallet_address = ?")
@@ -121,7 +121,7 @@ impl FromRequest for ApiCaller {
             });
 
             // If JWT authentication succeeded, we need org and project headers
-            if let Ok(_auth_user) = jwt_result {
+            if jwt_result.is_ok() {
                 let org_uid_header = match req
                     .headers()
                     .get("Haithe-Organization")
@@ -159,6 +159,10 @@ impl FromRequest for ApiCaller {
                         )));
                     }
                 };
+
+                // Get fresh references for the permission check
+                let db = state.db.clone();
+                let wallet_address = claims.sub.clone();
 
                 // Verify the user has permissions for the org/project
                 let permission_result = futures_executor::block_on(async move {
