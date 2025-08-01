@@ -323,12 +323,37 @@ const definitions = {
         "inputs": [
           {
             "internalType": "address",
-            "name": "usdc_",
+            "name": "usdt_",
             "type": "address"
           }
         ],
         "stateMutability": "nonpayable",
         "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "organization",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "spender",
+            "type": "address"
+          }
+        ],
+        "name": "OrganizationExpenditure",
+        "type": "event"
       },
       {
         "inputs": [
@@ -364,6 +389,34 @@ const definitions = {
           }
         ],
         "name": "addProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "orgAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creatorId_",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "spender_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount_",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectPaymentForCall",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -615,7 +668,7 @@ const definitions = {
       },
       {
         "inputs": [],
-        "name": "usdc",
+        "name": "usdt",
         "outputs": [
           {
             "internalType": "contract IERC20",
@@ -736,6 +789,24 @@ const definitions = {
           }
         ],
         "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "transferCompelledFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
       },
       {
@@ -1036,6 +1107,25 @@ const definitions = {
         "inputs": [
           {
             "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "funds",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
             "name": "tokenId",
             "type": "uint256"
           }
@@ -1182,6 +1272,24 @@ const definitions = {
       {
         "inputs": [
           {
+            "internalType": "uint256",
+            "name": "tokenId_",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount_",
+            "type": "uint256"
+          }
+        ],
+        "name": "registerFunds",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
             "internalType": "address",
             "name": "from",
             "type": "address"
@@ -1318,6 +1426,19 @@ const definitions = {
           }
         ],
         "name": "transferFrom",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId_",
+            "type": "uint256"
+          }
+        ],
+        "name": "withdrawFunds",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

@@ -14,4 +14,6 @@ export type {
   Creator,
   CreatorDetails,
   Product,
+  Conversation,
+  Message,
 } from "../shared/types";

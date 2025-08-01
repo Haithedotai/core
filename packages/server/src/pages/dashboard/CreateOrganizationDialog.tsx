@@ -24,7 +24,7 @@ export default function CreateOrganizationDialog({
 }: CreateOrganizationDialogProps) {
   const [orgName, setOrgName] = useState("");
   const api = useHaitheApi();
-  const { setSelectedOrganizationId } = useStore();
+  const { setSelectedOrganizationId, setSelectedOrg } = useStore();
   const createOrganizationMutation = api.createOrganization;
 
   const handleCreate = async () => {
@@ -35,6 +35,7 @@ export default function CreateOrganizationDialog({
       
       // Switch to the newly created organization
       if (newOrg?.id) {
+        setSelectedOrg(newOrg);
         setSelectedOrganizationId(newOrg.id);
       }
       

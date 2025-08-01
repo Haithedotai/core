@@ -139,7 +139,7 @@ async fn get_completions_handler(
     let llm = models::resolve_model(&model);
 
     let mut knowledges: Vec<Box<dyn Knowledge>> = vec![Box::new(StringKnowledge::new(
-        "You are a helpful assistant. You answer questions by using provided knowledge, messages and prompts.",
+        "You are an AI assistant integrated with the Haithe platform. You can use the attached knowledge to answer context aware questions when the user asks about them, else you can answer in general.",
     ))];
 
     let mut preamble = String::new();

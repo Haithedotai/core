@@ -16,7 +16,7 @@ import CreateOrganizationDialog from "./CreateOrganizationDialog";
 export default function OrganizationSelector() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const api = useHaitheApi();
-  const { selectedOrganizationId, setSelectedOrganizationId } = useStore();
+  const { selectedOrganizationId, setSelectedOrganizationId, selectedOrg, setSelectedOrg } = useStore();
   const { data: userOrganizations, isLoading: isUserOrganizationsLoading } = api.getUserOrganizations();
 
   // Don't show if not logged in to Haithe
@@ -44,6 +44,7 @@ export default function OrganizationSelector() {
   
   // Set default if none selected
   if (selectedOrganizationId === 0 && userOrganizations.length > 0) {
+    setSelectedOrg(userOrganizations[0]);
     setSelectedOrganizationId(userOrganizations[0].id);
   }
 
@@ -51,6 +52,7 @@ export default function OrganizationSelector() {
     if (value === "create-new") {
       setIsCreateDialogOpen(true);
     } else {
+      setSelectedOrg(userOrganizations.find(org => org.id === parseInt(value)) || userOrganizations[0]);
       setSelectedOrganizationId(parseInt(value));
     }
   };

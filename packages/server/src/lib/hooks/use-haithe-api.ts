@@ -380,11 +380,11 @@ export function useHaitheApi() {
         }),
 
         // Organization balance and expenditure
-        balance: (orgId: number) => useQuery({
+        organizationBalance: (orgId: number) => useQuery({
             queryKey: ['organizationBalance', orgId],
             queryFn: () => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.balance(orgId);
+                return client.organizationBalance(orgId);
             },
             enabled: !!orgId && !!client,
             staleTime: 30 * 1000, // 30 seconds
@@ -700,6 +700,125 @@ export function useHaitheApi() {
             onError: (error) => {
                 console.error(error?.toString?.() || error);
                 toast.error('Could not disable model. Please try again.');
+            }
+        }),
+
+        // Chat/Conversation methods
+        getConversations: (orgUid: string, projectUid: string) => useQuery({
+            queryKey: ['conversations', orgUid, projectUid],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getConversations(orgUid, projectUid);
+            },
+            enabled: isLoggedIn() && !!client && !!orgUid && !!projectUid,
+        }),
+
+        createConversation: useMutation({
+            mutationKey: ['createConversation'],
+            mutationFn: ({ orgUid, projectUid }: { orgUid: string; projectUid: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.createConversation(orgUid, projectUid);
+            },
+            onSuccess: (_, { orgUid, projectUid }) => {
+                queryClient.invalidateQueries({ queryKey: ['conversations', orgUid, projectUid] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not create conversation. Please try again.');
+            }
+        }),
+
+        getConversation: (id: number, orgUid: string, projectUid: string) => useQuery({
+            queryKey: ['conversation', id, orgUid, projectUid],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getConversation(id, orgUid, projectUid);
+            },
+            enabled: !!id && !!client && !!orgUid && !!projectUid,
+        }),
+
+        updateConversation: useMutation({
+            mutationKey: ['updateConversation'],
+            mutationFn: ({ id, title, orgUid, projectUid }: { id: number; title: string; orgUid: string; projectUid: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.updateConversation(id, title, orgUid, projectUid);
+            },
+            onSuccess: (_, { id, orgUid, projectUid }) => {
+                toast.success('Conversation updated successfully');
+                queryClient.invalidateQueries({ queryKey: ['conversation', id, orgUid, projectUid] });
+                queryClient.invalidateQueries({ queryKey: ['conversations', orgUid, projectUid] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update conversation. Please try again.');
+            }
+        }),
+
+        deleteConversation: useMutation({
+            mutationKey: ['deleteConversation'],
+            mutationFn: ({ id, orgUid, projectUid }: { id: number; orgUid: string; projectUid: string }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.deleteConversation(id, orgUid, projectUid);
+            },
+            onSuccess: (_, { id, orgUid, projectUid }) => {
+                toast.success('Conversation deleted successfully');
+                queryClient.removeQueries({ queryKey: ['conversation', id, orgUid, projectUid] });
+                queryClient.invalidateQueries({ queryKey: ['conversations', orgUid, projectUid] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not delete conversation. Please try again.');
+            }
+        }),
+
+        getConversationMessages: (conversationId: number, orgUid: string, projectUid: string) => useQuery({
+            queryKey: ['conversationMessages', conversationId, orgUid, projectUid],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getConversationMessages(conversationId, orgUid, projectUid);
+            },
+            enabled: !!conversationId && !!client && !!orgUid && !!projectUid,
+        }),
+
+        createMessage: useMutation({
+            mutationKey: ['createMessage'],
+            mutationFn: ({ conversationId, message, sender, orgUid, projectUid }: {
+                conversationId: number;
+                message: string;
+                sender: string;
+                orgUid: string;
+                projectUid: string;
+            }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.createMessage(conversationId, message, sender, orgUid, projectUid);
+            },
+            onSuccess: (_, { conversationId, orgUid, projectUid }) => {
+                queryClient.invalidateQueries({ queryKey: ['conversationMessages', conversationId, orgUid, projectUid] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not send message. Please try again.');
+            }
+        }),
+
+        getCompletions: useMutation({
+            mutationKey: ['getCompletions'],
+            mutationFn: ({ orgUid, projectUid, body }: {
+                orgUid: string;
+                projectUid: string;
+                body: {
+                    model: string;
+                    messages: Array<{ role: string; content: string }>;
+                    n?: number;
+                    temperature?: number;
+                };
+            }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getCompletions(orgUid, projectUid, body);
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not get AI completion. Please try again.');
             }
         }),
     };
