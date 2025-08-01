@@ -149,20 +149,28 @@ async fn get_completions_handler(
         .find(|m| m.name == model)
         .map_or(0, |m| m.price_per_call) as u64;
 
+    let mut product_payments: Vec<(String, String, u64)> = Vec::new();
+
     if final_enabled_products.is_empty() {
     } else {
         for p in final_enabled_products {
             println!("Processing product with address: {}", p);
 
-            let (uri, _encrypted_key, _price_per_call, category): (String, String, i64, String) =
-            sqlx::query_as::<_, (String, String, i64, String)>("SELECT uri, encrypted_key, price_per_call, category FROM products WHERE address = ?")
-                .bind(p)
+            let (uri, _encrypted_key, _price_per_call, category, creator): (String, String, i64, String, String) =
+            sqlx::query_as::<_, (String, String, i64, String, String)>("SELECT uri, encrypted_key, price_per_call, category, creator FROM products WHERE address = ?")
+                .bind(&p)
                 .fetch_one(&state.db)
                 .await?;
 
-            println!("Found product - URI: {}, Category: {}", uri, category);
+            println!(
+                "Found product - URI: {}, Category: {}, Creator: {}",
+                uri, category, creator
+            );
 
-            total_cost += _price_per_call as u64;
+            let product_cost = _price_per_call as u64;
+            total_cost += product_cost;
+
+            product_payments.push((p.clone(), creator, product_cost));
 
             if uri.is_empty() {
                 return Err(ApiError::BadRequest("Product URI is empty".to_string()));
@@ -240,6 +248,100 @@ async fn get_completions_handler(
         }
     }
 
+    for (product_address, creator_address, cost) in product_payments {
+        if cost > 0 {
+            println!(
+                "Collecting payment for product {} (creator: {}, cost: {})",
+                product_address, creator_address, cost
+            );
+
+            let org_address: String =
+                sqlx::query_scalar("SELECT address FROM organizations WHERE id = ?")
+                    .bind(org_id)
+                    .fetch_one(&state.db)
+                    .await?;
+
+            let formatted_organization_address: Address = org_address
+                .parse()
+                .map_err(|_| ApiError::BadRequest("Invalid organization address format".into()))?;
+
+            let orchestrator_contract =
+                contracts::get_contract_with_wallet("HaitheOrchestrator", None).await?;
+
+            let creator_addr: Address = creator_address
+                .parse()
+                .map_err(|_| ApiError::BadRequest("Invalid creator address format".into()))?;
+
+            let creator_id: u64 = orchestrator_contract
+                .method::<_, u64>("creators", (creator_addr,))?
+                .call()
+                .await?;
+
+            if creator_id == 0 {
+                println!(
+                    "Warning: Creator {} not registered in orchestrator contract",
+                    creator_address
+                );
+                continue;
+            }
+
+            let contract_call = orchestrator_contract.method::<_, ()>(
+                "collectPaymentForCall",
+                (
+                    formatted_organization_address,
+                    creator_id,
+                    formatted_organization_address,
+                    cost,
+                ),
+            )?;
+
+            let tx = contract_call.send().await?;
+            let tx_hash = tx.tx_hash();
+            println!(
+                "Payment collected for product {} - Transaction: {:?}",
+                product_address, tx_hash
+            );
+        }
+    }
+
+    let llm_cost = models
+        .iter()
+        .find(|m| m.name == model)
+        .map_or(0, |m| m.price_per_call) as u64;
+
+    if llm_cost > 0 {
+        println!("Collecting payment for LLM usage: {}", llm_cost);
+
+        let org_address: String =
+            sqlx::query_scalar("SELECT address FROM organizations WHERE id = ?")
+                .bind(org_id)
+                .fetch_one(&state.db)
+                .await?;
+
+        let formatted_organization_address: Address = org_address
+            .parse()
+            .map_err(|_| ApiError::BadRequest("Invalid organization address format".into()))?;
+
+        let orchestrator_contract =
+            contracts::get_contract_with_wallet("HaitheOrchestrator", None).await?;
+
+        let contract_call = orchestrator_contract.method::<_, ()>(
+            "collectPaymentForLLMCall",
+            (
+                formatted_organization_address,
+                formatted_organization_address,
+                llm_cost,
+            ),
+        )?;
+
+        let tx = contract_call.send().await?;
+        let tx_hash = tx.tx_hash();
+        println!(
+            "Payment collected for LLM usage - Transaction: {:?}",
+            tx_hash
+        );
+    }
+
     let mut agent = Agent::new("Haithe Agent", llm).preamble(&preamble);
     agent.temperature = Some(temperature);
     agent.max_tokens = Some(1024);
@@ -282,9 +384,8 @@ async fn get_completions_handler(
             .await?;
 
     let current_expenditure_u64 = current_expenditure.max(0) as u64;
-    let total_required = current_expenditure_u64 + total_cost;
 
-    if balance < total_required {
+    if balance < total_cost {
         return Err(ApiError::BadRequest("Insufficient funds".to_string()));
     }
 
@@ -298,7 +399,6 @@ async fn get_completions_handler(
         "id": format!("chatcmpl-{}", uuid::Uuid::new_v4().to_string()),
         "object": "chat.completion",
         "created": chrono::Utc::now().timestamp(),
-        "success": true,
         "model": model,
         "choices": choices,
         "usage": {

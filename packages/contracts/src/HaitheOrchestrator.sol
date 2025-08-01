@@ -127,4 +127,17 @@ contract HaitheOrchestrator {
 
         emit OrganizationExpenditure(orgAddress_, amount_, spender_);
     }
+
+    function collectPaymentForLLMCall(
+        address orgAddress_,
+        address spender_,
+        uint256 amount_
+    ) external {
+        require(isOrganization[orgAddress_], "Not a registered organization");
+        require(amount_ > 0, "Invalid amount");
+
+        usdt.transferFrom(orgAddress_, address(this), amount_);
+
+        emit OrganizationExpenditure(orgAddress_, amount_, spender_);
+    }
 }

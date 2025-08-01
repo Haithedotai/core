@@ -14,6 +14,7 @@ contract HaitheOrganization {
         name = name_;
         owner = owner_;
         _orchestrator = HaitheOrchestrator(msg.sender);
+        _orchestrator.usdt().approve(address(_orchestrator), type(uint256).max);
         enabledProducts = new AuxillaryList();
     }
 
