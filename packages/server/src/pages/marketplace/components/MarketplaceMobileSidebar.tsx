@@ -72,7 +72,7 @@ export default function MarketplaceMobileSidebar() {
       {/* Knowledge Types */}
       <div className="space-y-2">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
-          Knowledge Types
+          Filters
         </h4>
         <div className="space-y-2">
           <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
@@ -130,17 +130,6 @@ export default function MarketplaceMobileSidebar() {
               URL Knowledge
             </label>
           </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Tools & Prompts */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
-          Tools & Prompts
-        </h4>
-        <div className="space-y-2">
           <div className="flex items-center space-x-2 px-2 py-1.5 rounded-md">
             <Checkbox
               id="mobile-promptset"

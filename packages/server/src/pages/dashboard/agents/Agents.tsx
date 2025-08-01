@@ -174,7 +174,7 @@ export default function AgentsPage() {
         ) : (
           <div className="grid grid-cols-1 @2xl:grid-cols-2 @4xl:grid-cols-3 gap-6 @container">
             {agents.map((agent: any) => (
-              <Card key={agent.id} className="group hover:shadow-lg transition-all duration-200 hover:border-primary/20 shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+              <Card key={agent.id} className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
                 <CardHeader className="relative pb-4">
                   <div className="flex items-start justify-between mb-3">
@@ -276,14 +276,19 @@ export default function AgentsPage() {
                   </div>
 
                   {/* Action Button */}
-                  <div className="pt-2">
-                    <Button asChild size="sm" className="w-full">
+                    <Button asChild size="sm" className="w-full mt-2">
                       <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
                         <Icon name="Settings" className="size-4 mr-2" />
                         Configure Agent
                       </Link>
                     </Button>
-                  </div>
+
+                    <Button asChild size="sm" className="w-full">
+                      <Link to="/dashboard/agents/$id/chat" params={{ id: agent.id.toString() }}>
+                        <Icon name="MessageSquare" className="size-4 mr-2" />
+                        Chat with Agent
+                      </Link>
+                    </Button>
                 </CardContent>
               </Card>
             ))}

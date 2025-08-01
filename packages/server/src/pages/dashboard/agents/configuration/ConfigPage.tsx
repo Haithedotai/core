@@ -17,6 +17,7 @@ import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog";
 import { copyToClipboard } from "../../../../../utils";
+import DashboardHeader from "../../Header";
 
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
@@ -194,42 +195,31 @@ export default function AgentsConfigurationPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" />
-        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="space-y-3 flex items-center w-full justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="aspect-square size-12 md:size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
-                  <Icon name="Settings" className="size-8 text-primary" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
-                      {project.name}
-                    </h1>
-                    <Badge variant="default">
-                      Active
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl">
-                    Manage your agent
-                  </p>
-                </div>
-              </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader
+          title={project.name}
+          subtitle="Manage your agent"
+          iconName="Settings"
+        />
 
-              <div className="flex items-center gap-3">
-                <Button variant="outline" asChild>
-                  <Link to="/dashboard/agents">
-                    <Icon name="ArrowLeft" className="" />
-                    <p className="hidden md:block ml-2">Back to Agents</p>
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/agents/$id/chat" params={{ id: project.id.toString() }}>
+              <Icon name="BotMessageSquare" className="" />
+              <p className="hidden md:block ml-2">Chat with Agent</p>
+            </Link>
+          </Button>
+
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/agents">
+              <Icon name="ArrowLeft" className="" />
+              <p className="hidden md:block ml-2">Back to Agents</p>
+            </Link>
+          </Button>
         </div>
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">

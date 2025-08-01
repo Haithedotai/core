@@ -70,7 +70,7 @@ export default function MarketplaceSidebar() {
         {/* Knowledge Types */}
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
-            Knowledge
+            Filters
           </p>
           <div className="space-y-2">
             <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
@@ -138,17 +138,6 @@ export default function MarketplaceSidebar() {
                 URL Knowledge
               </label>
             </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Tools & Prompts */}
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
-            Tools & Prompts
-          </p>
-          <div className="space-y-2">
             <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="promptset"

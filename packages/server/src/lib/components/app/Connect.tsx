@@ -78,7 +78,7 @@ export default function Connect() {
                 variant="outline"
                 className="py-2 px-4 rounded-md"
             >
-                <Icon name="Wallet" className="size-4 mr-2" />
+                <Icon name="Wallet" className="size-4" />
                 Connect Wallet
             </Button>
         );
@@ -201,13 +201,13 @@ export default function Connect() {
             >
                 {logoutMutation.isPending ? (
                     <div className="flex items-center">
-                        <Icon name="Loader" className="size-4 mr-2 animate-spin" />
+                        <Icon name="Loader" className="size-4 animate-spin" />
                         Disconnecting...
                     </div>
                 ) : (
                     <div className="flex items-center">
                         <Icon name="LogOut" className="size-4" />
-                        <div className="hidden sm:block ml-2">
+                        <div className="hidden sm:block">
                             Disconnect
                         </div>
                     </div>

@@ -718,7 +718,7 @@ export default function CreatePage() {
                 </Card>
 
                 <div className="flex justify-end gap-4">
-                    <Button type="button" variant="outline">
+                    <Button type="button" variant="outline" onClick={() => navigate({ to: "/marketplace" })}>
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isLoading || uploadToMarketplaceAndGetReward.isPending}>
