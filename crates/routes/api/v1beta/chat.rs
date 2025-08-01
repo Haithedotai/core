@@ -138,5 +138,8 @@ pub async fn get_conversation_messages_handler(
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(get_conversations_handlers)
         .service(post_conversations_handlers)
-        .service(patch_conversations_handlers);
+        .service(patch_conversations_handlers)
+        .service(get_conversation_handler)
+        .service(delete_conversation_handler)
+        .service(get_conversation_messages_handler);
 }
