@@ -11,6 +11,7 @@ contract HaitheCreatorIdentity is ERC721URIStorage {
 
     mapping(uint256 => bytes32) public pvtKeySeeds;
     mapping(uint256 => string) public pubKeys;
+    mapping(uint256 => uint256) public funds;
 
     function determineNextSeed(address for_) public view returns (bytes32) {
         return bytes32(abi.encodePacked(for_, _nextTokenId));
@@ -44,12 +45,26 @@ contract HaitheCreatorIdentity is ERC721URIStorage {
         return _nextTokenId;
     }
 
-    // function _transfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId,
-    //     uint256 batchSize
-    // ) internal override {
-    //     require(from == address(0), "Token not transferable");
-    // }
+    function registerFunds(uint256 tokenId_, uint256 amount_) external payable {
+        require(
+            msg.sender == address(_orchestrator),
+            "Only orchestrator can register funds"
+        );
+        require(msg.value > 0, "Must send some ether");
+
+        funds[tokenId_] += amount_;
+    }
+
+    function withdrawFunds(uint256 tokenId_) external {
+        require(
+            msg.sender == ownerOf(tokenId_),
+            "Only owner can withdraw funds"
+        );
+        require(funds[tokenId_] > 0, "No funds to withdraw");
+        address to = msg.sender;
+        uint256 amount = funds[tokenId_];
+        funds[tokenId_] = 0;
+
+        payable(to).transfer(amount);
+    }
 }

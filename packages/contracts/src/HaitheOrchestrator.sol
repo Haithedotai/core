@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./HaitheCreatorIdentity.sol";
 
 contract HaitheOrchestrator {
-    IERC20 public usdc;
+    IERC20 public usdt;
     address public server;
 
     HaitheCreatorIdentity public creatorIdentity;
@@ -21,9 +21,15 @@ contract HaitheOrchestrator {
     address[] public organizations;
     mapping(string => bool) public organizationNameExists;
 
-    constructor(address usdc_) {
+    event OrganizationExpenditure(
+        address indexed organization,
+        uint256 amount,
+        address indexed spender
+    );
+
+    constructor(address usdt_) {
         server = msg.sender;
-        usdc = IERC20(usdc_);
+        usdt = IERC20(usdt_);
         creatorIdentity = new HaitheCreatorIdentity(server);
     }
 
@@ -105,5 +111,20 @@ contract HaitheOrchestrator {
             }
         }
         revert("Organization not found");
+    }
+
+    function collectPaymentForCall(
+        address orgAddress_,
+        uint256 creatorId_,
+        address spender_,
+        uint256 amount_
+    ) external {
+        require(isOrganization[orgAddress_], "Not a registered organization");
+        require(amount_ > 0, "Invalid amount");
+
+        creatorIdentity.registerFunds(creatorId_, amount_);
+        usdt.transferFrom(orgAddress_, address(creatorIdentity), amount_);
+
+        emit OrganizationExpenditure(orgAddress_, amount_, spender_);
     }
 }

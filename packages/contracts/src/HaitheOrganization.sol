@@ -18,7 +18,22 @@ contract HaitheOrganization {
     }
 
     function balance() external view returns (uint256) {
-        return _orchestrator.usdc().balanceOf(address(this));
+        return _orchestrator.usdt().balanceOf(address(this));
+    }
+
+    function transferCompelledFunds(address to, uint256 amount) external {
+        require(to != address(0), "Invalid recipient address");
+        require(amount > 0, "Amount must be greater than zero");
+        require(
+            _orchestrator.usdt().balanceOf(address(this)) >= amount,
+            "Insufficient balance"
+        );
+        require(
+            msg.sender == address(_orchestrator),
+            "Only orchestrator can transfer funds"
+        );
+
+        _orchestrator.usdt().transfer(to, amount);
     }
 
     function enableProduct(address product) external {
