@@ -34,7 +34,7 @@ pub async fn get_conversations_handlers(
 
     Ok(respond::ok(
         "conversations fetched",
-        web::Json(conversations),
+        serde_json::json!(conversations),
     ))
 }
 
@@ -43,7 +43,9 @@ pub async fn post_conversations_handlers(
     api_caller: ApiCaller,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let result = sqlx::query("INSERT INTO conversations (title, wallet_address) VALUES (?, ?) RETURNING id, title, created_at, updated_at")
+    let conversation = sqlx::query_as::<_, Conversation>(
+        "INSERT INTO conversations (title, wallet_address) VALUES (?, ?) RETURNING id, title, created_at, updated_at"
+    )
         .bind(&format!(
             "New Conversation {}",
             uuid::Uuid::new_v4().to_string()[0..8].to_string()
@@ -52,7 +54,10 @@ pub async fn post_conversations_handlers(
         .fetch_one(&state.db)
         .await?;
 
-    Ok(respond::ok("conversation created", web::Json(result)))
+    Ok(respond::ok(
+        "conversation created",
+        serde_json::json!(conversation),
+    ))
 }
 
 #[derive(Deserialize)]
@@ -69,25 +74,32 @@ struct CreateMessageBody {
 pub async fn patch_conversations_handlers(
     api_caller: ApiCaller,
     state: web::Data<AppState>,
-    web::Path(id): web::Path<i32>,
+    path: web::Path<i32>,
     web::Json(payload): web::Json<PatchConversationBody>,
 ) -> Result<impl Responder, ApiError> {
-    let result = sqlx::query("UPDATE conversations SET title = ? WHERE id = ? AND wallet_address = ? RETURNING id, title, created_at, updated_at")
+    let id = path.into_inner();
+    let conversation = sqlx::query_as::<_, Conversation>(
+        "UPDATE conversations SET title = ? WHERE id = ? AND wallet_address = ? RETURNING id, title, created_at, updated_at"
+    )
         .bind(&payload.title)
         .bind(id)
         .bind(&api_caller.wallet_address)
         .fetch_one(&state.db)
         .await?;
 
-    Ok(respond::ok("conversation updated", web::Json(result)))
+    Ok(respond::ok(
+        "conversation updated",
+        serde_json::json!(conversation),
+    ))
 }
 
 #[get("/conversations/{id}")]
 pub async fn get_conversation_handler(
     api_caller: ApiCaller,
     state: web::Data<AppState>,
-    web::Path(id): web::Path<i32>,
+    path: web::Path<i32>,
 ) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
     let conversation = sqlx::query_as::<_, Conversation>(
         "SELECT id, title, created_at, updated_at FROM conversations WHERE id = ? AND wallet_address = ?",
     )
@@ -97,15 +109,19 @@ pub async fn get_conversation_handler(
     .await
     .map_err(|_| ApiError::NotFound("Conversation not found".into()))?;
 
-    Ok(respond::ok("conversation fetched", web::Json(conversation)))
+    Ok(respond::ok(
+        "conversation fetched",
+        serde_json::json!(conversation),
+    ))
 }
 
 #[delete("/conversations/{id}")]
 pub async fn delete_conversation_handler(
     api_caller: ApiCaller,
     state: web::Data<AppState>,
-    web::Path(id): web::Path<i32>,
+    path: web::Path<i32>,
 ) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
     let result = sqlx::query("DELETE FROM conversations WHERE id = ? AND wallet_address = ?")
         .bind(id)
         .bind(&api_caller.wallet_address)
@@ -116,15 +132,19 @@ pub async fn delete_conversation_handler(
         return Err(ApiError::NotFound("Conversation not found".into()));
     }
 
-    Ok(respond::ok("conversation deleted", web::Json(result)))
+    Ok(respond::ok(
+        "conversation deleted",
+        serde_json::json!({ "rows_affected": result.rows_affected() }),
+    ))
 }
 
 #[get("/conversations/{id}/messages")]
 pub async fn get_conversation_messages_handler(
     api_caller: ApiCaller,
     state: web::Data<AppState>,
-    web::Path(id): web::Path<i32>,
+    path: web::Path<i32>,
 ) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
     // First verify the conversation belongs to this user
     let _conversation = sqlx::query_scalar::<_, i32>(
         "SELECT id FROM conversations WHERE id = ? AND wallet_address = ?",
@@ -150,9 +170,10 @@ pub async fn get_conversation_messages_handler(
 pub async fn post_conversation_messages_handler(
     api_caller: ApiCaller,
     state: web::Data<AppState>,
-    web::Path(id): web::Path<i32>,
+    path: web::Path<i32>,
     web::Json(payload): web::Json<CreateMessageBody>,
 ) -> Result<impl Responder, ApiError> {
+    let id = path.into_inner();
     // First verify the conversation belongs to this user
     let _conversation = sqlx::query_scalar::<_, i32>(
         "SELECT id FROM conversations WHERE id = ? AND wallet_address = ?",
@@ -163,14 +184,16 @@ pub async fn post_conversation_messages_handler(
     .await
     .map_err(|_| ApiError::NotFound("Conversation not found".into()))?;
 
-    let result = sqlx::query("INSERT INTO messages (conversation_id, content, sender) VALUES (?, ?, ?) RETURNING id, content as message, sender, created_at")
+    let message = sqlx::query_as::<_, Message>(
+        "INSERT INTO messages (conversation_id, content, sender) VALUES (?, ?, ?) RETURNING id, content as message, sender, created_at"
+    )
         .bind(id)
         .bind(&payload.message)
         .bind(&api_caller.wallet_address)
         .fetch_one(&state.db)
         .await?;
 
-    Ok(respond::ok("message created", web::Json(result)))
+    Ok(respond::ok("message created", web::Json(message)))
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
