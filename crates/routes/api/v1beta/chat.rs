@@ -1,5 +1,5 @@
 use crate::lib::{error::ApiError, extractors::AuthUser, respond, state::AppState};
-use actix_web::{HttpResponse, Responder, get, web};
+use actix_web::{HttpResponse, Responder, get, post, web};
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -28,6 +28,27 @@ pub async fn get_conversations_handlers(
         "conversations fetched",
         web::Json(conversations),
     ))
+}
+
+#[post("/conversations")]
+pub async fn post_conversations_handlers(
+    auth_user: AuthUser,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let result = sqlx::query("INSERT INTO conversations (title, wallet_address) VALUES (?, ?) RETURNING id, title, created_at, updated_at")
+        .bind(&format!(
+            "New Conversation {}",
+            uuid::Uuid::new_v4().to_string().slice(0, 4)
+        ))
+        .bind(&auth_user.wallet_address)
+        .fetch_one(&state.db)
+        .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(ApiError::Internal("Failed to create conversation".into()));
+    }
+
+    Ok(respond::created("conversation created", web::Json(result)))
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
