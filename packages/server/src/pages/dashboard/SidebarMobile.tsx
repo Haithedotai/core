@@ -18,7 +18,7 @@ export default function MobileNav() {
   const { pathname } = useLocation();
   const { authenticated } = usePrivy();
   const api = useHaitheApi();
-  
+
   // Returns true if the current path matches exactly, or for subpages, if it starts with the path and the path is not '/dashboard'
   const isActive = (path: string) => {
     if (path === '/dashboard') {
@@ -43,9 +43,9 @@ export default function MobileNav() {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
               Home
             </p>
-            <Button 
-              variant={isActive("/dashboard") ? "outline" : "ghost"} 
-              className="w-full justify-start h-10" 
+            <Button
+              variant={isActive("/dashboard") ? "outline" : "ghost"}
+              className="w-full justify-start h-10"
               asChild
               onClick={handleLinkClick}
             >
@@ -54,9 +54,9 @@ export default function MobileNav() {
                 Overview
               </Link>
             </Button>
-            <Button 
-              variant={isActive("/dashboard/agents") ? "outline" : "ghost"} 
-              className="w-full justify-start h-10" 
+            <Button
+              variant={isActive("/dashboard/agents") ? "outline" : "ghost"}
+              className="w-full justify-start h-10"
               asChild
               onClick={handleLinkClick}
             >
@@ -65,9 +65,9 @@ export default function MobileNav() {
                 Docs
               </Link>
             </Button>
-            <Button 
-              variant={isActive("/dashboard/agents") ? "outline" : "ghost"} 
-              className="w-full justify-start h-10" 
+            <Button
+              variant={isActive("/dashboard/agents") ? "outline" : "ghost"}
+              className="w-full justify-start h-10"
               asChild
               onClick={handleLinkClick}
             >
@@ -88,9 +88,9 @@ export default function MobileNav() {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
             Dashboard
           </p>
-          <Button 
-            variant={isActive("/dashboard") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/dashboard") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >
@@ -99,9 +99,9 @@ export default function MobileNav() {
               Overview
             </Link>
           </Button>
-          <Button 
-            variant={isActive("/dashboard/agents") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/dashboard/agents") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >
@@ -110,9 +110,9 @@ export default function MobileNav() {
               Agents
             </Link>
           </Button>
-          <Button 
-            variant={isActive("/dashboard/workflows") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/dashboard/workflows") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >
@@ -121,9 +121,9 @@ export default function MobileNav() {
               Workflows
             </Link>
           </Button>
-          <Button 
-            variant={isActive("/dashboard/analytics") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/dashboard/analytics") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >
@@ -136,14 +136,45 @@ export default function MobileNav() {
 
         <Separator className="my-2" />
 
+        {/* Account Links */}
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
+            Account
+          </p>
+          <Button
+            variant={isActive("/dashboard/profile") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
+            asChild
+            onClick={handleLinkClick}
+          >
+            <Link to="/dashboard/profile">
+              <Icon name="User" className="size-4 mr-3" />
+              Profile
+            </Link>
+          </Button>
+          <Button
+            variant={isActive("/dashboard/settings") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
+            asChild
+            onClick={handleLinkClick}
+          >
+            <Link to="/dashboard/settings">
+              <Icon name="Settings" className="size-4 mr-3" />
+              Settings
+            </Link>
+          </Button>
+        </div>
+
+        <Separator className="my-2" />
+
         {/* Marketplace Links */}
         <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
             Marketplace
           </p>
-          <Button 
-            variant={isActive("/marketplace") && pathname === "/marketplace" ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/marketplace") && pathname === "/marketplace" ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >
@@ -152,9 +183,9 @@ export default function MobileNav() {
               Marketplace
             </Link>
           </Button>
-          <Button 
-            variant={isActive("/dashboard/purchases") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/dashboard/purchases") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >
@@ -167,42 +198,11 @@ export default function MobileNav() {
 
         <Separator className="my-2" />
 
-        {/* Account Links */}
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
-            Account
-          </p>
-          <Button 
-            variant={isActive("/dashboard/profile") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
-            asChild
-            onClick={handleLinkClick}
-          >
-            <Link to="/dashboard/profile">
-              <Icon name="User" className="size-4 mr-3" />
-              Profile
-            </Link>
-          </Button>
-          <Button 
-            variant={isActive("/dashboard/settings") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
-            asChild
-            onClick={handleLinkClick}
-          >
-            <Link to="/dashboard/settings">
-              <Icon name="Building" className="size-4 mr-3" />
-              Settings
-            </Link>
-          </Button>
-        </div>
-
-        <Separator className="my-2" />
-
         {/* Other Links */}
         <div className="space-y-1">
-          <Button 
-            variant={isActive("/dashboard/help") ? "outline" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/dashboard/help") ? "outline" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
             onClick={handleLinkClick}
           >

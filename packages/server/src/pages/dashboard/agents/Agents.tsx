@@ -21,6 +21,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/src/lib/components/ui/alert-dialog";
+import { truncateAddress } from "@/src/lib/utils";
+import { copyToClipboard } from "@/utils";
+import DashboardHeader from "../Header";
+import { Separator } from "@/src/lib/components/ui/separator";
 
 export default function AgentsPage() {
   const api = useHaitheApi();
@@ -117,34 +121,20 @@ export default function AgentsPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" />
-        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="space-y-3 flex items-center w-full justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20 aspect-square">
-                  <Icon name="Bot" className="size-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                    Agents
-                  </h1>
-                  <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    Manage your AI agents and their marketplace extensions.
-                  </p>
-                </div>
-              </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader
+          title="Agents"
+          subtitle="Manage your AI agents and their marketplace extensions."
+          iconName="Bot"
+        />
 
-              <Button onClick={() => setCreateOpen(true)}>
-                <Icon name="Plus" />
-                <span className="hidden sm:block">New Agent</span>
-              </Button>
-            </div>
-
-          </div>
-        </div>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Icon name="Plus" />
+          <span className="hidden sm:block">New Agent</span>
+        </Button>
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -182,33 +172,55 @@ export default function AgentsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 @2xl:grid-cols-2 @4xl:grid-cols-3 gap-6 @container">
             {agents.map((agent: any) => (
-              <Card key={agent.id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{agent.name}</span>
-                    <div className="flex items-center gap-1">
-                      <Button asChild size="icon" variant="ghost">
+              <Card key={agent.id} className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
+                <CardHeader className="relative pb-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="size-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-primary/20 flex-shrink-0">
+                        <Icon name="Bot" className="size-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg font-semibold truncate">{agent.name}</CardTitle>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">
+                            {agent.status || 'Active'}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {agent.type || 'AI Agent'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                      <Button asChild size="icon" variant="ghost" className="size-8">
                         <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
-                          <Icon name="Settings" />
+                          <Icon name="Settings" className="size-4" />
                         </Link>
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => {
-                        setEditAgent(agent);
-                        setAgentName(agent.name);
-                        setEditOpen(true);
-                      }}>
-                        <Icon name="Pencil" />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-8"
+                        onClick={() => {
+                          setEditAgent(agent);
+                          setAgentName(agent.name);
+                          setEditOpen(true);
+                        }}
+                      >
+                        <Icon name="Pencil" className="size-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="size-8"
                             onClick={() => setDeleteAgent(agent)}
                           >
-                            <Icon name="Trash2" />
+                            <Icon name="Trash2" className="size-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -220,7 +232,7 @@ export default function AgentsPage() {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction 
+                            <AlertDialogAction
                               onClick={handleDelete}
                               disabled={api.deleteProject.isPending}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -231,11 +243,54 @@ export default function AgentsPage() {
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
-                  </CardTitle>
-                  <CardDescription>Created: {new Date(agent.created_at).toLocaleString()}</CardDescription>
+                  </div>
+
+                  <CardDescription className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Calendar" className="size-3" />
+                      Created {new Date(agent.created_at).toLocaleDateString()}
+                    </div>
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Badge>Agent ID: {agent.project_uid}</Badge>
+
+                <CardContent className="relative pt-0 space-y-4">
+                  {/* Agent ID */}
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Hash" className="size-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Agent ID</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {truncateAddress(agent.project_uid)}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => copyToClipboard(agent.project_uid, "Agent ID")}
+                        className="size-6"
+                      >
+                        <Icon name="Copy" className="size-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="flex items-center gap-2 w-full justify-end">
+                    <Button asChild>
+                      <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
+                        <Icon name="Settings" className="size-4" />
+                        Configure
+                      </Link>
+                    </Button>
+
+                    <Button asChild>
+                      <Link to="/dashboard/agents/$id/chat" params={{ id: agent.id.toString() }}>
+                        <Icon name="MessageSquare" className="size-4" />
+                        Chat
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}

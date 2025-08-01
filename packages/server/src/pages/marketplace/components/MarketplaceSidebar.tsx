@@ -15,7 +15,6 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Icon from "@/src/lib/components/custom/Icon";
-import type { MarketplaceCategory } from "../types";
 import { useMarketplaceStore } from "../../../lib/hooks/use-store";
 
 export default function MarketplaceSidebar() {
@@ -29,15 +28,15 @@ export default function MarketplaceSidebar() {
     return pathname === path || pathname.startsWith(path + '/');
   };
 
-  const handleCategoryClick = (category: MarketplaceCategory) => {
+  const handleCategoryClick = (category: any) => {
     const currentCategories = Array.isArray(safeFilters.category) ? safeFilters.category : [];
     const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter((c: MarketplaceCategory) => c !== category)
+      ? currentCategories.filter((c: any) => c !== category)
       : [...currentCategories, category];
     updateFilters({ category: newCategories.length > 0 ? newCategories : undefined });
   };
 
-  const isCategoryActive = (category: MarketplaceCategory) => {
+  const isCategoryActive = (category: any) => {
     if (!Array.isArray(safeFilters.category)) return false;
     return safeFilters.category.includes(category);
   };
@@ -56,12 +55,12 @@ export default function MarketplaceSidebar() {
             asChild
           >
             <Link to="/marketplace">
-              <Sparkles className="size-4 mr-3" />
+              <Icon name="ShoppingBag" className="size-4" />
               Explore All
             </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start h-10">
-            <Icon name="TrendingUp" className="size-4 mr-3" />
+            <Icon name="TrendingUp" className="size-4" />
             Trending Now
           </Button>
         </div>
@@ -71,7 +70,7 @@ export default function MarketplaceSidebar() {
         {/* Knowledge Types */}
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
-            Knowledge
+            Filters
           </p>
           <div className="space-y-2">
             <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
@@ -139,17 +138,6 @@ export default function MarketplaceSidebar() {
                 URL Knowledge
               </label>
             </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Tools & Prompts */}
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
-            Tools & Prompts
-          </p>
-          <div className="space-y-2">
             <div className="flex items-center space-x-3 px-2 py-1.5 rounded-md">
               <Checkbox
                 id="promptset"
@@ -188,7 +176,7 @@ export default function MarketplaceSidebar() {
           </p>
           <Button variant="ghost" className="w-full justify-start h-10" asChild>
             <Link to="/dashboard">
-              <Icon name="LayoutDashboard" className="size-4 mr-2" />
+              <Icon name="LayoutDashboard" className="size-4" />
               Dashboard
             </Link>
           </Button>

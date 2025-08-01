@@ -108,7 +108,8 @@ export default function MarketplaceItemCard({
   };
 
   return (
-    <Card className="group relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-100 cursor-pointer border bg-card/50 backdrop-blur-sm" onClick={() => onItemClick(item)}>
+    <Card onClick={() => onItemClick(item)} className="relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
       <CardHeader className="relative pb-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -199,7 +200,7 @@ export default function MarketplaceItemCard({
               <p className="text-xs font-medium truncate font-mono">
                 {item.creator.slice(0, 6)}...{item.creator.slice(-4)}
               </p>
-              <p className="text-xs text-muted-foreground">Creator Address</p>
+              <p className="text-xs text-muted-foreground">Wallet Address</p>
             </div>
           </div>
         </div>

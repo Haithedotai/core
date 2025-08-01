@@ -92,6 +92,27 @@ export default function Sidebar() {
 
                 <Separator className="my-2" />
 
+                {/* Account Links */}
+                <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
+                        Account
+                    </p>
+                    <Button variant={isActive("/dashboard/profile") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
+                        <Link to="/dashboard/profile">
+                            <Icon name="User" className="size-4 mr-3" />
+                            Profile
+                        </Link>
+                    </Button>
+                    <Button variant={isActive("/dashboard/settings") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
+                        <Link to="/dashboard/settings">
+                            <Icon name="Settings" className="size-4 mr-3" />
+                            Settings
+                        </Link>
+                    </Button>
+                </div>
+
+                <Separator className="my-2" />
+
                 {/* Marketplace Links */}
                 <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
@@ -107,27 +128,6 @@ export default function Sidebar() {
                         <Link to="/dashboard/purchases">
                             <Icon name="ShoppingBag" className="size-4 mr-3" />
                             My Products
-                        </Link>
-                    </Button>
-                </div>
-
-                <Separator className="my-2" />
-
-                {/* Account Links */}
-                <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-3 py-2">
-                        Account
-                    </p>
-                    <Button variant={isActive("/dashboard/profile") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
-                        <Link to="/dashboard/profile">
-                            <Icon name="User" className="size-4 mr-3" />
-                            Profile
-                        </Link>
-                    </Button>
-                    <Button variant={isActive("/dashboard/settings") ? "outline" : "ghost"} className="w-full justify-start h-10" asChild>
-                        <Link to="/dashboard/settings">
-                            <Icon name="Building" className="size-4 mr-3" />
-                            Settings
                         </Link>
                     </Button>
                 </div>

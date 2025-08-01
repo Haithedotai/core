@@ -14,6 +14,8 @@ import { useEffect, useRef } from "react";
 import type { Organization } from "../../../../../services/clients";
 import { Image } from "@/src/lib/components/custom/Image";
 import { toast } from "sonner";
+import { Separator } from "@/src/lib/components/ui/separator";
+import DashboardHeader from "./Header";
 
 interface StatsCardProps {
   title: string;
@@ -466,7 +468,6 @@ export default function DashboardPage() {
 
   // Get profile data
   const profileQuery = api.profile();
-  const profile = profileQuery.data;
   const { selectedOrganizationId } = useStore();
   const { data: organization } = api.getOrganization(selectedOrganizationId);
   const { data: agents } = api.getProjects(selectedOrganizationId);
@@ -476,39 +477,24 @@ export default function DashboardPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" />
-        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="space-y-3 flex items-center justify-between w-full">
-              <div className="flex items-center gap-4">
-                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
-                  <Icon name="LayoutDashboard" className="size-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                    Dashboard
-                  </h1>
-                  <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    {profile?.address ? `Registered since ${formatDate(profile?.registered, "MMM D, YYYY")}` : 'Manage your AI infrastructure and monitor performance'}
-                  </p>
-                </div>
-              </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader 
+          title="Dashboard"
+          subtitle="Manage your AI infrastructure and monitor performance"
+          iconName="LayoutDashboard"
+        />
 
-              <Button variant="outline" asChild>
-                <Link to="/dashboard/generate-api-key">
-                  <Icon name="Key" className={cn(
-                    "size-4 text-orange-400",
-                  )} />
-                  <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">
-                    {apiKeyLastIssued?.issued_at && apiKeyLastIssued?.issued_at !== 0 ? <span className="">API Key Enabled</span> : <span className="">Generate API Key</span>}
-                  </span>
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Button variant="outline" asChild>
+          <Link to="/dashboard/generate-api-key">
+            <Icon name="Key" className="size-4 text-orange-400" />
+            <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">
+              {apiKeyLastIssued?.issued_at && apiKeyLastIssued?.issued_at !== 0 ? "API Key Enabled" : "Generate API Key"}
+            </span>
+          </Link>
+        </Button>
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* Main Dashboard Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8">

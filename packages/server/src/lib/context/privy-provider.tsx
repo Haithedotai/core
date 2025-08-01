@@ -1,6 +1,7 @@
 import { PrivyProvider as PrivyProviderBase } from '@privy-io/react-auth';
 import { useTheme } from './theme-provider';
 import type { Chain } from 'viem';
+import { hardhat } from 'viem/chains';
 
 const hyperion: Chain = {
   id: 133717,
@@ -17,8 +18,6 @@ const hyperion: Chain = {
   },
 };
 
-const primaryChain = hyperion;
-
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
     const { theme } = useTheme();
 
@@ -26,8 +25,8 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         <PrivyProviderBase
             appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
             config={{
-                defaultChain: primaryChain,
-                supportedChains: [primaryChain],
+                defaultChain: hardhat,
+                supportedChains: [hardhat, hyperion],
                 loginMethods: ["wallet"],
                 appearance: {
                     theme: theme === "dark" ? "dark" : "light",

@@ -16,6 +16,8 @@ import { useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog";
+import { copyToClipboard } from "../../../../../utils";
+import DashboardHeader from "../../Header";
 
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
@@ -25,6 +27,7 @@ export default function AgentsConfigurationPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Get profile data
   const profileQuery = api.profile();
@@ -192,42 +195,31 @@ export default function AgentsConfigurationPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" />
-        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="space-y-3 flex items-center w-full justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="aspect-square size-12 md:size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
-                  <Icon name="Settings" className="size-8 text-primary" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
-                      {project.name}
-                    </h1>
-                    <Badge variant="default">
-                      Active
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-2xl">
-                    Manage your agent
-                  </p>
-                </div>
-              </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader
+          title={project.name}
+          subtitle="Manage your agent"
+          iconName="Settings"
+        />
 
-              <div className="flex items-center gap-3">
-                <Button variant="outline" asChild>
-                  <Link to="/dashboard/agents">
-                    <Icon name="ArrowLeft" className="" />
-                    <p className="hidden md:block ml-2">Back to Agents</p>
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/agents">
+              <Icon name="ArrowLeft" className="" />
+              <p className="hidden md:block">Back to Agents</p>
+            </Link>
+          </Button>
+
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/agents/$id/chat" params={{ id: project.id.toString() }}>
+              <Icon name="BotMessageSquare" className="" />
+              <p className="hidden md:block">Chat with Agent</p>
+            </Link>
+          </Button>
         </div>
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -270,43 +262,101 @@ export default function AgentsConfigurationPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Endpoint */}
-            <div className="space-y-2">
-              <Label>Endpoint</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground">Endpoint</Label>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="font-mono">POST</Badge>
+                <Badge variant="secondary" className="font-mono shrink-0">POST</Badge>
                 <Input
                   value={`${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`}
                   readOnly
-                  className="font-mono text-sm"
+                  className="font-mono text-sm flex-1"
                 />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(
+                    `${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`,
+                    "Endpoint",
+                    setCopiedField
+                  )}
+                  className="shrink-0"
+                >
+                  <Icon name={copiedField === "Endpoint" ? "Check" : "Copy"} className="size-4" />
+                </Button>
               </div>
             </div>
 
             {/* Headers */}
             <div className="space-y-3">
-              <Label>Required Headers</Label>
+              <Label className="text-sm font-medium text-muted-foreground">Required Headers</Label>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="rounded" />
-                  <Label className="w-24 text-sm">Authorization</Label>
-                  <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm" />
+                  <Label className="w-36 text-sm shrink-0">Authorization</Label>
+                  <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard("Bearer <YOUR-API-KEY>", "Authorization Header", setCopiedField)}
+                    className="shrink-0"
+                  >
+                    <Icon name={copiedField === "Authorization Header" ? "Check" : "Copy"} className="size-4" />
+                  </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="rounded" />
-                  <Label className="w-24 text-sm">OpenAI-Organization</Label>
-                  <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm" />
+                  <Label className="w-36 text-sm shrink-0">OpenAI-Organization</Label>
+                  <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(`org-${organization?.organization_uid}`, "OpenAI-Organization Header", setCopiedField)}
+                    className="shrink-0"
+                  >
+                    <Icon name={copiedField === "OpenAI-Organization Header" ? "Check" : "Copy"} className="size-4" />
+                  </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="rounded" />
-                  <Label className="w-24 text-sm">OpenAI-Project</Label>
-                  <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm" />
+                  <Label className="w-36 text-sm shrink-0">OpenAI-Project</Label>
+                  <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(`proj-${project.project_uid}`, "OpenAI-Project Header", setCopiedField)}
+                    className="shrink-0"
+                  >
+                    <Icon name={copiedField === "OpenAI-Project Header" ? "Check" : "Copy"} className="size-4" />
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Request Body */}
             <div className="space-y-2">
-              <Label>Request Body (JSON)</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-muted-foreground">Example Request Body (JSON)</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`{
+  "model": "gemini-2.0-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Hello, how can you help me today?"
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000,
+  "n": 1,
+}`, "Request Body JSON", setCopiedField)}
+                  className="shrink-0"
+                >
+                  <Icon name={copiedField === "Request Body JSON" ? "Check" : "Copy"} className="size-4" />
+                </Button>
+              </div>
               <Textarea
                 value={`{
   "model": "gemini-2.0-flash",
@@ -321,7 +371,8 @@ export default function AgentsConfigurationPage() {
     }
   ],
   "temperature": 0.7,
-  "max_tokens": 1000
+  "max_tokens": 1000,
+  "n": 1,
 }`}
                 readOnly
                 className="font-mono text-sm h-48"
