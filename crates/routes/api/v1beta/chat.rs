@@ -68,6 +68,7 @@ struct PatchConversationBody {
 #[derive(Deserialize)]
 struct CreateMessageBody {
     message: String,
+    sender: String,
 }
 
 #[patch("/conversations/{id}")]
@@ -156,7 +157,7 @@ pub async fn get_conversation_messages_handler(
     .map_err(|_| ApiError::NotFound("Conversation not found".into()))?;
 
     let messages = sqlx::query_as::<_, Message>(
-        "SELECT id, content as message, sender, created_at FROM messages WHERE conversation_id = ?",
+        "SELECT id, message, sender, created_at FROM agent_preview_messages WHERE conversation_id = ?",
     )
     .bind(id)
     .fetch_all(&state.db)
@@ -185,11 +186,11 @@ pub async fn post_conversation_messages_handler(
     .map_err(|_| ApiError::NotFound("Conversation not found".into()))?;
 
     let message = sqlx::query_as::<_, Message>(
-        "INSERT INTO messages (conversation_id, content, sender) VALUES (?, ?, ?) RETURNING id, content as message, sender, created_at"
+        "INSERT INTO agent_preview_messages (conversation_id, message, sender) VALUES (?, ?, ?) RETURNING id, message, sender, created_at"
     )
         .bind(id)
         .bind(&payload.message)
-        .bind(&api_caller.wallet_address)
+        .bind(&payload.sender)
         .fetch_one(&state.db)
         .await?;
 

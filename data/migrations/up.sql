@@ -112,19 +112,28 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    agent_preview_conversations (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users (id) ON DELETE SET NULL,
-        title VARCHAR(255),
+    IF NOT EXISTS conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
+        title TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP
     );
 
 CREATE TABLE
-    agent_preview_messages (
-        id SERIAL PRIMARY KEY,
+    IF NOT EXISTS agent_preview_conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
+        title TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP
+    );
+
+CREATE TABLE
+    IF NOT EXISTS agent_preview_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         conversation_id INTEGER REFERENCES conversations (id) ON DELETE CASCADE,
-        sender ENUM ('user', 'ai') NOT NULL,
+        sender TEXT NOT NULL CHECK (sender IN ('user', 'ai')),
         message TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
