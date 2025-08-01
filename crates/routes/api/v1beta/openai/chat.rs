@@ -298,6 +298,7 @@ async fn get_completions_handler(
         "id": format!("chatcmpl-{}", uuid::Uuid::new_v4().to_string()),
         "object": "chat.completion",
         "created": chrono::Utc::now().timestamp(),
+        "success": true,
         "model": model,
         "choices": choices,
         "usage": {
