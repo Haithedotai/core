@@ -276,19 +276,21 @@ export default function AgentsPage() {
                   </div>
 
                   {/* Action Button */}
-                    <Button asChild size="sm" className="w-full mt-2">
+                  <div className="flex items-center gap-2 w-full justify-end">
+                    <Button asChild>
                       <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
-                        <Icon name="Settings" className="size-4 mr-2" />
-                        Configure Agent
+                        <Icon name="Settings" className="size-4" />
+                        Configure
                       </Link>
                     </Button>
 
-                    <Button asChild size="sm" className="w-full">
+                    <Button asChild>
                       <Link to="/dashboard/agents/$id/chat" params={{ id: agent.id.toString() }}>
-                        <Icon name="MessageSquare" className="size-4 mr-2" />
-                        Chat with Agent
+                        <Icon name="MessageSquare" className="size-4" />
+                        Chat
                       </Link>
                     </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}

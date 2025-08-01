@@ -171,7 +171,7 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
         <div className="space-y-8">
           {/* Profile Hero Card */}
-          <Card className="relative overflow-hidden shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <Card className="relative overflow-hidden shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] to-secondary/[0.02]" />
             <CardHeader className="relative pb-4 sm:pb-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -226,7 +226,7 @@ export default function ProfilePage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Profile Information - Takes up 2 columns */}
             <div className="lg:col-span-2 space-y-6">
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+              <Card className="shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
                 <CardHeader className="relative pb-4">
                   <div className="flex items-center gap-3">
@@ -299,7 +299,7 @@ export default function ProfilePage() {
 
             {/* Account Details Sidebar */}
             <div className="space-y-6">
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+              <Card className="shadow-lg border bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
                 <CardHeader className="relative">
                   <div className="flex items-center gap-3">

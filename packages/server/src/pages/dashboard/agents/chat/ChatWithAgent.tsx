@@ -132,15 +132,15 @@ export default function ChatWithAgent() {
       {/* Header */}
       <div className="w-full flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
         <DashboardHeader
-          title="Chat with Agent"
-          subtitle="Interact with your AI agent through natural conversation."
+          title={`Chat with ${agent.name}`}
+          subtitle={`Interact with your AI agent through natural conversation.`}
           iconName="BotMessageSquare"
         />
 
-        <Link to="/dashboard/agents">
+        <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
           <Button variant="outline" size="sm" className="hidden sm:flex">
             <Icon name="ArrowLeft" className="size-4" />
-            Back
+            Back to Agent
           </Button>
           <Button variant="outline" size="icon" className="sm:hidden">
             <Icon name="ArrowLeft" className="size-4" />

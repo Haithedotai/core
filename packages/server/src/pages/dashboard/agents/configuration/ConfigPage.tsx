@@ -204,16 +204,16 @@ export default function AgentsConfigurationPage() {
 
         <div className="flex items-center gap-3">
           <Button variant="outline" asChild>
-            <Link to="/dashboard/agents/$id/chat" params={{ id: project.id.toString() }}>
-              <Icon name="BotMessageSquare" className="" />
-              <p className="hidden md:block ml-2">Chat with Agent</p>
+            <Link to="/dashboard/agents">
+              <Icon name="ArrowLeft" className="" />
+              <p className="hidden md:block">Back to Agents</p>
             </Link>
           </Button>
 
           <Button variant="outline" asChild>
-            <Link to="/dashboard/agents">
-              <Icon name="ArrowLeft" className="" />
-              <p className="hidden md:block ml-2">Back to Agents</p>
+            <Link to="/dashboard/agents/$id/chat" params={{ id: project.id.toString() }}>
+              <Icon name="BotMessageSquare" className="" />
+              <p className="hidden md:block">Chat with Agent</p>
             </Link>
           </Button>
         </div>
