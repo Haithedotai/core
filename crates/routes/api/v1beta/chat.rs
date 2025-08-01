@@ -135,11 +135,29 @@ pub async fn get_conversation_messages_handler(
     Ok(respond::ok("messages fetched", web::Json(messages)))
 }
 
+#[post("/conversations/{id}/messages")]
+pub async fn post_conversation_messages_handler(
+    auth_user: AuthUser,
+    state: web::Data<AppState>,
+    web::Path(id): web::Path<i32>,
+    web::Json(payload): web::Json<Message>,
+) -> Result<impl Responder, ApiError> {
+    let result = sqlx::query("INSERT INTO messages (conversation_id, content, sender) VALUES (?, ?, ?) RETURNING id, content, sender, created_at")
+        .bind(id)
+        .bind(&payload.message)
+        .bind(&auth_user.wallet_address)
+        .fetch_one(&state.db)
+        .await?;
+
+    Ok(respond::ok("message created", web::Json(result)))
+}
+
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(get_conversations_handlers)
         .service(post_conversations_handlers)
         .service(patch_conversations_handlers)
         .service(get_conversation_handler)
         .service(delete_conversation_handler)
-        .service(get_conversation_messages_handler);
+        .service(get_conversation_messages_handler)
+        .service(post_conversation_messages_handler);
 }
