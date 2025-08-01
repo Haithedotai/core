@@ -564,21 +564,9 @@ async fn get_org_balance_handler(
         .call()
         .await?;
 
-    let current_expenditure: i64 =
-        sqlx::query_scalar("SELECT expenditure FROM organizations WHERE id = ?")
-            .bind(org_id)
-            .fetch_one(&state.db)
-            .await?;
-
-    let remaining_balance = if current_expenditure < 0 {
-        balance + ((-current_expenditure) as u64)
-    } else {
-        balance.saturating_sub(current_expenditure as u64)
-    };
-
     Ok(respond::ok(
         "Organization balance fetched",
-        serde_json::json!({"balance": remaining_balance}),
+        serde_json::json!({"balance": balance}),
     ))
 }
 
