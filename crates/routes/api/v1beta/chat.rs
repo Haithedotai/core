@@ -74,5 +74,7 @@ pub async fn patch_conversations_handlers(
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
-    cfg.service(get_conversations_handlers);
+    cfg.service(get_conversations_handlers)
+        .service(post_conversations_handlers)
+        .service(patch_conversations_handlers);
 }
