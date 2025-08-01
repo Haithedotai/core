@@ -1,5 +1,5 @@
 use crate::lib::{error::ApiError, extractors::AuthUser, respond, state::AppState};
-use actix_web::{HttpResponse, Responder, get, patch, post, web};
+use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -89,6 +89,25 @@ pub async fn get_conversation_handler(
     .map_err(|_| ApiError::NotFound("Conversation not found".into()))?;
 
     Ok(respond::ok("conversation fetched", web::Json(conversation)))
+}
+
+#[delete("/conversations/{id}")]
+pub async fn delete_conversation_handler(
+    auth_user: AuthUser,
+    state: web::Data<AppState>,
+    web::Path(id): web::Path<i32>,
+) -> Result<impl Responder, ApiError> {
+    let result = sqlx::query("DELETE FROM conversations WHERE id = ? AND wallet_address = ?")
+        .bind(id)
+        .bind(&auth_user.wallet_address)
+        .execute(&state.db)
+        .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(ApiError::NotFound("Conversation not found".into()));
+    }
+
+    Ok(respond::ok("conversation deleted", web::Json(result)))
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
