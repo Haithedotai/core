@@ -27,13 +27,12 @@ pub struct Project {
 pub struct FaucetRequest {
     pub id: i64,
     pub wallet_address: String,
-    pub product_id: i64,
     pub requested_at: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct FaucetPostRequest {
-    pub product_id: Option<i64>,
+    // No fields needed since faucet requests are no longer tied to products
 }
 
 #[get("")]
@@ -192,7 +191,6 @@ async fn get_faucet_handler(
             serde_json::json!({
                 "last_request": {
                     "id": request.id,
-                    "product_id": request.product_id,
                     "requested_at": request.requested_at
                 }
             }),
@@ -202,7 +200,6 @@ async fn get_faucet_handler(
             serde_json::json!({
                 "last_request": {
                     "id": 0,
-                    "product_id": 0,
                     "requested_at": ""
                 }
             }),
@@ -216,20 +213,17 @@ async fn post_faucet_handler(
     request: web::Json<FaucetPostRequest>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
-    let product_id = request.product_id.unwrap_or(1);
-
     let recent_request: Option<FaucetRequest> = sqlx::query_as::<_, FaucetRequest>(
-        "SELECT * FROM faucet_requests WHERE wallet_address = ? AND product_id = ? AND requested_at > datetime('now', '-1 hour')",
+        "SELECT * FROM faucet_requests WHERE wallet_address = ? AND requested_at > datetime('now', '-1 hour')",
     )
     .bind(&user.wallet_address)
-    .bind(product_id)
     .fetch_optional(&state.db)
     .await
     .map_err(|_| ApiError::Internal("DB error".into()))?;
 
     if recent_request.is_some() {
         return Err(ApiError::BadRequest(
-            "Faucet can only be used once per hour per product".into(),
+            "Faucet can only be used once per hour".into(),
         ));
     }
 
@@ -259,9 +253,8 @@ async fn post_faucet_handler(
         .await
         .map_err(|e| ApiError::Internal(format!("Transfer failed: {}", e)))?;
 
-    sqlx::query("INSERT INTO faucet_requests (wallet_address, product_id) VALUES (?, ?)")
+    sqlx::query("INSERT INTO faucet_requests (wallet_address) VALUES (?)")
         .bind(&user.wallet_address)
-        .bind(product_id)
         .execute(&state.db)
         .await
         .map_err(|_| ApiError::Internal("Failed to record faucet request".into()))?;
@@ -271,7 +264,6 @@ async fn post_faucet_handler(
         serde_json::json!({
             "amount": "500",
             "token": "tUSDT",
-            "product_id": product_id,
             "transaction_hash": format!("{:?}", tx_hash),
             "recipient": user.wallet_address
         }),
