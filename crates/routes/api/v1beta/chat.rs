@@ -73,6 +73,24 @@ pub async fn patch_conversations_handlers(
     Ok(respond::ok("conversation updated", web::Json(result)))
 }
 
+#[get("/conversations/{id}")]
+pub async fn get_conversation_handler(
+    auth_user: AuthUser,
+    state: web::Data<AppState>,
+    web::Path(id): web::Path<i32>,
+) -> Result<impl Responder, ApiError> {
+    let conversation = sqlx::query_as::<_, Conversation>(
+        "SELECT id, title, created_at, updated_at FROM conversations WHERE id = ? AND wallet_address = ?",
+    )
+    .bind(id)
+    .bind(&auth_user.wallet_address)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| ApiError::NotFound("Conversation not found".into()))?;
+
+    Ok(respond::ok("conversation fetched", web::Json(conversation)))
+}
+
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(get_conversations_handlers)
         .service(post_conversations_handlers)
