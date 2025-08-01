@@ -110,3 +110,21 @@ CREATE TABLE
         requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (wallet_address, product_id)
     );
+
+CREATE TABLE
+    agent_preview_conversations (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users (id) ON DELETE SET NULL,
+        title VARCHAR(255),
+        started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ended_at TIMESTAMP
+    );
+
+CREATE TABLE
+    agent_preview_messages (
+        id SERIAL PRIMARY KEY,
+        conversation_id INTEGER REFERENCES conversations (id) ON DELETE CASCADE,
+        sender ENUM ('user', 'ai') NOT NULL,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
