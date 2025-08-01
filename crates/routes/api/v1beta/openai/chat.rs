@@ -304,6 +304,44 @@ async fn get_completions_handler(
         }
     }
 
+    let llm_cost = models
+        .iter()
+        .find(|m| m.name == model)
+        .map_or(0, |m| m.price_per_call) as u64;
+
+    if llm_cost > 0 {
+        println!("Collecting payment for LLM usage: {}", llm_cost);
+
+        let org_address: String =
+            sqlx::query_scalar("SELECT address FROM organizations WHERE id = ?")
+                .bind(org_id)
+                .fetch_one(&state.db)
+                .await?;
+
+        let formatted_organization_address: Address = org_address
+            .parse()
+            .map_err(|_| ApiError::BadRequest("Invalid organization address format".into()))?;
+
+        let orchestrator_contract =
+            contracts::get_contract_with_wallet("HaitheOrchestrator", None).await?;
+
+        let contract_call = orchestrator_contract.method::<_, ()>(
+            "collectPaymentForLLMCall",
+            (
+                formatted_organization_address,
+                formatted_organization_address,
+                llm_cost,
+            ),
+        )?;
+
+        let tx = contract_call.send().await?;
+        let tx_hash = tx.tx_hash();
+        println!(
+            "Payment collected for LLM usage - Transaction: {:?}",
+            tx_hash
+        );
+    }
+
     let mut agent = Agent::new("Haithe Agent", llm).preamble(&preamble);
     agent.temperature = Some(temperature);
     agent.max_tokens = Some(1024);
