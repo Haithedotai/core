@@ -52,9 +52,25 @@ export default function FaucetDialog() {
 
   // Calculate if faucet is available
   const canRequestTokens = () => {
-    if (!faucetInfo.data?.last_request) return true;
+    // If no data is loaded yet, allow requests (default state)
+    if (!faucetInfo.data) return true;
+    
+    // If no last request exists, allow requests (first time user)
+    if (!faucetInfo.data.last_request) return true;
 
-    const lastRequestTime = new Date(faucetInfo.data.last_request.requested_at).getTime();
+    // If last request has no valid requested_at date, allow requests
+    if (!faucetInfo.data.last_request.requested_at || faucetInfo.data.last_request.requested_at === '') {
+      return true;
+    }
+
+    // Check if the date is valid
+    const lastRequestDate = new Date(faucetInfo.data.last_request.requested_at);
+    if (isNaN(lastRequestDate.getTime())) {
+      return true; // Invalid date, allow requests
+    }
+
+    // Check if enough time has passed since last request
+    const lastRequestTime = lastRequestDate.getTime();
     const currentTime = Date.now();
     const timeElapsed = currentTime - lastRequestTime;
     const oneHourInMs = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -213,10 +229,17 @@ export default function FaucetDialog() {
                     {faucetInfo.data.last_request ? (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
-                          <Icon name="Clock" className="size-4 text-orange-500" />
-                          <span className="text-orange-700 dark:text-orange-300">
-                            {canRequestTokens() ? "Ready to request" : "Cooldown active"}
-                          </span>
+                          {canRequestTokens() ? (
+                            <>
+                              <Icon name="CircleCheck" className="size-4 text-green-500" />
+                              <span className="text-green-700 dark:text-green-300">Ready to request</span>
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="Clock" className="size-4 text-orange-500" />
+                              <span className="text-orange-700 dark:text-orange-300">Cooldown active</span>
+                            </>
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Last request: {getSpecificRelativeTime(faucetInfo.data.last_request.requested_at)}
@@ -224,8 +247,8 @@ export default function FaucetDialog() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-sm">
-                        <Icon name="Circle" className="size-4 text-blue-500" />
-                        <span className="text-blue-700 dark:text-blue-300">No tokens requested yet</span>
+                        <Icon name="CircleCheck" className="size-4 text-green-500" />
+                        <span className="text-green-700 dark:text-green-300">Ready to request</span>
                       </div>
                     )}
                   </div>

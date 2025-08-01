@@ -11,6 +11,7 @@ import Icon from "@/src/lib/components/custom/Icon";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { toast } from "sonner";
+import DashboardHeader from "../Header";
 
 export default function ProfilePage() {
   const api = useHaitheApi();
@@ -156,28 +157,15 @@ export default function ProfilePage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0" />
-        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <div className="size-16 rounded-lg bg-gradient-to-br from-primary/5 to-primary/2 flex items-center justify-center border border-primary/20">
-                  <Icon name="User" className="size-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                    Profile
-                  </h1>
-                  <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                    Manage your personal information and preferences
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader 
+          title="Profile"
+          subtitle="Manage your personal information and preferences"
+          iconName="User"
+        />
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* Main Profile Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8">

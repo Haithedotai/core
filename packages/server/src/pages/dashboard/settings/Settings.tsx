@@ -6,6 +6,8 @@ import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { toast } from "sonner";
 import { formatEther } from "viem";
+import DashboardHeader from "../Header";
+import { Separator } from "@/src/lib/components/ui/separator";
 
 interface LLMModel {
   id: number;
@@ -134,16 +136,15 @@ export default function SettingsPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-foreground leading-tight">Settings</h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              Manage your organization settings and LLM model preferences
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader 
+          title="Settings"
+          subtitle="Manage your organization settings and LLM model preferences"
+          iconName="Settings"
+        />
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">

@@ -8,6 +8,8 @@ import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
+import DashboardHeader from "../Header";
+import { Separator } from "@/src/lib/components/ui/separator";
 
 export default function WorkflowsPage() {
   const api = useHaitheApi();
@@ -63,54 +65,25 @@ export default function WorkflowsPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
-            <div className="space-y-3">
-              <h1 className="text-4xl font-bold text-foreground leading-tight">
-                AI Workflows
-              </h1>
-              <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl">
-                Design and orchestrate complex AI workflows with multiple agents
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+        <DashboardHeader
+          title="Workflows"
+          subtitle="Design and orchestrate complex AI workflows with multiple agents."
+          iconName="GitBranch"
+        />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Icon name="Search" className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder="Search workflows..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Workflows</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <Separator className="bg-border/50" />
 
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Workflows Grid */}
         {workflows.length === 0 ? (
           <div className="text-center py-16">
             <Icon name="GitBranch" className="size-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-medium mb-2">No workflows found</h3>
+            <h3 className="text-xl font-medium mb-2">Workflows</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Create your first AI workflow to orchestrate multiple agents and automate complex processes.
+              This page is under development. Coming soon...
             </p>
           </div>
         ) : (

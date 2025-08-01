@@ -15,7 +15,6 @@ import {
 import { categories } from "../mockData";
 import Icon from "@/src/lib/components/custom/Icon";
 import { FileText, Code, Database, Link as LinkIcon, MessageSquare } from "lucide-react";
-import type { MarketplaceCategory } from "../types";
 import { useMarketplaceStore } from "../../../lib/hooks/use-store";
 
 export default function MarketplaceMobileSidebar() {
@@ -34,20 +33,18 @@ export default function MarketplaceMobileSidebar() {
     setIsOpen(false);
   };
 
-  const handleCategoryClick = (category: MarketplaceCategory) => {
+  const handleCategoryClick = (category: any) => {
     const currentCategories = Array.isArray(safeFilters.category) ? safeFilters.category : [];
     const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter((c: MarketplaceCategory) => c !== category)
+      ? currentCategories.filter((c: any) => c !== category)
       : [...currentCategories, category];
     updateFilters({ category: newCategories.length > 0 ? newCategories : undefined });
   };
 
-  const isCategoryActive = (category: MarketplaceCategory) => {
+  const isCategoryActive = (category: any) => {
     if (!Array.isArray(safeFilters.category)) return false;
     return safeFilters.category.includes(category);
   };
-
-  const marketplaceCategories = categories.filter(cat => cat !== 'All Categories');
 
   const NavigationContent = () => (
     <div className="flex flex-col w-full gap-4 px-4 py-2">
@@ -60,12 +57,12 @@ export default function MarketplaceMobileSidebar() {
           onClick={handleLinkClick}
         >
           <Link to="/marketplace">
-            <Icon name="Sparkles" className="size-4 mr-3" />
+            <Icon name="ShoppingBag" className="size-4" />
             Explore All
           </Link>
         </Button>
         <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Icon name="Zap" className="size-4 mr-3" />
+          <Icon name="TrendingUp" className="size-4" />
           Trending Now
         </Button>
       </div>
@@ -173,18 +170,14 @@ export default function MarketplaceMobileSidebar() {
 
       {/* My Marketplace */}
       <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
-          My Marketplace
-        </h4>
-        <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Icon name="Heart" className="size-4 mr-3" />
-          Wishlist
-          <Badge variant="secondary" className="ml-auto text-xs">0</Badge>
-        </Button>
-        <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Icon name="ShoppingCart" className="size-4 mr-3" />
-          Cart
-          <Badge variant="secondary" className="ml-auto text-xs">1</Badge>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
+          Navigation
+        </p>
+        <Button variant="ghost" className="w-full justify-start h-10" asChild>
+          <Link to="/dashboard">
+            <Icon name="LayoutDashboard" className="size-4" />
+            Dashboard
+          </Link>
         </Button>
       </div>
     </div>

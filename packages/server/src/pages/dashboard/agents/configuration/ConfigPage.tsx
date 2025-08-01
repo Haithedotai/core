@@ -16,6 +16,7 @@ import { useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog";
+import { copyToClipboard } from "../../../../../utils";
 
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
@@ -25,6 +26,7 @@ export default function AgentsConfigurationPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Get profile data
   const profileQuery = api.profile();
@@ -270,43 +272,101 @@ export default function AgentsConfigurationPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Endpoint */}
-            <div className="space-y-2">
-              <Label>Endpoint</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-muted-foreground">Endpoint</Label>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="font-mono">POST</Badge>
+                <Badge variant="secondary" className="font-mono shrink-0">POST</Badge>
                 <Input
                   value={`${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`}
                   readOnly
-                  className="font-mono text-sm"
+                  className="font-mono text-sm flex-1"
                 />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(
+                    `${process.env.BUN_PUBLIC_RUST_SERVER_URL}/v1beta/openai/chat/completions`,
+                    "Endpoint",
+                    setCopiedField
+                  )}
+                  className="shrink-0"
+                >
+                  <Icon name={copiedField === "Endpoint" ? "Check" : "Copy"} className="size-4" />
+                </Button>
               </div>
             </div>
 
             {/* Headers */}
             <div className="space-y-3">
-              <Label>Required Headers</Label>
+              <Label className="text-sm font-medium text-muted-foreground">Required Headers</Label>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="rounded" />
-                  <Label className="w-24 text-sm">Authorization</Label>
-                  <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm" />
+                  <Label className="w-36 text-sm shrink-0">Authorization</Label>
+                  <Input value="Bearer <YOUR-API-KEY>" readOnly className="font-mono text-sm flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard("Bearer <YOUR-API-KEY>", "Authorization Header", setCopiedField)}
+                    className="shrink-0"
+                  >
+                    <Icon name={copiedField === "Authorization Header" ? "Check" : "Copy"} className="size-4" />
+                  </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="rounded" />
-                  <Label className="w-24 text-sm">OpenAI-Organization</Label>
-                  <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm" />
+                  <Label className="w-36 text-sm shrink-0">OpenAI-Organization</Label>
+                  <Input value={`org-${organization?.organization_uid}`} readOnly className="font-mono text-sm flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(`org-${organization?.organization_uid}`, "OpenAI-Organization Header", setCopiedField)}
+                    className="shrink-0"
+                  >
+                    <Icon name={copiedField === "OpenAI-Organization Header" ? "Check" : "Copy"} className="size-4" />
+                  </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="rounded" />
-                  <Label className="w-24 text-sm">OpenAI-Project</Label>
-                  <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm" />
+                  <Label className="w-36 text-sm shrink-0">OpenAI-Project</Label>
+                  <Input value={`proj-${project.project_uid}`} readOnly className="font-mono text-sm flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(`proj-${project.project_uid}`, "OpenAI-Project Header", setCopiedField)}
+                    className="shrink-0"
+                  >
+                    <Icon name={copiedField === "OpenAI-Project Header" ? "Check" : "Copy"} className="size-4" />
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Request Body */}
             <div className="space-y-2">
-              <Label>Request Body (JSON)</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-muted-foreground">Example Request Body (JSON)</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`{
+  "model": "gemini-2.0-flash",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Hello, how can you help me today?"
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000,
+  "n": 1,
+}`, "Request Body JSON", setCopiedField)}
+                  className="shrink-0"
+                >
+                  <Icon name={copiedField === "Request Body JSON" ? "Check" : "Copy"} className="size-4" />
+                </Button>
+              </div>
               <Textarea
                 value={`{
   "model": "gemini-2.0-flash",
@@ -321,7 +381,8 @@ export default function AgentsConfigurationPage() {
     }
   ],
   "temperature": 0.7,
-  "max_tokens": 1000
+  "max_tokens": 1000,
+  "n": 1,
 }`}
                 readOnly
                 className="font-mono text-sm h-48"

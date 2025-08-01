@@ -107,6 +107,5 @@ CREATE TABLE
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
         product_id INTEGER NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (wallet_address, product_id)
+        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
