@@ -106,7 +106,7 @@ CREATE TABLE
     IF NOT EXISTS faucet_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         wallet_address TEXT NOT NULL REFERENCES accounts (wallet_address) ON DELETE CASCADE,
-        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
 CREATE TABLE
