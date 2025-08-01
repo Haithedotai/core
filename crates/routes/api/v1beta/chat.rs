@@ -1,5 +1,5 @@
 use crate::lib::{error::ApiError, extractors::AuthUser, respond, state::AppState};
-use actix_web::{HttpResponse, Responder, get, post, web};
+use actix_web::{HttpResponse, Responder, get, patch, post, web};
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -49,6 +49,28 @@ pub async fn post_conversations_handlers(
     }
 
     Ok(respond::created("conversation created", web::Json(result)))
+}
+
+#[derive(Deserialize)]
+struct PatchConversationBody {
+    title: String,
+}
+
+#[patch("/conversations/{id}")]
+pub async fn patch_conversations_handlers(
+    auth_user: AuthUser,
+    state: web::Data<AppState>,
+    web::Path(id): web::Path<i32>,
+    web::Json(payload): web::Json<PatchConversationBody>,
+) -> Result<impl Responder, ApiError> {
+    let result = sqlx::query("UPDATE conversations SET title = ? WHERE id = ? AND wallet_address = ? RETURNING id, title, created_at, updated_at")
+        .bind(&payload.title)
+        .bind(id)
+        .bind(&auth_user.wallet_address)
+        .fetch_one(&state.db)
+        .await?;
+
+    Ok(respond::ok("conversation updated", web::Json(result)))
 }
 
 pub fn routes(cfg: &mut actix_web::web::ServiceConfig) {
