@@ -116,8 +116,8 @@ CREATE TABLE
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users (id) ON DELETE SET NULL,
         title VARCHAR(255),
-        started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        ended_at TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP
     );
 
 CREATE TABLE
