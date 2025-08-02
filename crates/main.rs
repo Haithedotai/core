@@ -46,6 +46,7 @@ async fn main() -> std::io::Result<()> {
     let global_app_state = web::Data::new(AppState {
         nonce_registry: Mutex::new(HashMap::new()),
         db: db_pool,
+        window_buffer_memory: Mutex::new(HashMap::new()),
     });
 
     let port = std::env::var("PORT")

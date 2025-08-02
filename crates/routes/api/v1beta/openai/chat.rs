@@ -4,8 +4,8 @@ use crate::lib::{contracts, error::ApiError, models};
 use actix_web::{HttpResponse, Responder, post, web};
 use alith::data::crypto::decrypt;
 use alith::{
-    Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, StringKnowledge, StructureTool,
-    ToolError,
+    Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, SearchTool, StringKnowledge,
+    StructureTool, ToolError, WindowBufferMemory,
 };
 use async_trait::async_trait;
 use chrono;
@@ -56,6 +56,14 @@ async fn get_completions_handler(
         .bind(&api_caller.project_uid)
         .fetch_one(&state.db)
         .await?;
+
+    // Get project settings for search and memory
+    let (search_enabled, memory_enabled): (bool, bool) = sqlx::query_as::<_, (bool, bool)>(
+        "SELECT search_enabled, memory_enabled FROM projects WHERE id = ?",
+    )
+    .bind(project_id)
+    .fetch_one(&state.db)
+    .await?;
 
     let enabled_models: Vec<u64> =
         sqlx::query_scalar::<_, u64>("SELECT model_id FROM org_model_enrollments WHERE org_id = ?")
@@ -347,6 +355,21 @@ async fn get_completions_handler(
     agent.max_tokens = Some(1024);
     agent.knowledges = Arc::new(knowledges);
 
+    if search_enabled {
+        agent = agent.tool(SearchTool::default()).await;
+    }
+
+    if memory_enabled {
+        {
+            let mut memory_map = state.window_buffer_memory.lock().unwrap();
+            if !memory_map.contains_key(&api_caller.project_uid) {
+                memory_map.insert(api_caller.project_uid.clone(), WindowBufferMemory::new(30));
+            }
+        }
+
+        agent = agent.memory(WindowBufferMemory::new(30));
+    }
+
     let prompt = messages
         .iter()
         .filter_map(|msg| msg.get("content").and_then(|c| c.as_str()))
@@ -412,9 +435,9 @@ async fn get_completions_handler(
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct RpcToolInput {
     pub url: String,
-    pub method: String,                    // GET, POST, etc.
-    pub param_position: Option<String>,    // "query" or "body"
-    pub params: Option<serde_json::Value>, // dynamic JSON input
+    pub method: String,
+    pub param_position: Option<String>,
+    pub params: Option<serde_json::Value>,
 }
 
 pub struct RpcTool;

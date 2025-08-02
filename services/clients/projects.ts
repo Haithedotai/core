@@ -23,9 +23,28 @@ export class HaitheProjectsClient extends BaseClient {
     return this.fetch(`/v1/projects/${id}`, this.authClient.getAuthToken());
   }
 
-  updateProject(id: number, name: string): Promise<Project> {
+  updateProject(
+    id: number,
+    updates: {
+      name?: string;
+      search_enabled?: boolean;
+      memory_enabled?: boolean;
+    }
+  ): Promise<Project> {
+    const queryParams = new URLSearchParams();
+
+    if (updates.name !== undefined) {
+      queryParams.append("name", updates.name);
+    }
+    if (updates.search_enabled !== undefined) {
+      queryParams.append("search_enabled", updates.search_enabled.toString());
+    }
+    if (updates.memory_enabled !== undefined) {
+      queryParams.append("memory_enabled", updates.memory_enabled.toString());
+    }
+
     return this.fetch(
-      `/v1/projects/${id}?name=${encodeURIComponent(name)}`,
+      `/v1/projects/${id}?${queryParams.toString()}`,
       this.authClient.getAuthToken(),
       { method: "PATCH" }
     );
@@ -109,106 +128,135 @@ export class HaitheProjectsClient extends BaseClient {
   }
 
   // Chat/Conversation related methods
-  getConversations(orgUid: string, projectUid: string): Promise<Conversation[]> {
+  getConversations(
+    orgUid: string,
+    projectUid: string
+  ): Promise<Conversation[]> {
     return this.fetch(
       `/v1beta/chat/conversations`,
       this.authClient.getAuthToken(),
       {
         headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`
-        }
-      }
-    );
-  }
-
-  createConversation(orgUid: string, projectUid: string): Promise<Conversation> {
-    return this.fetch(
-      `/v1beta/chat/conversations`,
-      this.authClient.getAuthToken(),
-      {
-          method: "POST",
-          headers: {
-            'Haithe-Organization': `org-${orgUid}`,
-            'Haithe-Project': `proj-${projectUid}`
-          }
-      }
-    );
-  }
-
-  getConversation(id: number, orgUid: string, projectUid: string): Promise<Conversation> {
-    return this.fetch(
-      `/v1beta/chat/conversations/${id}`,
-      this.authClient.getAuthToken(),
-      {
-        headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`
-        }
-      }
-    );
-  }
-
-  updateConversation(id: number, title: string, orgUid: string, projectUid: string): Promise<Conversation> {
-    return this.fetch(
-      `/v1beta/chat/conversations/${id}`,
-      this.authClient.getAuthToken(),
-      { 
-        method: "PATCH",
-        headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
         },
-        body: JSON.stringify({ title })
       }
     );
   }
 
-  deleteConversation(id: number, orgUid: string, projectUid: string): Promise<{ rows_affected: number }> {
+  createConversation(
+    orgUid: string,
+    projectUid: string
+  ): Promise<Conversation> {
     return this.fetch(
-      `/v1beta/chat/conversations/${id}`,
-      this.authClient.getAuthToken(),
-      { 
-        method: "DELETE",
-        headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`
-        }
-      }
-    );
-  }
-
-  getConversationMessages(conversationId: number, orgUid: string, projectUid: string): Promise<Message[]> {
-    return this.fetch(
-      `/v1beta/chat/conversations/${conversationId}/messages`,
+      `/v1beta/chat/conversations`,
       this.authClient.getAuthToken(),
       {
-        headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`
-        }
-      }
-    );
-  }
-
-  createMessage(conversationId: number, message: string, sender: string, orgUid: string, projectUid: string): Promise<Message> {
-    return this.fetch(
-      `/v1beta/chat/conversations/${conversationId}/messages`,
-      this.authClient.getAuthToken(),
-      { 
         method: "POST",
         headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
         },
-        body: JSON.stringify({ message, sender })
+      }
+    );
+  }
+
+  getConversation(
+    id: number,
+    orgUid: string,
+    projectUid: string
+  ): Promise<Conversation> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${id}`,
+      this.authClient.getAuthToken(),
+      {
+        headers: {
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
+        },
+      }
+    );
+  }
+
+  updateConversation(
+    id: number,
+    title: string,
+    orgUid: string,
+    projectUid: string
+  ): Promise<Conversation> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${id}`,
+      this.authClient.getAuthToken(),
+      {
+        method: "PATCH",
+        headers: {
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
+        },
+        body: JSON.stringify({ title }),
+      }
+    );
+  }
+
+  deleteConversation(
+    id: number,
+    orgUid: string,
+    projectUid: string
+  ): Promise<{ rows_affected: number }> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${id}`,
+      this.authClient.getAuthToken(),
+      {
+        method: "DELETE",
+        headers: {
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
+        },
+      }
+    );
+  }
+
+  getConversationMessages(
+    conversationId: number,
+    orgUid: string,
+    projectUid: string
+  ): Promise<Message[]> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${conversationId}/messages`,
+      this.authClient.getAuthToken(),
+      {
+        headers: {
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
+        },
+      }
+    );
+  }
+
+  createMessage(
+    conversationId: number,
+    message: string,
+    sender: string,
+    orgUid: string,
+    projectUid: string
+  ): Promise<Message> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${conversationId}/messages`,
+      this.authClient.getAuthToken(),
+      {
+        method: "POST",
+        headers: {
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
+        },
+        body: JSON.stringify({ message, sender }),
       }
     );
   }
 
   getCompletions(
-    orgUid: string, 
-    projectUid: string, 
+    orgUid: string,
+    projectUid: string,
     body: {
       model: string;
       messages: Array<{ role: string; content: string }>;
@@ -240,11 +288,11 @@ export class HaitheProjectsClient extends BaseClient {
       {
         method: "POST",
         headers: {
-          'Haithe-Organization': `org-${orgUid}`,
-          'Haithe-Project': `proj-${projectUid}`,
-          'Content-Type': 'application/json'
+          "Haithe-Organization": `org-${orgUid}`,
+          "Haithe-Project": `proj-${projectUid}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       }
     );
   }

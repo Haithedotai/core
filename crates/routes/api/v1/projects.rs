@@ -12,6 +12,8 @@ pub struct Project {
     pub project_uid: String,
     pub name: String,
     pub created_at: String,
+    pub search_enabled: bool,
+    pub memory_enabled: bool,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -29,7 +31,9 @@ struct CreateProjectQuery {
 
 #[derive(Deserialize)]
 struct UpdateProjectQuery {
-    name: String,
+    name: Option<String>,
+    search_enabled: Option<bool>,
+    memory_enabled: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -130,7 +134,7 @@ async fn create_project_handler(
     let project_uid = Uuid::new_v4().to_string().replace("-", "");
 
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name, project_uid) VALUES (?, ?, ?) RETURNING *",
+        "INSERT INTO projects (org_id, name, project_uid) VALUES (?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled",
     )
     .bind(&query.org_id)
     .bind(&query.name)
@@ -149,11 +153,13 @@ async fn get_project_handler(
 ) -> Result<impl Responder, ApiError> {
     let project_id = path.into_inner();
 
-    let project = sqlx::query_as::<_, Project>("SELECT * FROM projects WHERE id = ?")
-        .bind(project_id)
-        .fetch_one(&state.db)
-        .await
-        .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
+    let project = sqlx::query_as::<_, Project>(
+        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled FROM projects WHERE id = ?"
+    )
+    .bind(project_id)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
 
     Ok(respond::ok("Project retrieved", project))
 }
@@ -171,13 +177,45 @@ async fn update_project_handler(
         return Err(ApiError::Forbidden);
     }
 
-    let project =
-        sqlx::query_as::<_, Project>("UPDATE projects SET name = ? WHERE id = ? RETURNING *")
-            .bind(&query.name)
-            .bind(project_id)
-            .fetch_one(&state.db)
-            .await
-            .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
+    let mut updates = Vec::new();
+    let mut params = Vec::new();
+
+    if let Some(name) = &query.name {
+        updates.push("name = ?");
+        params.push(name.as_str());
+    }
+
+    if let Some(search_enabled) = query.search_enabled {
+        updates.push("search_enabled = ?");
+        params.push(if search_enabled { "1" } else { "0" });
+    }
+
+    if let Some(memory_enabled) = query.memory_enabled {
+        updates.push("memory_enabled = ?");
+        params.push(if memory_enabled { "1" } else { "0" });
+    }
+
+    if updates.is_empty() {
+        return Err(ApiError::BadRequest(
+            "No fields provided to update".to_string(),
+        ));
+    }
+
+    let sql = format!(
+        "UPDATE projects SET {} WHERE id = ? RETURNING *",
+        updates.join(", ")
+    );
+
+    let mut query_builder = sqlx::query_as::<_, Project>(&sql);
+    for param in params {
+        query_builder = query_builder.bind(param);
+    }
+    query_builder = query_builder.bind(project_id);
+
+    let project = query_builder
+        .fetch_one(&state.db)
+        .await
+        .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
 
     Ok(respond::ok("Project updated", project))
 }
@@ -194,11 +232,13 @@ async fn delete_project_handler(
         return Err(ApiError::Forbidden);
     }
 
-    let project = sqlx::query_as::<_, Project>("DELETE FROM projects WHERE id = ? RETURNING *")
-        .bind(project_id)
-        .fetch_one(&state.db)
-        .await
-        .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
+    let project = sqlx::query_as::<_, Project>(
+        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled"
+    )
+    .bind(project_id)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| ApiError::NotFound("Project not found".to_string()))?;
 
     Ok(respond::ok("Project deleted", project))
 }

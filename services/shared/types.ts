@@ -27,6 +27,8 @@ export interface Project {
   org_id: number;
   name: string;
   created_at: string;
+  search_enabled: boolean;
+  memory_enabled: boolean;
 }
 
 export interface ProjectMember {
@@ -41,23 +43,23 @@ export interface UserProfile {
 }
 
 export interface Creator {
-    wallet_address: string;
-    uri: string;
-    pub_key: string;
-    created_at: string;
+  wallet_address: string;
+  uri: string;
+  pub_key: string;
+  created_at: string;
 }
 
 export interface Creator {
-    wallet_address: string;
-    uri: string;
-    pub_key: string;
-    created_at: string;
+  wallet_address: string;
+  uri: string;
+  pub_key: string;
+  created_at: string;
 }
 
 export interface CreatorDetails {
-    wallet_address: string;
-    uri: string;
-    created_at: string;
+  wallet_address: string;
+  uri: string;
+  created_at: string;
 }
 
 export interface Product {
