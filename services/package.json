@@ -7,6 +7,9 @@
     "./definitions": "./definitions.ts"
   },
   "dependencies": {
-    "viem": "^0.1.0"
+    "alith": "^0.10.4",
+    "minimatch": "^10.0.3",
+    "node-rsa": "^1.1.1",
+    "viem": "^2.33.0"
   }
 }
