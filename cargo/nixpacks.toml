@@ -1,5 +1,16 @@
+# [variables]
+# PKG_CONFIG_PATH = "/nix/store"
+
 [phase.name]
-aptPkgs = ['wget', "clang", "llvm", "pkg-config", "nettle-dev"]
+aptPkgs = [
+    'wget',
+    "clang",
+    "llvm",
+    "pkg-config",
+    "nettle-dev",
+    "nettle",
+    "nettle-devel",
+]
 
 [phases.setup]
 nixpkgs = [
@@ -12,9 +23,6 @@ nixpkgs = [
     "rustc",
     "cargo",
 ]
-
-[variables]
-PKG_CONFIG_PATH = "/nix/store"
 
 [phases.install]
 cmds = ["cargo fetch"]
