@@ -1,5 +1,5 @@
-# [variables]
-# PKG_CONFIG_PATH = "/nix/store"
+[variables]
+PKG_CONFIG_PATH = "/nix/store"
 
 [phase.name]
 aptPkgs = [
