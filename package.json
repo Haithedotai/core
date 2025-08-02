@@ -17,8 +17,8 @@
   ],
   "scripts": {
     "test-all": "python3 services/test/conductor.py",
-    "server:build": "cd services/server && bun build",
-    "server:start": "cd services/server && bun run start"
+    "server:build": "cd packages/server && bun build",
+    "server:start": "cd packages/server && bun run start"
   },
   "private": true,
   "devDependencies": {
