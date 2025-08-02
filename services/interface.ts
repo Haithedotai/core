@@ -202,8 +202,12 @@ export class HaitheClient {
     return this.projects.getProjects(orgId);
   }
 
-  updateProject(id: number, name: string): Promise<Project> {
-    return this.projects.updateProject(id, name);
+  updateProject(id: number, updates: {
+    name?: string;
+    search_enabled?: boolean;
+    memory_enabled?: boolean;
+  }): Promise<Project> {
+    return this.projects.updateProject(id, updates);
   }
 
   deleteProject(id: number): Promise<Project> {
