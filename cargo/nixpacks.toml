@@ -10,6 +10,9 @@ nixpkgs = [
     "cargo",
 ]
 
+[phases.build.env]
+PKG_CONFIG_PATH = "/nix/store"
+
 [phases.install]
 cmds = ["cargo fetch"]
 
