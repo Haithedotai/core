@@ -1,3 +1,5 @@
+language = "rust"
+
 [phases.setup]
 nixpkgs = ["rustc", "cargo"]
 
