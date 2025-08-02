@@ -1,4 +1,6 @@
-language = "rust"
+[variables]
+NIXPACKS_RUST_VERSION = "1.88.0"
+NIXPACKS_LANG = "rust"
 
 [phases.setup]
 nixpkgs = ["rustc", "cargo"]
