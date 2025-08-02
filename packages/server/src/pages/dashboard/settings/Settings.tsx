@@ -123,6 +123,10 @@ export default function SettingsPage() {
     return null;
   };
 
+  console.log({
+    availableModels
+  })
+
   const getProviderIcon = (provider: string) => {
     switch (provider) {
       case "Google": return "Sparkles";

@@ -57,7 +57,7 @@ export default function FundOrgDialog({ organization }: { organization: Organiza
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="secondary" size="sm">
                     <Icon name="QrCode" className="size-4" />
                     <p className="hidden md:block">Fund Organization</p>
                 </Button>

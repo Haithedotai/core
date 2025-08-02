@@ -275,14 +275,16 @@ export default function ChatWithAgent() {
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-start gap-3">
                 <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h4 className="text-sm font-medium text-red-800">
-                    Insufficient balance
-                    {selectedOrg && <FundOrgDialog organization={selectedOrg} />}
-                  </h4>
-                  <p className="text-sm text-red-700 mt-1">
-                    Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
-                  </p>
+                <div className="flex items-center justify-between w-full">
+                  <div>
+                    <h4 className="text-sm font-medium text-red-800">
+                      Insufficient balance
+                    </h4>
+                    <p className="text-sm text-red-700 mt-1">
+                      Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
+                    </p>
+                  </div>
+                  {selectedOrg && <FundOrgDialog organization={selectedOrg} />}
                 </div>
               </div>
             </div>
