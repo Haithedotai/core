@@ -7,6 +7,7 @@ import { getMimeType } from "./utils";
 
 const server = serve({
   development: false,
+  port: 3000,
 
   routes: {
     "/api": new Response(JSON.stringify({
