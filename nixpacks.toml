@@ -2,7 +2,7 @@
 nixpkgs = ["rustc", "cargo"]
 
 [phases.install]
-cmds = ["echo hi"]
+cmds = ["cargo fetch"]
 
 [phases.build]
 cmds = ["cargo build --release"]
