@@ -2,7 +2,7 @@ import * as viem from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { HaitheAuthClient } from "./auth";
 import { BaseClient } from "../shared/baseClient";
-import definitions from "../../definitions";
+import definitions from "../definitions";
 import { extractPrivateKeyFromSignature } from "../shared/utils";
 import type { Creator, CreatorDetails, Product } from "../shared/types";
 import { encrypt } from "alith/data";
@@ -152,7 +152,9 @@ export class HaitheCreatorClient extends BaseClient {
 
     const arrayBuffer = await file.arrayBuffer();
     const encryptedData = await encrypt(new Uint8Array(arrayBuffer), password);
-    const encryptedFile = new File([encryptedData], file.name, { type: file.type });
+    const encryptedFile = new File([encryptedData], file.name, {
+      type: file.type,
+    });
     const encryptedKeyUint8 = await encrypt(
       new TextEncoder().encode(tee_pubkey + encryptionKey),
       password

@@ -11,6 +11,7 @@
     "analyze": "bun install --analyze src/**/*.tsx"
   },
   "dependencies": {
+    "services": "workspace:*",
     "@google/genai": "^1.9.0",
     "@hono/zod-validator": "^0.7.0",
     "@privy-io/react-auth": "^2.18.0",

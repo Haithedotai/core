@@ -1,0 +1,12 @@
+{
+  "name": "services",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    ".": "./interface.ts",
+    "./definitions": "./definitions.ts"
+  },
+  "dependencies": {
+    "viem": "^0.1.0"
+  }
+}
