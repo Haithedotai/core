@@ -129,7 +129,7 @@ async function main() {
 
 main().then(async () => {
   await Bun.write(
-    Bun.file("../../definitions.json"),
+    Bun.file("../../cargo/definitions.json"),
     JSON.stringify(definitions, null, 2)
   );
 

@@ -1,4 +1,0 @@
-{
-  "abi": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]",
-  "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-}
