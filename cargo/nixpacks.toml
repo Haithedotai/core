@@ -1,3 +1,6 @@
+[phase.name]
+aptPkgs = ['wget', "clang", "llvm", "pkg-config", "nettle-dev"]
+
 [phases.setup]
 nixpkgs = [
     "pkg-config",
