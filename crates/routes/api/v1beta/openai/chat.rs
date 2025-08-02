@@ -360,14 +360,14 @@ async fn get_completions_handler(
     }
 
     if memory_enabled {
-        let memory = {
+        {
             let mut memory_map = state.window_buffer_memory.lock().unwrap();
-            memory_map
-                .entry(api_caller.project_uid.clone())
-                .or_insert_with(|| WindowBufferMemory::new(30))
-                .clone()
-        };
-        agent = agent.memory(memory);
+            if !memory_map.contains_key(&api_caller.project_uid) {
+                memory_map.insert(api_caller.project_uid.clone(), WindowBufferMemory::new(30));
+            }
+        }
+
+        agent = agent.memory(WindowBufferMemory::new(30));
     }
 
     let prompt = messages
