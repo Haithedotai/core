@@ -26,15 +26,13 @@ import { copyToClipboard } from "@/utils";
 import DashboardHeader from "../Header";
 import { Separator } from "@/src/lib/components/ui/separator";
 
+
 export default function AgentsPage() {
   const api = useHaitheApi();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
   const [agentName, setAgentName] = useState("");
-  const [editAgent, setEditAgent] = useState<any>(null);
-  const [deleteAgent, setDeleteAgent] = useState<any>(null);
 
   // Get profile data
   const profileQuery = api.profile();
@@ -83,7 +81,7 @@ export default function AgentsPage() {
 
   // Filtered agents
   const agents = (agentsQuery.data || [])
-    .filter((agent: any) => agent.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    .filter((agent) => agent.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   // Handlers
   const handleCreate = async () => {
@@ -94,29 +92,7 @@ export default function AgentsPage() {
     agentsQuery.refetch();
   };
 
-  const handleEdit = async () => {
-    try {
-      if (!editAgent || !agentName) return;
-      await api.updateProject.mutateAsync({ id: editAgent.id, name: agentName });
-      setEditOpen(false);
-      setEditAgent(null);
-      setAgentName("");
-      agentsQuery.refetch();
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  const handleDelete = async () => {
-    try {
-      if (!deleteAgent) return;
-      await api.deleteProject.mutateAsync(deleteAgent.id);
-      setDeleteAgent(null);
-      agentsQuery.refetch();
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <div className="min-h-full bg-background">
@@ -173,75 +149,18 @@ export default function AgentsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 @3xl:grid-cols-2 @6xl:grid-cols-3 gap-6 @container">
-            {agents.map((agent: any) => (
+            {agents.map((agent) => (
               <Card key={agent.id} className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />
                 <CardHeader className="relative pb-4">
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="size-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-primary/20 flex-shrink-0">
                         <Icon name="Bot" className="size-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg font-semibold truncate">{agent.name}</CardTitle>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <Badge variant="secondary" className="text-xs">
-                            {agent.status || 'Active'}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {agent.type || 'AI Agent'}
-                          </Badge>
-                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                      <Button asChild size="icon" variant="ghost" className="size-8">
-                        <Link to="/dashboard/agents/$id" params={{ id: agent.id.toString() }}>
-                          <Icon name="Settings" className="size-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="size-8"
-                        onClick={() => {
-                          setEditAgent(agent);
-                          setAgentName(agent.name);
-                          setEditOpen(true);
-                        }}
-                      >
-                        <Icon name="Pencil" className="size-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="size-8"
-                            onClick={() => setDeleteAgent(agent)}
-                          >
-                            <Icon name="Trash2" className="size-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Agent</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{agent.name}"? This action cannot be undone and will permanently remove the agent and all its associated data.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={handleDelete}
-                              disabled={api.deleteProject.isPending}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              {api.deleteProject.isPending ? "Deleting..." : "Delete"}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </div>
                   </div>
 
@@ -321,28 +240,7 @@ export default function AgentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Agent Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleEdit();
-          }
-        }}>
-          <DialogHeader>
-            <DialogTitle>Edit Agent</DialogTitle>
-          </DialogHeader>
-          <Input
-            placeholder="Agent name"
-            value={agentName}
-            onChange={e => setAgentName(e.target.value)}
-          />
-          <DialogFooter>
-            <Button onClick={handleEdit} disabled={!agentName || api.updateProject.isPending}>
-              {api.updateProject.isPending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 } 

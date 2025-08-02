@@ -428,9 +428,13 @@ export function useHaitheApi() {
 
         updateProject: useMutation({
             mutationKey: ['updateProject'],
-            mutationFn: ({ id, name }: { id: number; name: string }) => {
+            mutationFn: ({ id, updates }: { id: number; updates: {
+                name?: string;
+                search_enabled?: boolean;
+                memory_enabled?: boolean;
+            } }) => {
                 if (!client) throw new Error("Wallet not connected");
-                return client.updateProject(id, name);
+                return client.updateProject(id, updates);
             },
             onSuccess: (_, { id }) => {
                 toast.success('Project updated successfully');

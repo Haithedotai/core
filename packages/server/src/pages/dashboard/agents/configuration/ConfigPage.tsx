@@ -16,6 +16,17 @@ import { useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/src/lib/components/ui/alert-dialog";
 import { copyToClipboard } from "../../../../../utils";
 import DashboardHeader from "../../Header";
 
@@ -28,11 +39,16 @@ export default function AgentsConfigurationPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [agentName, setAgentName] = useState("");
+  const [searchEnabled, setSearchEnabled] = useState(false);
+  const [memoryEnabled, setMemoryEnabled] = useState(false);
+  const [deleteAgent, setDeleteAgent] = useState<any>(null);
 
   // Get profile data
   const profileQuery = api.profile();
   const orgId = useStore((s) => s.selectedOrganizationId);
-  const { data: project, isLoading: isLoadingProject } = api.getProject(parseInt(params.id));
+  const { data: project, isLoading: isLoadingProject, refetch: refetchProject } = api.getProject(parseInt(params.id));
 
   // Get organization data
   const { data: organization } = api.getOrganization(orgId);
@@ -192,6 +208,41 @@ export default function AgentsConfigurationPage() {
     setSaveDialogOpen(false);
   };
 
+  // Handle edit agent
+  const handleEdit = async () => {
+    try {
+      if (!project || !agentName) return;
+      await api.updateProject.mutateAsync({
+        id: project.id,
+        updates: {
+          name: agentName,
+          search_enabled: searchEnabled,
+          memory_enabled: memoryEnabled
+        }
+      });
+      setEditOpen(false);
+      setAgentName("");
+      setSearchEnabled(false);
+      setMemoryEnabled(false);
+      refetchProject();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Handle delete agent
+  const handleDelete = async () => {
+    try {
+      if (!project) return;
+      await api.deleteProject.mutateAsync(project.id);
+      setDeleteAgent(null);
+      // Redirect to agents list
+      window.location.href = '/dashboard/agents';
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
@@ -226,9 +277,56 @@ export default function AgentsConfigurationPage() {
         {/* Agent Info Card */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="Bot" className="size-5" />
-              Agent Information
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Icon name="Bot" className="size-5" />
+                Agent Information
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setAgentName(project.name);
+                    setSearchEnabled(project.search_enabled || false);
+                    setMemoryEnabled(project.memory_enabled || false);
+                    setEditOpen(true);
+                  }}
+                >
+                  <Icon name="Pencil" className="size-4" />
+                  <span className="hidden md:block">Edit Agent</span>
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setDeleteAgent(project)}
+                    >
+                      <Icon name="Trash2" className="size-4" />
+                      <span className="hidden md:block">Delete Agent</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{project.name}"? This action cannot be undone and will permanently remove the agent and all its associated data.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={api.deleteProject.isPending}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {api.deleteProject.isPending ? "Deleting..." : "Delete"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -244,6 +342,46 @@ export default function AgentsConfigurationPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Enabled Extensions</p>
                 <p className="text-sm">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Search Enabled</p>
+                  <p className="text-sm text-muted-foreground">Web search capabilities</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {project.search_enabled ? (
+                    <>
+                      <Badge variant="secondary" className="text-sm font-medium text-green-600">Enabled</Badge>
+                    </>
+                  ) : (
+                    <>
+                      <Badge variant="secondary" className="text-sm font-medium text-muted-foreground">Disabled</Badge>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Memory Enabled</p>
+                  <p className="text-sm text-muted-foreground">Conversation memory</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {project.memory_enabled ? (
+                    <>
+                      <Badge variant="secondary" className="text-sm font-medium text-green-600">Enabled</Badge>
+                    </>
+                  ) : (
+                    <>
+                      <Badge variant="secondary" className="text-sm font-medium text-muted-foreground">Disabled</Badge>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -548,6 +686,69 @@ export default function AgentsConfigurationPage() {
             </Button>
             <Button onClick={handleSaveChanges}>
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Agent Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleEdit();
+          }
+        }}>
+          <DialogHeader>
+            <DialogTitle>Edit Agent</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="agent-name">Agent Name</Label>
+              <Input
+                id="agent-name"
+                placeholder="Agent name"
+                value={agentName}
+                onChange={e => setAgentName(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="search-enabled">Search Enabled</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable web search capabilities for this agent
+                  </p>
+                </div>
+                <Switch
+                  id="search-enabled"
+                  checked={searchEnabled}
+                  onCheckedChange={setSearchEnabled}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="memory-enabled">Memory Enabled</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable conversation memory for this agent
+                  </p>
+                </div>
+                <Switch
+                  id="memory-enabled"
+                  checked={memoryEnabled}
+                  onCheckedChange={setMemoryEnabled}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEdit} disabled={!agentName || api.updateProject.isPending}>
+              {api.updateProject.isPending ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
