@@ -17,8 +17,6 @@ aptPkgs = [
 [phases.setup]
 nixpkgs = [
     "pkg-config",
-    "nettle",
-    "clang",
     "binutils",
     "gcc",
     "rust-bin.stable.latest.default",
