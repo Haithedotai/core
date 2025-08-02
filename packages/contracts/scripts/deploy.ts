@@ -44,7 +44,6 @@ const client = viem
   })
   .extend(viem.publicActions);
 
-const definitionsFile = "../../definitions";
 const definitions: Record<
   string,
   {
@@ -130,12 +129,12 @@ async function main() {
 
 main().then(async () => {
   await Bun.write(
-    Bun.file(definitionsFile + ".json"),
+    Bun.file("../../definitions.json"),
     JSON.stringify(definitions, null, 2)
   );
 
   await Bun.write(
-    Bun.file(definitionsFile + ".ts"),
+    Bun.file("../../services/definitions.ts"),
     "const definitions = " +
       JSON.stringify(definitions, null, 2) +
       "as const;\nexport default definitions;\n"

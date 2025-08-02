@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["rustc", "cargo"]
+nixpkgs = ["rustc", "cargo", "python3"]
 
 [phases.install]
 cmds = ["cargo fetch"]
@@ -8,4 +8,4 @@ cmds = ["cargo fetch"]
 cmds = ["cargo build --release"]
 
 [phases.start]
-cmd = "target/release/main"
+cmd = "python3 run-rust-server.py"
