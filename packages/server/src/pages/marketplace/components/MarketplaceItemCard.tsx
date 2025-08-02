@@ -1,12 +1,11 @@
-import { Heart, FileText, Code, Database, Link, MessageSquare, Copy, CheckCircle, Hash, Clock } from 'lucide-react';
+import { FileText, Code, Database, Link, MessageSquare, Copy, CheckCircle } from 'lucide-react';
 import { Button } from '../../../lib/components/ui/button';
 import { Badge } from '../../../lib/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../lib/components/ui/card';
 import { Separator } from '../../../lib/components/ui/separator';
-import type { Product } from '../../../../../../services/shared/types';
+import type { Product } from 'services';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import AddProductButton from '@/src/pages/marketplace/components/AddProductButton';
 import { useStore } from '@/src/lib/hooks/use-store';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 

@@ -5,7 +5,7 @@ import MinimalFilters from './components/MinimalFilters';
 import MarketplaceItemCard from './components/MarketplaceItemCard';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
 import { useMarketplaceStore } from '../../lib/hooks/use-store';
-import type { Product } from '../../../../../services/shared/types';
+import type { Product } from 'services';
 import Icon from '@/src/lib/components/custom/Icon';
 
 export default function MarketplacePage() {

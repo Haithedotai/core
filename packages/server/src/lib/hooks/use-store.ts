@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Organization } from '../../../../../services/clients';
+import type { Organization } from 'services';
 
 interface MarketplaceFilters {
   category?: string[];

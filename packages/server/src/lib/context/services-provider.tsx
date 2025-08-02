@@ -1,4 +1,4 @@
-import HaitheClient from "../../../../../services/interface";
+import HaitheClient from "services";
 import { createContext, useContext } from "react";
 import { useWalletClient } from "wagmi";
 

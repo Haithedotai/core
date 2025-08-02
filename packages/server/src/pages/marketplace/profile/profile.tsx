@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Avatar, AvatarFallback, AvatarImage } from "../../../lib/components/ui/avatar";
 import { Plus } from "lucide-react";
 import MarketplaceItemCard from "../components/MarketplaceItemCard";
-import type { Product } from "../../../../../../services/shared/types";
+import type { Product } from "services";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";

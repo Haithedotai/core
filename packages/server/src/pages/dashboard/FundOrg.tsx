@@ -6,7 +6,7 @@ import Icon from "@/src/lib/components/custom/Icon";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { copyToClipboard } from "@/utils";
 import QRCode from "qrcode";
-import type { Organization } from "../../../../../services/clients";
+import type { Organization } from "services";
 import { Image } from "@/src/lib/components/custom/Image";
 
 export default function FundOrgDialog({ organization }: { organization: Organization }) {

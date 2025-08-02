@@ -1,18 +1,12 @@
-import { useState } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/lib/components/ui/dialog";
-import { Input } from "@/src/lib/components/ui/input";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Link } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { formatDate, truncateAddress } from "@/src/lib/utils";
 import { useStore } from "@/src/lib/hooks/use-store";
 import { copyToClipboard } from "@/utils";
-import QRCode from "qrcode";
-import { useEffect } from "react";
-import type { Organization } from "../../../../../services/clients";
-import { Image } from "@/src/lib/components/custom/Image";
+import type { Organization } from "services";
 import { Separator } from "@/src/lib/components/ui/separator";
 import DashboardHeader from "./Header";
 import FundOrgDialog from "./FundOrg";
@@ -309,8 +303,7 @@ export default function DashboardPage() {
   const api = useHaitheApi();
 
   // Get profile data
-  const profileQuery = api.profile();
-  const { selectedOrganizationId, selectedOrg } = useStore();
+  const { selectedOrganizationId } = useStore();
   const { data: organization } = api.getOrganization(selectedOrganizationId);
   const { data: agents } = api.getProjects(selectedOrganizationId);
   const { data: apiKeyLastIssued } = api.apiKeyLastIssued();
