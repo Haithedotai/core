@@ -172,7 +172,7 @@ export default function AgentsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 @2xl:grid-cols-2 @4xl:grid-cols-3 gap-6 @container">
+          <div className="grid grid-cols-1 @3xl:grid-cols-2 @6xl:grid-cols-3 gap-6 @container">
             {agents.map((agent: any) => (
               <Card key={agent.id} className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-lg" />

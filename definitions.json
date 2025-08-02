@@ -424,6 +424,29 @@
       {
         "inputs": [
           {
+            "internalType": "address",
+            "name": "orgAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "spender_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount_",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectPaymentForLLMCall",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
             "internalType": "string",
             "name": "name_",
             "type": "string"
@@ -1284,7 +1307,7 @@
         ],
         "name": "registerFunds",
         "outputs": [],
-        "stateMutability": "payable",
+        "stateMutability": "nonpayable",
         "type": "function"
       },
       {

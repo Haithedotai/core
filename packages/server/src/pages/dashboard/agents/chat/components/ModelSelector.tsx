@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/src/lib/components/ui/button";
 import {
   Select,
@@ -30,6 +30,13 @@ export default function ModelSelector() {
 
   // Get enabled models only
   const { data: enabledModels, isLoading: isLoadingEnabled } = haithe.getEnabledModels(Number(selectedOrg?.id));
+
+  // Auto-select first model if models exist and none is selected
+  useEffect(() => {
+    if (enabledModels && enabledModels.length > 0 && !selectedModel) {
+      setSelectedModel(enabledModels[0].name);
+    }
+  }, [enabledModels, selectedModel, setSelectedModel]);
 
   const getProviderIcon = (provider: string) => {
     switch (provider) {

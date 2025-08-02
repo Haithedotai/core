@@ -20,11 +20,11 @@ interface ChatHeaderProps {
   balance?: { balance: number };
 }
 
-export default function ChatHeader({ 
-  agent, 
-  conversations, 
-  currentConversationId, 
-  onSelectConversation, 
+export default function ChatHeader({
+  agent,
+  conversations,
+  currentConversationId,
+  onSelectConversation,
   onNewConversation,
   balance
 }: ChatHeaderProps) {
@@ -56,7 +56,13 @@ export default function ChatHeader({
 
   return (
     <div className="border-b border-border/50 px-4 py-3 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+
       <div className="flex items-center gap-3">
+        <Button variant="ghost" asChild>
+          <Link to="/dashboard/agents/$id" params={{ id: agent.id }}>
+            <Icon name="ArrowLeft" className="size-4" />
+          </Link>
+        </Button>
         <div className="flex items-center gap-2">
           <div className="relative">
             <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -79,7 +85,7 @@ export default function ChatHeader({
 
       <div className="flex items-center gap-2">
         <ModelSelector />
-        
+
         {/* Organization Balance */}
         {balance && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md">
@@ -89,19 +95,13 @@ export default function ChatHeader({
             </span>
           </div>
         )}
-        
+
         <ChatHistory
           conversations={conversations}
           currentConversationId={currentConversationId}
           onSelectConversation={onSelectConversation}
           onNewConversation={onNewConversation}
         />
-        
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/dashboard/agents/$id" params={{ id: agent.id }}>
-            <Icon name="Settings" className="size-4" />
-          </Link>
-        </Button>
       </div>
     </div>
   );

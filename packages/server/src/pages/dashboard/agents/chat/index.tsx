@@ -11,7 +11,3 @@ export { default as ChatHistory } from "./components/ChatHistory";
 export { default as ChatHeader } from "./components/ChatHeader";
 export { default as ChatArea } from "./components/ChatArea";
 export { default as ModelSelector } from "./components/ModelSelector";
-
-
-
- 
