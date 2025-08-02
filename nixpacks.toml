@@ -1,8 +1,8 @@
-[build]
-language = "rust"
-
 [phases.setup]
-nixpkgs = ["rustc", "cargo"]
+nixPkgs = ["rustc", "cargo"]
+
+[phases.install]
+cmds = ["cargo fetch"]
 
 [phases.build]
 cmds = ["cargo build --release"]
