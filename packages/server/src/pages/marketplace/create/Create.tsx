@@ -13,6 +13,7 @@ import { parseEther } from "viem";
 import { useNavigate } from "@tanstack/react-router";
 import { useApi } from "@/src/lib/hooks/use-api";
 import { useWalletClient } from "wagmi";
+import Icon from "@/src/lib/components/custom/Icon";
 
 // Define the category types
 const CATEGORIES = [
@@ -722,7 +723,10 @@ export default function CreatePage() {
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isLoading || uploadToMarketplaceAndGetReward.isPending}>
-                        {isLoading || uploadToMarketplaceAndGetReward.isPending ? "Creating..." : "Create Item"}
+                        {isLoading || uploadToMarketplaceAndGetReward.isPending ? <span className="flex items-center">
+                            <Icon name="LoaderCircle" className="animate-spin mr-2" />
+                            Creating...
+                        </span> : "Create Item"}
                     </Button>
                 </div>
             </form>

@@ -13,6 +13,8 @@ pub struct Organization {
     pub name: String,
     pub owner: String,
     pub created_at: String,
+    pub address: String,
+    pub orchestrator_idx: i64,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]

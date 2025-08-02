@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "@tanstack/react-router";
 import { Button } from "@/src/lib/components/ui/button";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
@@ -12,6 +12,7 @@ import ChatArea from "./components/ChatArea";
 import ChatInput from "./components/ChatInput";
 import Layout from "../../layout";
 import { formatEther } from "viem";
+import FundOrgDialog from "../../FundOrg";
 
 export default function ChatWithAgent() {
   const { id } = useParams({
@@ -22,6 +23,10 @@ export default function ChatWithAgent() {
   const { selectedOrg } = useStore();
   const { selectedModel } = useChatStore();
   const queryClient = useQueryClient();
+
+  console.log({
+    selectedOrg
+  })
 
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +81,7 @@ export default function ChatWithAgent() {
       }
 
       // Send the user message
-      await createMessageMutation.mutateAsync({
+      const res = await createMessageMutation.mutateAsync({
         conversationId: conversationId,
         message: content.trim(),
         sender: 'user',
@@ -169,13 +174,13 @@ export default function ChatWithAgent() {
 
   // Get the total price per call for all enabled products of this agent
   const agentPricePerCall = pricePerCallQuery.data?.total_price_per_call || 0;
-  
+
   // Total price per call = agent products + LLM model
   const totalPricePerCall = agentPricePerCall + modelPricePerCall;
   const organizationBalance = balanceQuery.data?.balance || 0;
 
   // Check if balance is sufficient for the total price per call
-  const hasSufficientBalance = organizationBalance >= totalPricePerCall;
+  const hasSufficientBalance = organizationBalance !== 0 && organizationBalance >= totalPricePerCall
 
   // Loading state
   if (agentsQuery.isPending) {
@@ -252,9 +257,9 @@ export default function ChatWithAgent() {
                     No models enabled
                   </h4>
                   <p className="text-sm text-yellow-700 mt-1">
-                    Your organization needs to enable at least one model to chat with your agent. 
-                    <Link 
-                      to="/dashboard/settings" 
+                    Your organization needs to enable at least one model to chat with your agent.
+                    <Link
+                      to="/dashboard/settings"
                       className="text-yellow-800 underline hover:text-yellow-900 ml-1"
                     >
                       Go to settings
@@ -273,15 +278,10 @@ export default function ChatWithAgent() {
                 <div className="flex-1">
                   <h4 className="text-sm font-medium text-red-800">
                     Insufficient balance
+                    {selectedOrg && <FundOrgDialog organization={selectedOrg} />}
                   </h4>
                   <p className="text-sm text-red-700 mt-1">
-                    Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call: ${formatEther(BigInt(agentPricePerCall))} (agent products) + ${formatEther(BigInt(modelPricePerCall))} (LLM model) = ${formatEther(BigInt(totalPricePerCall))}. 
-                    <Link 
-                      to="/dashboard/purchases" 
-                      className="text-red-800 underline hover:text-red-900 ml-1"
-                    >
-                      Top up your balance
-                    </Link>
+                    Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
                   </p>
                 </div>
               </div>

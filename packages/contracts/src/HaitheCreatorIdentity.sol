@@ -45,12 +45,11 @@ contract HaitheCreatorIdentity is ERC721URIStorage {
         return _nextTokenId;
     }
 
-    function registerFunds(uint256 tokenId_, uint256 amount_) external payable {
+    function registerFunds(uint256 tokenId_, uint256 amount_) external {
         require(
             msg.sender == address(_orchestrator),
             "Only orchestrator can register funds"
         );
-        require(msg.value > 0, "Must send some ether");
 
         funds[tokenId_] += amount_;
     }

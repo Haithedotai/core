@@ -103,7 +103,7 @@ export class HaitheProjectsClient extends BaseClient {
     total_price_per_call: number;
   }> {
     return this.fetch(
-      `/v1/projects/${projectId}/price_per_call`,
+      `/v1/projects/${projectId}/price-per-call`,
       this.authClient.getAuthToken()
     );
   }
