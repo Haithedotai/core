@@ -8,4 +8,4 @@ cmds = ["cargo fetch"]
 cmds = ["cargo build --release"]
 
 [phases.start]
-cmds = ["./target/release/main"]
+cmd = "target/release/main"
