@@ -65,6 +65,10 @@ async fn main() -> std::io::Result<()> {
                     .allowed_headers(vec![
                         actix_web::http::header::AUTHORIZATION,
                         actix_web::http::header::CONTENT_TYPE,
+                        actix_web::http::header::HeaderName::from_static("haithe-organization"),
+                        actix_web::http::header::HeaderName::from_static("haithe-project"),
+                        actix_web::http::header::HeaderName::from_static("openai-organization"),
+                        actix_web::http::header::HeaderName::from_static("openai-project"),
                     ])
                     .supports_credentials()
                     .max_age(3600),

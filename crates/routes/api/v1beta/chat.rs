@@ -3,6 +3,13 @@ use actix_web::{HttpResponse, Responder, delete, get, patch, post, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum MessageSender {
+    User,
+    Ai,
+}
+
 #[derive(Debug, Clone, FromRow, Serialize)]
 struct Conversation {
     id: i32,
@@ -68,7 +75,7 @@ struct PatchConversationBody {
 #[derive(Deserialize)]
 struct CreateMessageBody {
     message: String,
-    sender: String,
+    sender: MessageSender,
 }
 
 #[patch("/conversations/{id}")]
@@ -190,7 +197,10 @@ pub async fn post_conversation_messages_handler(
     )
         .bind(id)
         .bind(&payload.message)
-        .bind(&payload.sender)
+        .bind(match payload.sender {
+            MessageSender::User => "user",
+            MessageSender::Ai => "ai",
+        })
         .fetch_one(&state.db)
         .await?;
 

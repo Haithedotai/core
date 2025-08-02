@@ -29,7 +29,7 @@ export default function PurchasesPage() {
   const { data: allProducts, isLoading: isLoadingAllProducts } = api.getAllProducts();
 
   // Get organization balance and expenditure
-  const { data: organizationBalance, isLoading: isLoadingBalance } = api.balance(orgId);
+  const { data: organizationBalance, isLoading: isLoadingBalance } = api.organizationBalance(orgId);
   const { data: organizationExpenditure, isLoading: isLoadingExpenditure } = api.getOrganizationExpenditure(orgId);
 
   // Loading state

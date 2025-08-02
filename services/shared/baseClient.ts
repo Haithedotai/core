@@ -10,7 +10,7 @@ export abstract class BaseClient {
   public fetch<T>(
     uri: string,
     authToken: string | null,
-    args?: Omit<Parameters<typeof fetch>[1], "headers">
+    args?: Parameters<typeof fetch>[1]
   ): Promise<T> {
     if (!this.baseUrl) {
       throw new Error("Base URL is not set");
@@ -23,12 +23,16 @@ export abstract class BaseClient {
       : this.baseUrl;
     const url = base + uri;
 
+    // Safely extract headers and other args
+    const { headers: addedHeaders, ...restArgs } = args || {};
+
     return new Promise((resolve, reject) => {
       fetch(url.toString(), {
-        ...args,
+        ...restArgs,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
+          ...addedHeaders,
         },
       })
         .then((response) => {
@@ -41,12 +45,17 @@ export abstract class BaseClient {
           return response.json();
         })
         .then((response) => {
+          if (uri === '/v1beta/openai/chat/completions') {
+            resolve(response as T);
+            return;
+          }
+
           if (
-            !response ||
-            typeof response !== "object" ||
-            !("success" in response) ||
-            !("message" in response) ||
-            !("data" in response)
+            (!response ||
+              typeof response !== "object" ||
+              !("success" in response) ||
+              !("message" in response) ||
+              !("data" in response))
           ) {
             throw new Error("Invalid API response");
           }

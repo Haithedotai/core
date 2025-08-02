@@ -69,3 +69,17 @@ export interface Product {
   category: string;
   created_at: string;
 }
+
+export interface Conversation {
+  id: number;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Message {
+  id: number;
+  message: string;
+  sender: string;
+  created_at: string;
+}

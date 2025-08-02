@@ -126,7 +126,16 @@ export class HaitheOrgsClient extends BaseClient {
     return this.fetch(`/v1/models`, this.authClient.getAuthToken());
   }
 
-  getEnabledModels(orgId: number): Promise<number[]> {
+  getEnabledModels(orgId: number): Promise<
+    {
+      id: number;
+      name: string;
+      display_name: string;
+      provider: string;
+      is_active: boolean;
+      price_per_call: number;
+    }[]
+  > {
     return this.fetch(
       `/v1/orgs/${orgId}/models`,
       this.authClient.getAuthToken()

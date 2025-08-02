@@ -1,6 +1,7 @@
 import { BaseClient } from "../shared/baseClient";
 import type { Project, ProjectMember } from "../shared/types";
 import { HaitheAuthClient } from "./auth";
+import type { Conversation, Message } from "../shared/types";
 
 export class HaitheProjectsClient extends BaseClient {
   private authClient: HaitheAuthClient;
@@ -104,6 +105,147 @@ export class HaitheProjectsClient extends BaseClient {
     return this.fetch(
       `/v1/projects/${projectId}/price_per_call`,
       this.authClient.getAuthToken()
+    );
+  }
+
+  // Chat/Conversation related methods
+  getConversations(orgUid: string, projectUid: string): Promise<Conversation[]> {
+    return this.fetch(
+      `/v1beta/chat/conversations`,
+      this.authClient.getAuthToken(),
+      {
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`
+        }
+      }
+    );
+  }
+
+  createConversation(orgUid: string, projectUid: string): Promise<Conversation> {
+    return this.fetch(
+      `/v1beta/chat/conversations`,
+      this.authClient.getAuthToken(),
+      {
+          method: "POST",
+          headers: {
+            'Haithe-Organization': `org-${orgUid}`,
+            'Haithe-Project': `proj-${projectUid}`
+          }
+      }
+    );
+  }
+
+  getConversation(id: number, orgUid: string, projectUid: string): Promise<Conversation> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${id}`,
+      this.authClient.getAuthToken(),
+      {
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`
+        }
+      }
+    );
+  }
+
+  updateConversation(id: number, title: string, orgUid: string, projectUid: string): Promise<Conversation> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${id}`,
+      this.authClient.getAuthToken(),
+      { 
+        method: "PATCH",
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`
+        },
+        body: JSON.stringify({ title })
+      }
+    );
+  }
+
+  deleteConversation(id: number, orgUid: string, projectUid: string): Promise<{ rows_affected: number }> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${id}`,
+      this.authClient.getAuthToken(),
+      { 
+        method: "DELETE",
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`
+        }
+      }
+    );
+  }
+
+  getConversationMessages(conversationId: number, orgUid: string, projectUid: string): Promise<Message[]> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${conversationId}/messages`,
+      this.authClient.getAuthToken(),
+      {
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`
+        }
+      }
+    );
+  }
+
+  createMessage(conversationId: number, message: string, sender: string, orgUid: string, projectUid: string): Promise<Message> {
+    return this.fetch(
+      `/v1beta/chat/conversations/${conversationId}/messages`,
+      this.authClient.getAuthToken(),
+      { 
+        method: "POST",
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`
+        },
+        body: JSON.stringify({ message, sender })
+      }
+    );
+  }
+
+  getCompletions(
+    orgUid: string, 
+    projectUid: string, 
+    body: {
+      model: string;
+      messages: Array<{ role: string; content: string }>;
+      n?: number;
+      temperature?: number;
+    }
+  ): Promise<{
+    id: string;
+    object: string;
+    created: number;
+    model: string;
+    choices: Array<{
+      index: number;
+      message: {
+        role: string;
+        content: string;
+      };
+      finish_reason: string;
+    }>;
+    usage: {
+      total_cost: number;
+      expense_till_now: number;
+      prompt_tokens: number;
+    };
+  }> {
+    return this.fetch(
+      `/v1beta/openai/chat/completions`,
+      this.authClient.getAuthToken(),
+      {
+        method: "POST",
+        headers: {
+          'Haithe-Organization': `org-${orgUid}`,
+          'Haithe-Project': `proj-${projectUid}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      }
     );
   }
 }

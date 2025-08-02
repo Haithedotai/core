@@ -27,7 +27,7 @@ import { useHaitheApi } from '../lib/hooks/use-haithe-api';
 import Loader from '../lib/components/app/Loader';
 import AgentsConfiguration from './dashboard/agents/configuration';
 import GenerateAPIKey from './dashboard/generateAPIKey';
-import ChatWithAgent from './dashboard/agents/chat';
+import { ChatWithAgent, ChatList, ChatSettings } from './dashboard/agents/chat';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -273,12 +273,40 @@ const generateAPIKeyRoute = createRoute({
   },
 })
 
+const chatListRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/chat',
+  component: function ChatListRoute() {
+    return withPageErrorBoundary(
+      withProtectedRoute(ChatList, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
+  },
+})
+
 const chatWithAgentRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard/agents/$id/chat',
   component: function ChatWithAgentRoute() {
     return withPageErrorBoundary(
       withProtectedRoute(ChatWithAgent, {
+        walletConnected: true,
+        signedInToHaithe: true,
+        hasOrg: true
+      })
+    )({});
+  },
+})
+
+const chatSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/agents/$id/chat/settings',
+  component: function ChatSettingsRoute() {
+    return withPageErrorBoundary(
+      withProtectedRoute(ChatSettings, {
         walletConnected: true,
         signedInToHaithe: true,
         hasOrg: true
@@ -306,7 +334,9 @@ const routeTree = rootRoute.addChildren([
   itemDetailRoute,
   marketplaceProfileRoute,
   generateAPIKeyRoute,
-  chatWithAgentRoute
+  chatListRoute,
+  chatWithAgentRoute,
+  chatSettingsRoute
 ])
 
 const router = createRouter({

@@ -201,13 +201,13 @@ export default function Connect() {
             >
                 {logoutMutation.isPending ? (
                     <div className="flex items-center">
-                        <Icon name="Loader" className="size-4 animate-spin" />
+                        <Icon name="Loader" className="size-4 animate-spin mr-2" />
                         Disconnecting...
                     </div>
                 ) : (
                     <div className="flex items-center">
                         <Icon name="LogOut" className="size-4" />
-                        <div className="hidden sm:block">
+                        <div className="hidden sm:block ml-2">
                             Disconnect
                         </div>
                     </div>

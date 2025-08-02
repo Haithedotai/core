@@ -468,11 +468,10 @@ export default function DashboardPage() {
 
   // Get profile data
   const profileQuery = api.profile();
-  const { selectedOrganizationId } = useStore();
+  const { selectedOrganizationId, selectedOrg } = useStore();
   const { data: organization } = api.getOrganization(selectedOrganizationId);
   const { data: agents } = api.getProjects(selectedOrganizationId);
   const { data: apiKeyLastIssued } = api.apiKeyLastIssued();
-
 
   return (
     <div className="min-h-full bg-background">

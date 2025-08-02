@@ -15,6 +15,8 @@ import {
   type Creator,
   type Product,
   type CreatorDetails,
+  type Conversation,
+  type Message,
 } from "./clients";
 
 export class HaitheClient {
@@ -179,7 +181,7 @@ export class HaitheClient {
     return this.orgs.getEnabledProducts(orgAddress);
   }
 
-  balance(orgId: number): Promise<{ balance: number }> {
+  organizationBalance(orgId: number): Promise<{ balance: number }> {
     return this.orgs.balance(orgId);
   }
 
@@ -311,7 +313,16 @@ export class HaitheClient {
     return this.projects.getProjectProducts(projectId);
   }
 
-  getEnabledModels(orgId: number): Promise<number[]> {
+  getEnabledModels(orgId: number): Promise<
+    {
+      id: number;
+      name: string;
+      display_name: string;
+      provider: string;
+      is_active: boolean;
+      price_per_call: number;
+    }[]
+  > {
     return this.orgs.getEnabledModels(orgId);
   }
 
@@ -349,6 +360,66 @@ export class HaitheClient {
 
   transferUSDT(recipient: viem.Address, amount: bigint): Promise<`0x${string}`> {
     return this.auth.transferUSDT(recipient, amount);
+  }
+
+  // Chat/Conversation methods
+  getConversations(orgUid: string, projectUid: string): Promise<Conversation[]> {
+    return this.projects.getConversations(orgUid, projectUid);
+  }
+
+  createConversation(orgUid: string, projectUid: string): Promise<Conversation> {
+    return this.projects.createConversation(orgUid, projectUid);
+  }
+
+  getConversation(id: number, orgUid: string, projectUid: string): Promise<Conversation> {
+    return this.projects.getConversation(id, orgUid, projectUid);
+  }
+
+  updateConversation(id: number, title: string, orgUid: string, projectUid: string): Promise<Conversation> {
+    return this.projects.updateConversation(id, title, orgUid, projectUid);
+  }
+
+  deleteConversation(id: number, orgUid: string, projectUid: string): Promise<{ rows_affected: number }> {
+    return this.projects.deleteConversation(id, orgUid, projectUid);
+  }
+
+  getConversationMessages(conversationId: number, orgUid: string, projectUid: string): Promise<Message[]> {
+    return this.projects.getConversationMessages(conversationId, orgUid, projectUid);
+  }
+
+  createMessage(conversationId: number, message: string, sender: string, orgUid: string, projectUid: string): Promise<Message> {
+    return this.projects.createMessage(conversationId, message, sender, orgUid, projectUid);
+  }
+
+  getCompletions(
+    orgUid: string, 
+    projectUid: string, 
+    body: {
+      model: string;
+      messages: Array<{ role: string; content: string }>;
+      n?: number;
+      temperature?: number;
+    }
+  ): Promise<{
+    id: string;
+    object: string;
+    created: number;
+    model: string;
+    choices: Array<{
+      index: number;
+      message: {
+        role: string;
+        content: string;
+      };
+      finish_reason: string;
+    }>;
+    usage: {
+      total_cost: number;
+      expense_till_now: number;
+      prompt_tokens: number;
+    };
+  }> {
+    return this.projects.getCompletions(orgUid, projectUid, body);
   }
 }
 

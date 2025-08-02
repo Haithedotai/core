@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Organization } from '../../../../../services/clients';
 
 interface MarketplaceFilters {
   category?: string[];
@@ -13,7 +14,9 @@ interface MarketplaceFilters {
 type Store = {
   selectedOrganizationId: number
   setSelectedOrganizationId: (organizationId: number) => void
-  
+  selectedOrg: Organization | null
+  setSelectedOrg: (org: Organization | null) => void
+
   // Onboarding temporary storage
   onboardingData: {
     orgName: string
@@ -38,25 +41,29 @@ type Store = {
 
 export const useStore = create<Store>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       selectedOrganizationId: 0,
-      setSelectedOrganizationId: (organizationId: number) => 
+      setSelectedOrganizationId: (organizationId: number) =>
         set({ selectedOrganizationId: organizationId }),
+
+      selectedOrg: null,
+      setSelectedOrg: (org: Organization | null) =>
+        set({ selectedOrg: org }),
 
       // Onboarding state
       onboardingData: {
         orgName: '',
         isCompleted: false,
       },
-      setOnboardingOrgName: (name: string) => 
+      setOnboardingOrgName: (name: string) =>
         set((state) => ({
           onboardingData: { ...state.onboardingData, orgName: name }
         })),
-      completeOnboarding: () => 
+      completeOnboarding: () =>
         set((state) => ({
           onboardingData: { ...state.onboardingData, isCompleted: true }
         })),
-      clearOnboardingData: () => 
+      clearOnboardingData: () =>
         set({
           onboardingData: { orgName: '', isCompleted: false }
         }),
@@ -92,6 +99,7 @@ export const useStore = create<Store>()(
       name: 'haithe-store', // unique name for localStorage
       partialize: (state) => ({
         selectedOrganizationId: state.selectedOrganizationId,
+        selectedOrg: state.selectedOrg,
         onboardingData: state.onboardingData,
         profile: state.profile,
       }),
@@ -106,7 +114,7 @@ interface MarketplaceStore {
   searchQuery: string
   viewMode: 'grid' | 'list'
   favorites: string[]
-  
+
   // Actions
   setFilters: (filters: MarketplaceFilters) => void
   setSearchQuery: (query: string) => void
@@ -144,7 +152,7 @@ export const useMarketplaceStore = create<MarketplaceStore>()(
         }),
 
       clearFilters: () =>
-        set({ 
+        set({
           filters: {},
           searchQuery: ''
         }),
@@ -161,6 +169,29 @@ export const useMarketplaceStore = create<MarketplaceStore>()(
         searchQuery: state.searchQuery,
         viewMode: state.viewMode,
         favorites: state.favorites,
+      }),
+    }
+  )
+)
+
+// Chat Store
+interface ChatStore {
+  selectedModel: string | null;
+  setSelectedModel: (model: string) => void;
+  clearSelectedModel: () => void;
+}
+
+export const useChatStore = create<ChatStore>()(
+  persist(
+    (set) => ({
+      selectedModel: null,
+      setSelectedModel: (model: string) => set({ selectedModel: model }),
+      clearSelectedModel: () => set({ selectedModel: null }),
+    }),
+    {
+      name: 'haithe-chat-store',
+      partialize: (state) => ({
+        selectedModel: state.selectedModel,
       }),
     }
   )
