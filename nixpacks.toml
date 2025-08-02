@@ -3,11 +3,9 @@ nixPkgs = ["bun"]
 
 [phases.install]
 cmds = ["bun install"]
-workingDirectory = "packages/server"
 
 [phases.build]
-cmds = ["bun run build"]
-workingDirectory = "packages/server"
+cmds = ["bun run server:build"]
 
 [start]
-cmd = "bun run start"
+cmd = "bun run server:start"
