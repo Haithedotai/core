@@ -47,6 +47,8 @@ CREATE TABLE
         org_id INTEGER NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        search_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+        memory_enabled BOOLEAN NOT NULL DEFAULT FALSE,
         UNIQUE (name, org_id),
         UNIQUE (project_uid)
     );
