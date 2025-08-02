@@ -10,7 +10,7 @@ nixpkgs = [
     "cargo",
 ]
 
-[phases.build.env]
+[variables]
 PKG_CONFIG_PATH = "/nix/store"
 
 [phases.install]
