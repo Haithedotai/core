@@ -1,7 +1,7 @@
 import * as viem from "viem";
 import type { MinimalPersistentStorage, UserProfile } from "../shared/types";
 import { BaseClient } from "../shared/baseClient";
-import definitions from "definitions";
+import definitions from "../definitions";
 
 export class HaitheAuthClient extends BaseClient {
   public walletClient: viem.WalletClient;
@@ -204,7 +204,10 @@ export class HaitheAuthClient extends BaseClient {
     });
   }
 
-  async transferUSDT(recipient: viem.Address, amount: bigint): Promise<`0x${string}`> {
+  async transferUSDT(
+    recipient: viem.Address,
+    amount: bigint
+  ): Promise<`0x${string}`> {
     if (!this.isLoggedIn()) {
       throw new Error("Not logged in");
     }

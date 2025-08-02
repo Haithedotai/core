@@ -1,0 +1,20 @@
+[phases.setup]
+nixpkgs = [
+    "pkg-config",
+    "nettle",
+    "clang",
+    "binutils",
+    "gcc",
+    "rust-bin.stable.latest.default",
+    "rustc",
+    "cargo",
+]
+
+[phases.install]
+cmds = ["cargo fetch"]
+
+[phases.build]
+cmds = ["cargo build --release"]
+
+[start]
+cmd = "./target/release/main"

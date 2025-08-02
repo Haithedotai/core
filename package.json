@@ -27,7 +27,8 @@
     "typescript": "^5"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "services"
   ],
   "module": "index.ts",
   "type": "module",
