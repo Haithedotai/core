@@ -1,3 +1,6 @@
+[build]
+language = "rust"
+
 [phases.setup]
 nixpkgs = ["rustc", "cargo"]
 
@@ -5,4 +8,4 @@ nixpkgs = ["rustc", "cargo"]
 cmds = ["cargo build --release"]
 
 [phases.start]
-cmd = "./target/release/your-binary-name"
+cmd = "./target/release/main"
