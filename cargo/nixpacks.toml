@@ -1,10 +1,10 @@
 [phases.setup]
 nixpkgs = [
+    "pkg-config",
+    "nettle",
+    "clang",
     "binutils",
     "gcc",
-    "pkg-config",
-    "nettle.dev",
-    "clang",
     "rust-bin.stable.latest.default",
     "rustc",
     "cargo",
