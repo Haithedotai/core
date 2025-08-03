@@ -23,34 +23,24 @@ const server = serve({
     "/*": (req) => {
       const url = new URL(req.url);
       const pathname = url.pathname;
-      
+
       // Skip API routes
       if (pathname.startsWith('/api')) {
         return new Response("Not Found", { status: 404 });
       }
-      
+
       // Try to serve static files from dist directory
       const filePath = path.join(process.cwd(), "dist", pathname === "/" ? "index.html" : pathname);
-      
-      if (existsSync(filePath)) {
-        const file = Bun.file(filePath);
-        const mimeType = getMimeType(filePath);
-        
-        return new Response(file, {
-          headers: {
-            'Content-Type': mimeType,
-            'Cache-Control': pathname === "/" || pathname.endsWith('.html') 
-              ? 'no-cache' 
-              : 'public, max-age=31536000', // 1 year cache for static assets
-          },
-        });
-      }
-      
-      // Fallback to index.html for SPA routing
-      return new Response(dist.index, {
+
+      const file = Bun.file(filePath);
+      const mimeType = getMimeType(filePath);
+
+      return new Response(file, {
         headers: {
-          'Content-Type': 'text/html',
-          'Cache-Control': 'no-cache',
+          'Content-Type': mimeType,
+          'Cache-Control': pathname === "/" || pathname.endsWith('.html')
+            ? 'no-cache'
+            : 'public, max-age=31536000', // 1 year cache for static assets
         },
       });
     }
@@ -61,18 +51,18 @@ const server = serve({
     if (req.url.includes("/api/v1")) {
       return hono.fetch(req);
     }
-    
+
     // Handle static files for non-GET requests
     const url = new URL(req.url);
     const pathname = url.pathname;
-    
+
     if (!pathname.startsWith('/api')) {
       const filePath = path.join(process.cwd(), "dist", pathname);
-      
+
       if (existsSync(filePath)) {
         const file = Bun.file(filePath);
         const mimeType = getMimeType(filePath);
-        
+
         return new Response(file, {
           headers: {
             'Content-Type': mimeType,
@@ -81,7 +71,7 @@ const server = serve({
         });
       }
     }
-    
+
     return new Response("Not Found", { status: 404 });
   },
 
