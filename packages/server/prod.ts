@@ -94,8 +94,6 @@ const server = serve({
         return new Response("Not Found", { status: 404 });
       }
 
-      console.log({ pathname, hasFileExtension });
-
       const indexPath = path.join(import.meta.dir, "dist", "index.html");
       const file = Bun.file(indexPath);
       return new Response(file, {
