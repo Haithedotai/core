@@ -2,8 +2,8 @@
 cmds = [
     "apt update",
     "apt upgrade -y",
-    "apt install build-essential cmake pkg-config -y",
-    "apt install clang libclang-dev llvm nettle-dev libstdc++6 libstdc++-12-dev libc6-dev -y",
+    "apt install clang libclang-dev llvm build-essential cmake pkg-config libstdc++6 libstdc++-12-dev libc6-dev -y",
+    "apt install nettle-dev -y",
     # "/configure --prefix=/usr/ && make && make install",
 ]
 nixpkgs = [
