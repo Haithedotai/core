@@ -20,30 +20,25 @@ const server = serve({
     "/api/v1/*": (req) => {
       return hono.fetch(req);
     },
-    // "/*": dist,
 
     "/*": (req) => {
       const url = new URL(req.url);
       const pathname = url.pathname;
 
-      // Skip API routes
       if (pathname.startsWith("/api")) {
         return new Response("Not Found", { status: 404 });
       }
 
-      // Normalize pathname by removing trailing slash for file lookup
       const normalizedPath = pathname.endsWith("/") && pathname !== "/" 
         ? pathname.slice(0, -1) 
         : pathname;
 
-      // Try to serve static files from dist directory
       const filePath = path.join(
         import.meta.dir,
         "dist",
         normalizedPath === "/" ? "index.html" : normalizedPath
       );
 
-      // Check if the file exists
       if (existsSync(filePath)) {
         const file = Bun.file(filePath);
         const mimeType = getMimeType(filePath);
@@ -59,7 +54,11 @@ const server = serve({
         });
       }
 
-      // If file doesn't exist, serve index.html for client-side routing
+      const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(normalizedPath);
+      if (hasFileExtension) {
+        return new Response("Not Found", { status: 404 });
+      }
+
       const indexPath = path.join(import.meta.dir, "dist", "index.html");
       if (existsSync(indexPath)) {
         const file = Bun.file(indexPath);
@@ -76,17 +75,14 @@ const server = serve({
   },
 
   fetch(req) {
-    // CATCHES ALL OTHER METHODS
     if (req.url.includes("/api/v1")) {
       return hono.fetch(req);
     }
 
-    // Handle static files for non-GET requests
     const url = new URL(req.url);
     const pathname = url.pathname;
 
     if (!pathname.startsWith("/api")) {
-      // Normalize pathname by removing trailing slash for file lookup
       const normalizedPath = pathname.endsWith("/") && pathname !== "/" 
         ? pathname.slice(0, -1) 
         : pathname;
@@ -105,7 +101,11 @@ const server = serve({
         });
       }
 
-      // If file doesn't exist, serve index.html for client-side routing
+      const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(normalizedPath);
+      if (hasFileExtension) {
+        return new Response("Not Found", { status: 404 });
+      }
+
       const indexPath = path.join(import.meta.dir, "dist", "index.html");
       if (existsSync(indexPath)) {
         const file = Bun.file(indexPath);
