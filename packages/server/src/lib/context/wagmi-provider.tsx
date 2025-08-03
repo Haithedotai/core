@@ -30,8 +30,9 @@ const hyperion: Chain = {
 const isProd = process.env.NODE_ENV === "production";
 
 export const config = createConfig({
-  chains: isProd ? [hyperion] : [hardhat],
+  chains: isProd ? [mainnet, hyperion] : [mainnet, hardhat],
   transports: {
+    [mainnet.id]: http(),
     [hyperion.id]: http(),
     [hardhat.id]: http(),
   },
