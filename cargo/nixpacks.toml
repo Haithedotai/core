@@ -1,34 +1,9 @@
-# [variables]
-# PKG_CONFIG_PATH = "/nix/store"
-
-[phase.name]
-aptPkgs = [
-    'wget',
-    "clang",
-    "llvm",
-    "pkg-config",
-    "nettle-dev",
-    "nettle",
-    "nettle-devel",
-    "cmake",
-    "pkgconfig",
-]
-
 [phases.setup]
-nixpkgs = [
-    "pkg-config",
-    "binutils",
-    "gcc",
-    "rust-bin.stable.latest.default",
-    "rustc",
-    "cargo",
-    "cmake",
-    "nettle.dev",
-]
+nixpkgs = ["rust-bin.stable.latest.default", "rustc", "cargo"]
 
 [phases.install]
 cmds = [
-    "apt install clang llvm pkg-config nettle-dev cmake -y",
+    "apt install clang llvm pkg-config nettle-dev pkg-config cmake -y",
     "/configure --prefix=/usr/ && make && make install",
     "cargo fetch",
 ]
