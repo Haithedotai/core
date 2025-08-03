@@ -31,11 +31,16 @@ const server = serve({
         return new Response("Not Found", { status: 404 });
       }
 
+      // Normalize pathname by removing trailing slash for file lookup
+      const normalizedPath = pathname.endsWith("/") && pathname !== "/" 
+        ? pathname.slice(0, -1) 
+        : pathname;
+
       // Try to serve static files from dist directory
       const filePath = path.join(
         import.meta.dir,
         "dist",
-        pathname === "/" ? "index.html" : pathname
+        normalizedPath === "/" ? "index.html" : normalizedPath
       );
 
       // Check if the file exists
@@ -47,7 +52,7 @@ const server = serve({
           headers: {
             "Content-Type": mimeType,
             "Cache-Control":
-              pathname === "/" || pathname.endsWith(".html")
+              normalizedPath === "/" || normalizedPath.endsWith(".html")
                 ? "no-cache"
                 : "public, max-age=31536000", // 1 year cache for static assets
           },
@@ -81,7 +86,12 @@ const server = serve({
     const pathname = url.pathname;
 
     if (!pathname.startsWith("/api")) {
-      const filePath = path.join(import.meta.dir, "dist", pathname);
+      // Normalize pathname by removing trailing slash for file lookup
+      const normalizedPath = pathname.endsWith("/") && pathname !== "/" 
+        ? pathname.slice(0, -1) 
+        : pathname;
+
+      const filePath = path.join(import.meta.dir, "dist", normalizedPath);
 
       if (existsSync(filePath)) {
         const file = Bun.file(filePath);
