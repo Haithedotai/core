@@ -10,10 +10,12 @@ const server = serve({
   port: 3000,
 
   routes: {
-    "/api": new Response(JSON.stringify({
-      message: "Bun Server",
-      version: "v1.0.0",
-    })),
+    "/api": new Response(
+      JSON.stringify({
+        message: "Bun Server",
+        version: "v1.0.0",
+      })
+    ),
     // CATCHES ONLY GET REQUESTS
     "/api/v1/*": (req) => {
       return hono.fetch(req);
@@ -25,25 +27,30 @@ const server = serve({
       const pathname = url.pathname;
 
       // Skip API routes
-      if (pathname.startsWith('/api')) {
+      if (pathname.startsWith("/api")) {
         return new Response("Not Found", { status: 404 });
       }
 
       // Try to serve static files from dist directory
-      const filePath = path.join(process.cwd(), "dist", pathname === "/" ? "index.html" : pathname);
+      const filePath = path.join(
+        import.meta.dir,
+        "dist",
+        pathname === "/" ? "index.html" : pathname
+      );
 
       const file = Bun.file(filePath);
       const mimeType = getMimeType(filePath);
 
       return new Response(file, {
         headers: {
-          'Content-Type': mimeType,
-          'Cache-Control': pathname === "/" || pathname.endsWith('.html')
-            ? 'no-cache'
-            : 'public, max-age=31536000', // 1 year cache for static assets
+          "Content-Type": mimeType,
+          "Cache-Control":
+            pathname === "/" || pathname.endsWith(".html")
+              ? "no-cache"
+              : "public, max-age=31536000", // 1 year cache for static assets
         },
       });
-    }
+    },
   },
 
   fetch(req) {
@@ -56,7 +63,7 @@ const server = serve({
     const url = new URL(req.url);
     const pathname = url.pathname;
 
-    if (!pathname.startsWith('/api')) {
+    if (!pathname.startsWith("/api")) {
       const filePath = path.join(process.cwd(), "dist", pathname);
 
       if (existsSync(filePath)) {
@@ -65,8 +72,8 @@ const server = serve({
 
         return new Response(file, {
           headers: {
-            'Content-Type': mimeType,
-            'Cache-Control': 'public, max-age=31536000',
+            "Content-Type": mimeType,
+            "Cache-Control": "public, max-age=31536000",
           },
         });
       }
