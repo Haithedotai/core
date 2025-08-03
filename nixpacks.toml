@@ -8,4 +8,4 @@ cmds = ["bun install"]
 cmds = ["bun run server:build"]
 
 [start]
-cmd = "bun run server:start"
+cmd = "bun run packages/server/prod.ts"
