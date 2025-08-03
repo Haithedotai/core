@@ -7,6 +7,26 @@ import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
 import { Link } from "@tanstack/react-router";
 
+// Define Hyperion testnet chain
+const hyperion = {
+  id: 133717,
+  name: "Hyperion Testnet",
+  nativeCurrency: {
+    name: "tMetis",
+    symbol: "TMETIS",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://hyperion-testnet.metisdevops.link"],
+    },
+  },
+};
+
+const isProd = process.env.NODE_ENV === "production";
+const correctChainId = isProd ? hyperion.id : hardhat.id;
+const correctChainName = isProd ? "Hyperion Testnet" : "Hardhat";
+
 export default function Connect() {
     const { ready, authenticated, user, login: privyLogin, logout: privyLogout } = usePrivy();
     const api = useHaitheApi();
@@ -17,8 +37,8 @@ export default function Connect() {
     const isWalletConnected = ready && authenticated && user?.wallet?.address;
     const isHaitheLoggedIn = api.isLoggedIn();
 
-    // Check if on correct network
-    const isOnCorrectNetwork = currentChainId === hardhat.id;
+    // Check if on correct network - also handle case where currentChainId might be undefined
+    const isOnCorrectNetwork = currentChainId && currentChainId === correctChainId;
 
     // Get profile data when logged in
     const profileQuery = api.profile();
@@ -41,8 +61,8 @@ export default function Connect() {
 
     const handleNetworkSwitch = async () => {
         try {
-            console.log('Attempting to switch to hardhat network:', hardhat.id);
-            switchChain({ chainId: hardhat.id });
+            console.log(`Attempting to switch to ${correctChainName} network:`, correctChainId);
+            switchChain({ chainId: correctChainId });
         } catch (error) {
             console.error('Failed to switch network:', error);
         }
@@ -84,8 +104,13 @@ export default function Connect() {
         );
     }
 
-    // Stage 2: Wallet connected but wrong network
+    // Stage 2: Wallet connected but wrong network or network not detected
     if (!isOnCorrectNetwork) {
+        const currentNetworkName = currentChainId === mainnet.id ? "Ethereum Mainnet" : 
+                                  currentChainId === hardhat.id ? "Hardhat" :
+                                  currentChainId === hyperion.id ? "Hyperion Testnet" :
+                                  `Chain ID ${currentChainId}`;
+        
         return (
             <div className="flex items-center gap-3">
                 <Button
@@ -102,9 +127,9 @@ export default function Connect() {
                     ) : (
                         <div className="flex items-center">
                             <Icon name="CircleAlert" className="size-4 mr-2" />
-                            Switch to Hardhat
+                            Switch to {correctChainName}
                             <span className="ml-2 text-xs opacity-70">
-                                (Current: {currentChainId})
+                                (Current: {currentNetworkName})
                             </span>
                         </div>
                     )}

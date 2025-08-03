@@ -1,5 +1,5 @@
 import { http } from "wagmi";
-import { hardhat, mainnet } from "viem/chains";
+import { hardhat, mainnet, type Chain } from "viem/chains";
 
 import {
   createConfig,
@@ -12,11 +12,29 @@ declare module "wagmi" {
   }
 }
 
+const hyperion: Chain = {
+  id: 133717,
+  name: "Hyperion Testnet",
+  nativeCurrency: {
+    name: "tMetis",
+    symbol: "TMETIS",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://hyperion-testnet.metisdevops.link"],
+    },
+  },
+};
+
+const isProd = process.env.NODE_ENV === "production";
+
 export const config = createConfig({
-  chains: [hardhat, mainnet],
+  chains: isProd ? [mainnet, hyperion] : [mainnet, hardhat],
   transports: {
-    [hardhat.id]: http(),
     [mainnet.id]: http(),
+    [hyperion.id]: http(),
+    [hardhat.id]: http(),
   },
 });
 

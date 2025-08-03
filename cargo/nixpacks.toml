@@ -1,0 +1,14 @@
+[phases.setup]
+nixpkgs = ["rust-bin.stable.latest.default", "rustc", "cargo"]
+cmds = [
+    "apt update",
+    "apt upgrade -y",
+    "apt install clang libclang llvm pkg-config nettle-dev cmake -y",
+    # "/configure --prefix=/usr/ && make && make install",
+]
+
+[phases.build]
+cmds = ["cargo build --release"]
+
+[start]
+cmd = "./target/release/main"
