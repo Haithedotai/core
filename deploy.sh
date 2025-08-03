@@ -1,7 +1,9 @@
+#!/bin/bash
 set -e
 
-source ~/.profile
-source ~/.bashrc
+source ~/.profile || true
+source ~/.bashrc || true
+export PATH="/root/.bun/bin:$PATH"
 
 echo "✅ Environment loaded."
 
