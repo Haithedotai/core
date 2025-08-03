@@ -27,7 +27,11 @@ nixpkgs = [
 ]
 
 [phases.install]
-cmds = ["/configure --prefix=/usr/ && make && make install", "cargo fetch"]
+cmds = [
+    "apt install clang llvm pkg-config nettle-dev",
+    "/configure --prefix=/usr/ && make && make install",
+    "cargo fetch",
+]
 
 [phases.build]
 cmds = ["cargo build --release"]
