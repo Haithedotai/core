@@ -1,5 +1,9 @@
-#!/bin/bash
 set -e
+
+source ~/.profile
+source ~/.bashrc
+
+echo "✅ Environment loaded."
 
 echo "👉 Pulling latest code..."
 git pull origin main
