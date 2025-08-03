@@ -1,3 +1,6 @@
+[phase.name]
+aptPkgs = ['unzip']
+
 [phases.setup]
 nixPkgs = ["bun"]
 
