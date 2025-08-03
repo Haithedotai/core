@@ -17,7 +17,7 @@ cmds = [
 ]
 
 [phases.build]
-cmds = ["cargo build --release"]
+cmds = ["echo nul"]
 
 [start]
-cmd = "./target/release/main"
+cmd = "cargo run --release"
