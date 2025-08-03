@@ -16,7 +16,7 @@ const server = serve({
         version: "v1.0.0",
       })
     ),
-    // CATCHES ONLY GET REQUESTS
+    // CATCHES ONLY GET REQUEST
     "/api/v1/*": (req) => {
       return hono.fetch(req);
     },
