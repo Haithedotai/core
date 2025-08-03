@@ -59,7 +59,15 @@ const server = serve({
         });
       }
 
-      // If file doesn't exist, serve index.html for client-side routing
+      // Check if this looks like a static asset request (has file extension)
+      const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(normalizedPath);
+      if (hasFileExtension) {
+        // If it has a file extension but doesn't exist, return 404
+        return new Response("Not Found", { status: 404 });
+      }
+
+      // If file doesn't exist and doesn't have a file extension, 
+      // serve index.html for client-side routing
       const indexPath = path.join(import.meta.dir, "dist", "index.html");
       if (existsSync(indexPath)) {
         const file = Bun.file(indexPath);
@@ -105,7 +113,15 @@ const server = serve({
         });
       }
 
-      // If file doesn't exist, serve index.html for client-side routing
+      // Check if this looks like a static asset request (has file extension)
+      const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(normalizedPath);
+      if (hasFileExtension) {
+        // If it has a file extension but doesn't exist, return 404
+        return new Response("Not Found", { status: 404 });
+      }
+
+      // If file doesn't exist and doesn't have a file extension, 
+      // serve index.html for client-side routing
       const indexPath = path.join(import.meta.dir, "dist", "index.html");
       if (existsSync(indexPath)) {
         const file = Bun.file(indexPath);
