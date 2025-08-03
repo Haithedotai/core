@@ -30,7 +30,7 @@ const server = serve({
       }
 
       // Try to serve static files from dist directory
-      const filePath = path.join(process.cwd(), "dist", pathname === "/" ? "index.html" : pathname);
+      const filePath = path.join(process.cwd(), "dist", pathname === "/packages/server" ? "index.html" : pathname);
 
       const file = Bun.file(filePath);
       const mimeType = getMimeType(filePath);
