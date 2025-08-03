@@ -28,7 +28,7 @@ nixpkgs = [
 
 [phases.install]
 cmds = [
-    "apt install clang llvm pkg-config nettle-dev",
+    "apt install clang llvm pkg-config nettle-dev cmake -y",
     "/configure --prefix=/usr/ && make && make install",
     "cargo fetch",
 ]
