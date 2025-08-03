@@ -18,6 +18,8 @@ const hyperion: Chain = {
   },
 };
 
+const isProd = process.env.NODE_ENV === "production";
+
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
     const { theme } = useTheme();
 
@@ -25,8 +27,8 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         <PrivyProviderBase
             appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
             config={{
-                defaultChain: hardhat,
-                supportedChains: [hardhat, hyperion],
+                defaultChain: isProd ? hyperion : hardhat,
+                supportedChains: isProd ? [hyperion] : [hardhat, hyperion],
                 loginMethods: ["wallet"],
                 appearance: {
                     theme: theme === "dark" ? "dark" : "light",

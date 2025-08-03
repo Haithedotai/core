@@ -60,7 +60,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .wrap(
                 Cors::default()
-                    .allowed_origin("http://localhost:3000")
+                    .allow_any_origin()
                     .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "OPTIONS"])
                     .allowed_headers(vec![
                         actix_web::http::header::AUTHORIZATION,
