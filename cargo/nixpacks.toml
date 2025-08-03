@@ -2,7 +2,7 @@
 cmds = [
     "apt update",
     "apt upgrade -y",
-    "apt install clang libclang-dev llvm pkg-config nettle-dev cmake -y",
+    "apt install clang libclang-dev llvm pkg-config nettle-dev libstdc++6 cmake -y",
     # "/configure --prefix=/usr/ && make && make install",
 ]
 nixpkgs = [
@@ -10,6 +10,7 @@ nixpkgs = [
     "rustc",
     "cargo",
     "llvmPackages.libclang",
+    "libstdcxx",
 ]
 
 [phases.build]
