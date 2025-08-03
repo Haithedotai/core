@@ -1,11 +1,31 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useChainId, useSwitchChain } from "wagmi";
-import { hardhat, mainnet } from "viem/chains";
+import { hardhat } from "viem/chains";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
 import { Link } from "@tanstack/react-router";
+
+// Define Hyperion testnet chain
+const hyperion = {
+  id: 133717,
+  name: "Hyperion Testnet",
+  nativeCurrency: {
+    name: "tMetis",
+    symbol: "TMETIS",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://hyperion-testnet.metisdevops.link"],
+    },
+  },
+};
+
+const isProd = process.env.NODE_ENV === "production";
+const correctChainId = isProd ? hyperion.id : hardhat.id;
+const correctChainName = isProd ? "Hyperion Testnet" : "Hardhat";
 
 export default function Connect() {
     const { ready, authenticated, user, login: privyLogin, logout: privyLogout } = usePrivy();
@@ -18,7 +38,7 @@ export default function Connect() {
     const isHaitheLoggedIn = api.isLoggedIn();
 
     // Check if on correct network
-    const isOnCorrectNetwork = currentChainId === hardhat.id;
+    const isOnCorrectNetwork = currentChainId === correctChainId;
 
     // Get profile data when logged in
     const profileQuery = api.profile();
@@ -41,8 +61,8 @@ export default function Connect() {
 
     const handleNetworkSwitch = async () => {
         try {
-            console.log('Attempting to switch to hardhat network:', hardhat.id);
-            switchChain({ chainId: hardhat.id });
+            console.log(`Attempting to switch to ${correctChainName} network:`, correctChainId);
+            switchChain({ chainId: correctChainId });
         } catch (error) {
             console.error('Failed to switch network:', error);
         }
@@ -102,7 +122,7 @@ export default function Connect() {
                     ) : (
                         <div className="flex items-center">
                             <Icon name="CircleAlert" className="size-4 mr-2" />
-                            Switch to Hardhat
+                            Switch to {correctChainName}
                             <span className="ml-2 text-xs opacity-70">
                                 (Current: {currentChainId})
                             </span>
