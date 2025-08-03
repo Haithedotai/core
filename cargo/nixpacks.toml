@@ -5,7 +5,12 @@ cmds = [
     "apt install clang libclang-dev llvm pkg-config nettle-dev cmake -y",
     # "/configure --prefix=/usr/ && make && make install",
 ]
-nixpkgs = ["rust-bin.stable.latest.default", "rustc", "cargo"]
+nixpkgs = [
+    "rust-bin.stable.latest.default",
+    "rustc",
+    "cargo",
+    "llvmPackages.libclang",
+]
 
 [phases.build]
 cmds = ["cargo build --release"]
