@@ -1,7 +1,5 @@
 [phases.setup]
 nixpkgs = ["rust-bin.stable.latest.default", "rustc", "cargo"]
-
-[phases.install]
 cmds = [
     "apt install clang llvm pkg-config nettle-dev cmake -y",
     # "/configure --prefix=/usr/ && make && make install",
