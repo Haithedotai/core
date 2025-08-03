@@ -64,7 +64,7 @@ const server = serve({
     const pathname = url.pathname;
 
     if (!pathname.startsWith("/api")) {
-      const filePath = path.join(process.cwd(), "dist", pathname);
+      const filePath = path.join(import.meta.dir, "dist", pathname);
 
       if (existsSync(filePath)) {
         const file = Bun.file(filePath);
