@@ -5,7 +5,13 @@ aptPkgs = ['unzip']
 nixPkgs = ["bun"]
 
 [phases.install]
-cmds = ["bun install"]
+cmds = [
+    "apt update",
+    "apt upgrade",
+    "apt install unzip",
+    "bun upgrade",
+    "bun install",
+]
 
 [phases.build]
 cmds = ["bun run server:build"]
