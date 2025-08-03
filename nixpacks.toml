@@ -7,8 +7,8 @@ nixPkgs = ["bun"]
 [phases.install]
 cmds = [
     "apt update",
-    "apt upgrade",
-    "apt install unzip",
+    "apt upgrade -y",
+    "apt install -y unzip",
     "bun upgrade",
     "bun install",
 ]
