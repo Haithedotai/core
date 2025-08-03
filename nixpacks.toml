@@ -1,11 +1,20 @@
+[phase.name]
+aptPkgs = ['unzip']
+
 [phases.setup]
 nixPkgs = ["bun"]
 
 [phases.install]
-cmds = ["bun install"]
+cmds = [
+    "apt update",
+    "apt upgrade -y",
+    "apt install -y unzip",
+    "bun upgrade",
+    "bun install",
+]
 
 [phases.build]
 cmds = ["bun run server:build"]
 
 [start]
-cmd = "bun run server:start"
+cmd = "bun run packages/server/prod.ts"
