@@ -38,18 +38,35 @@ const server = serve({
         pathname === "/" ? "index.html" : pathname
       );
 
-      const file = Bun.file(filePath);
-      const mimeType = getMimeType(filePath);
+      // Check if the file exists
+      if (existsSync(filePath)) {
+        const file = Bun.file(filePath);
+        const mimeType = getMimeType(filePath);
 
-      return new Response(file, {
-        headers: {
-          "Content-Type": mimeType,
-          "Cache-Control":
-            pathname === "/" || pathname.endsWith(".html")
-              ? "no-cache"
-              : "public, max-age=31536000", // 1 year cache for static assets
-        },
-      });
+        return new Response(file, {
+          headers: {
+            "Content-Type": mimeType,
+            "Cache-Control":
+              pathname === "/" || pathname.endsWith(".html")
+                ? "no-cache"
+                : "public, max-age=31536000", // 1 year cache for static assets
+          },
+        });
+      }
+
+      // If file doesn't exist, serve index.html for client-side routing
+      const indexPath = path.join(import.meta.dir, "dist", "index.html");
+      if (existsSync(indexPath)) {
+        const file = Bun.file(indexPath);
+        return new Response(file, {
+          headers: {
+            "Content-Type": "text/html",
+            "Cache-Control": "no-cache",
+          },
+        });
+      }
+
+      return new Response("Not Found", { status: 404 });
     },
   },
 
@@ -74,6 +91,18 @@ const server = serve({
           headers: {
             "Content-Type": mimeType,
             "Cache-Control": "public, max-age=31536000",
+          },
+        });
+      }
+
+      // If file doesn't exist, serve index.html for client-side routing
+      const indexPath = path.join(import.meta.dir, "dist", "index.html");
+      if (existsSync(indexPath)) {
+        const file = Bun.file(indexPath);
+        return new Response(file, {
+          headers: {
+            "Content-Type": "text/html",
+            "Cache-Control": "no-cache",
           },
         });
       }
