@@ -3,6 +3,7 @@ import { cn } from "../../utils";
 import { Button } from "../ui/button";
 import Icon from "../custom/Icon";
 import { usePrivy } from "@privy-io/react-auth";
+import { formatEther } from "viem";
 
 export default function Balance({ address }: { address?: `0x${string}` }) {
     const { user } = usePrivy();
@@ -19,7 +20,7 @@ export default function Balance({ address }: { address?: `0x${string}` }) {
 
     return (
         <div className="text-sm text-muted-foreground flex justify-center items-center gap-2">
-            <p>Your Balance: {balance?.data?.value ? Number(balance.data.value) * 1000 : 0} TMETIS</p>
+            <p>Your Balance: {formatEther(balance?.data?.value ? balance.data.value : 0n)} TMETIS</p>
             <Button variant="ghost" size="icon" onClick={() => balance.refetch()}>
                 <Icon name="RefreshCcw" className={cn(
                     "size-4",
