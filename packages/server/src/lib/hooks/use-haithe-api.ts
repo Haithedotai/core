@@ -177,16 +177,6 @@ export function useHaitheApi() {
             staleTime: 1 * 1000, // 1 second
         }),
 
-        tMetisBalance: () => useQuery({
-            queryKey: ['tMetisBalance'],
-            queryFn: () => {
-                if (!client) throw new Error("Wallet not connected");
-                return client.tMetisBalance();
-            },
-            enabled: isLoggedIn() && !!client,
-            staleTime: 1 * 1000, // 1 second
-        }),
-
         transferUSDT: useMutation({
             mutationKey: ['transferUSDT'],
             mutationFn: ({ recipient, amount }: { recipient: string; amount: bigint }) => {

@@ -21,27 +21,22 @@ const hyperion: Chain = {
 const isProd = process.env.NODE_ENV === "production";
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
-  const { theme } = useTheme();
+    const { theme } = useTheme();
 
-  return (
-    <PrivyProviderBase
-      appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
-      config={{
-        defaultChain: isProd ? hyperion : hardhat,
-        supportedChains: isProd ? [hyperion, mainnet] : [hardhat, hyperion, mainnet],
-        loginMethods: ["wallet", "google"],
-        appearance: {
-          theme: theme === "dark" ? "dark" : "light",
-          landingHeader: "Sign in to Haithe",
-        },
-        embeddedWallets: {
-          ethereum: {
-            createOnLogin: "users-without-wallets",
-          }
-        }
-      }}
-    >
-      {children}
-    </PrivyProviderBase>
-  )
+    return (
+        <PrivyProviderBase
+            appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
+            config={{
+                defaultChain: isProd ? hyperion : hardhat,
+                supportedChains: isProd ? [hyperion, mainnet] : [hardhat, hyperion, mainnet],
+                loginMethods: ["wallet"],
+                appearance: {
+                    theme: theme === "dark" ? "dark" : "light",
+                    landingHeader: "Sign in to Haithe",
+                }
+            }}
+        >
+            {children}
+        </PrivyProviderBase>
+    )
 }

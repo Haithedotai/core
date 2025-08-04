@@ -4,13 +4,10 @@ import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent } from "@/src/lib/components/ui/card";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Image } from "@/src/lib/components/custom/Image";
-import { cn, truncateAddress } from "@/src/lib/utils";
+import { cn } from "@/src/lib/utils";
 import { getSpecificRelativeTime } from "@/src/lib/utils/date";
 import moment from "moment";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
-import { copyToClipboard } from "@/utils";
-import { usePrivy } from "@privy-io/react-auth";
-import { formatEther } from "viem";
 
 interface FaucetOption {
   id: string;
@@ -63,30 +60,30 @@ const useFaucetCooldown = (faucetInfo: any) => {
     const currentMoment = moment();
     const timeElapsed = currentMoment.diff(lastRequestMoment, 'milliseconds');
     const sixtyMinutesInMs = 60 * 60 * 1000;
-
+    
     return timeElapsed >= sixtyMinutesInMs;
   };
 
   const getRemainingCooldownTime = () => {
     if (!faucetInfo.data?.last_request?.requested_at) return 0;
-
+    
     const lastRequestMoment = moment.utc(faucetInfo.data.last_request.requested_at);
     if (!lastRequestMoment.isValid()) return 0;
-
+    
     const currentMoment = moment();
     const timeElapsed = currentMoment.diff(lastRequestMoment, 'milliseconds');
     const sixtyMinutesInMs = 60 * 60 * 1000;
-
+    
     const remaining = sixtyMinutesInMs - timeElapsed;
     return Math.max(0, remaining);
   };
 
   const formatRemainingTime = (ms: number) => {
     if (ms <= 0) return '';
-
+    
     const minutes = Math.floor(ms / (1000 * 60));
     const seconds = Math.floor((ms % (1000 * 60)) / 1000);
-
+    
     return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   };
 
@@ -106,7 +103,7 @@ const useFaucetCooldown = (faucetInfo: any) => {
 
 // Faucet Selection Card Component
 const FaucetSelectionCard = ({ faucet, onSelect }: { faucet: FaucetOption; onSelect: (faucet: FaucetOption) => void }) => (
-  <Card
+  <Card 
     className="cursor-pointer hover:shadow-md transition-all duration-100 hover:bg-accent/50"
     onClick={() => onSelect(faucet)}
   >
@@ -186,19 +183,19 @@ const FaucetStatus = ({ faucetInfo, canRequestTokens, remainingCooldown, formatR
 };
 
 // Faucet Action Button Component
-const FaucetActionButton = ({
-  faucet,
-  canRequestTokens,
-  remainingCooldown,
-  formatRemainingTime,
-  onRequestTokens,
-  isPending
+const FaucetActionButton = ({ 
+  faucet, 
+  canRequestTokens, 
+  remainingCooldown, 
+  formatRemainingTime, 
+  onRequestTokens, 
+  isPending 
 }: any) => {
   if (faucet.id === "usdt") {
     return (
-      <Button
-        variant="default"
-        size="sm"
+      <Button 
+        variant="default" 
+        size="sm" 
         className="w-full"
         onClick={onRequestTokens}
         disabled={isPending || !canRequestTokens()}
@@ -225,14 +222,14 @@ const FaucetActionButton = ({
 
   if (faucet.id === "metis") {
     return (
-      <Button
-        variant="default"
-        size="sm"
+      <Button 
+        variant="default" 
+        size="sm" 
         className="w-full"
         onClick={() => window.open(faucet.address, '_blank')}
       >
-        <Icon name="ExternalLink" className="size-4 mr-2" />
-        Telegram Bot Faucet
+        <Icon name="MessageCircle" className="size-4 mr-2" />
+        Open Telegram Bot
       </Button>
     );
   }
@@ -240,69 +237,17 @@ const FaucetActionButton = ({
   return null;
 };
 
-// Wallet Balance Display Component
-const WalletBalanceDisplay = ({ walletAddress }: { walletAddress: string }) => {
-  const { usdtBalance, tMetisBalance } = useHaitheApi();
-  
-  const usdtBalanceData = usdtBalance();
-  const tMetisBalanceData = tMetisBalance();
-
-  const formatBalance = (balance: bigint | undefined, isLoading: boolean, error: any) => {
-    if (isLoading) return "Loading...";
-    if (error) return "Error";
-    if (!balance) return "0.00";
-    return formatEther(balance);
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="text-sm font-medium text-foreground">Wallet Balances:</div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-          <div className="flex items-center gap-2 mb-1">
-            <Image src="/static/tether.svg" alt="USDT" className="size-4" />
-            <span className="text-xs font-medium text-muted-foreground">USDT</span>
-          </div>
-          <div className="text-sm font-mono">
-            {formatBalance(usdtBalanceData.data, usdtBalanceData.isLoading, usdtBalanceData.error)}
-          </div>
-        </div>
-        <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-          <div className="flex items-center gap-2 mb-1">
-            <Image src="/static/metis.svg" alt="tMETIS" className="size-4" />
-            <span className="text-xs font-medium text-muted-foreground">tMETIS</span>
-          </div>
-          <div className="text-sm font-mono">
-            {formatBalance(tMetisBalanceData.data, tMetisBalanceData.isLoading, tMetisBalanceData.error)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Faucet Details View Component
-const FaucetDetailsView = ({
-  faucet,
-  onBack,
-  faucetInfo,
-  canRequestTokens,
-  remainingCooldown,
-  formatRemainingTime,
-  onRequestTokens,
-  isPending,
-  walletAddress
-}: {
-  faucet: FaucetOption;
-  onBack: () => void;
-  faucetInfo: any;
-  canRequestTokens: () => boolean;
-  remainingCooldown: number;
-  formatRemainingTime: (ms: number) => string;
-  onRequestTokens: () => void;
-  isPending: boolean;
-  walletAddress: string;
-}) => (
+const FaucetDetailsView = ({ 
+  faucet, 
+  onBack, 
+  faucetInfo, 
+  canRequestTokens, 
+  remainingCooldown, 
+  formatRemainingTime, 
+  onRequestTokens, 
+  isPending 
+}: any) => (
   <div className="space-y-6">
     <Button variant="ghost" onClick={onBack} className="justify-start h-auto">
       <Icon name="ArrowLeft" className="size-4" />
@@ -319,40 +264,21 @@ const FaucetDetailsView = ({
       </div>
     </div>
 
-    <div className="space-y-2 mb-4">
-      <div className="text-sm font-medium text-foreground">Wallet Address:</div>
-      <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
-        <code className="text-sm font-mono text-foreground flex-1 break-all">
-          {walletAddress}
-        </code>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => copyToClipboard(walletAddress, 'Copied to clipboard')}
-          className="size-8"
-        >
-          <Icon name="Copy" className="size-4" />
-        </Button>
-      </div>
-    </div>
-
     {faucet.id === "metis" && (
-      <div>
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-foreground">Faucet URL:</div>
-          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
-            <code className="text-sm font-mono text-foreground flex-1 break-all">
-              https://hype-faucet.metis.io
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => window.open("https://hype-faucet.metis.io", '_blank')}
-              className="size-8"
-            >
-              <Icon name="ExternalLink" className="size-4" />
-            </Button>
-          </div>
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-foreground">Telegram Bot:</div>
+        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
+          <code className="text-sm font-mono text-foreground flex-1 break-all">
+            {faucet.address}
+          </code>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.open(faucet.address, '_blank')}
+            className="size-8"
+          >
+            <Icon name="ExternalLink" className="size-4" />
+          </Button>
         </div>
       </div>
     )}
@@ -360,7 +286,7 @@ const FaucetDetailsView = ({
     {faucet.id === "usdt" && (
       <div className="space-y-3">
         <div className="text-sm font-medium text-foreground">Faucet Status:</div>
-        <FaucetStatus
+        <FaucetStatus 
           faucetInfo={faucetInfo}
           canRequestTokens={canRequestTokens}
           remainingCooldown={remainingCooldown}
@@ -369,9 +295,8 @@ const FaucetDetailsView = ({
       </div>
     )}
 
-
     <div className="space-y-3">
-      <FaucetActionButton
+      <FaucetActionButton 
         faucet={faucet}
         canRequestTokens={canRequestTokens}
         remainingCooldown={remainingCooldown}
@@ -379,7 +304,6 @@ const FaucetDetailsView = ({
         onRequestTokens={onRequestTokens}
         isPending={isPending}
       />
-      <WalletBalanceDisplay walletAddress={walletAddress} />
     </div>
   </div>
 );
@@ -388,7 +312,7 @@ const FaucetDetailsView = ({
 export default function FaucetDialog() {
   const [selectedFaucet, setSelectedFaucet] = useState<FaucetOption | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  
   const { getFaucetInfo, requestFaucetTokens } = useHaitheApi();
   const faucetInfo = getFaucetInfo();
   const { canRequestTokens, remainingCooldown, formatRemainingTime } = useFaucetCooldown(faucetInfo);
@@ -399,9 +323,6 @@ export default function FaucetDialog() {
     setSelectedFaucet(null);
   };
   const handleRequestTokens = () => requestFaucetTokens.mutate(undefined);
-
-  const { user } = usePrivy();
-  const walletAddress = user?.wallet?.address;
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -424,37 +345,33 @@ export default function FaucetDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        {walletAddress && (
-          <div className="space-y-6 mt-2">
-            {!selectedFaucet ? (
-              <div className="space-y-4">
-                <WalletBalanceDisplay walletAddress={walletAddress} />
-                <div className="text-sm font-medium text-foreground">Select a faucet:</div>
-                <div className="grid gap-3">
-                  {faucetOptions.map((faucet) => (
-                    <FaucetSelectionCard
-                      key={faucet.id}
-                      faucet={faucet}
-                      onSelect={handleFaucetSelect}
-                    />
-                  ))}
-                </div>
+        <div className="space-y-6 mt-2">
+          {!selectedFaucet ? (
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-foreground">Select a faucet:</div>
+              <div className="grid gap-3">
+                {faucetOptions.map((faucet) => (
+                  <FaucetSelectionCard 
+                    key={faucet.id} 
+                    faucet={faucet} 
+                    onSelect={handleFaucetSelect} 
+                  />
+                ))}
               </div>
-            ) : (
-              <FaucetDetailsView
-                faucet={selectedFaucet}
-                onBack={() => setSelectedFaucet(null)}
-                faucetInfo={faucetInfo}
-                canRequestTokens={canRequestTokens}
-                remainingCooldown={remainingCooldown}
-                formatRemainingTime={formatRemainingTime}
-                onRequestTokens={handleRequestTokens}
-                isPending={requestFaucetTokens.isPending}
-                walletAddress={walletAddress}
-              />
-            )}
-          </div>
-        )}
+            </div>
+          ) : (
+            <FaucetDetailsView 
+              faucet={selectedFaucet}
+              onBack={() => setSelectedFaucet(null)}
+              faucetInfo={faucetInfo}
+              canRequestTokens={canRequestTokens}
+              remainingCooldown={remainingCooldown}
+              formatRemainingTime={formatRemainingTime}
+              onRequestTokens={handleRequestTokens}
+              isPending={requestFaucetTokens.isPending}
+            />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

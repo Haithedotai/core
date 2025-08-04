@@ -12,7 +12,6 @@ import Connect from "@/src/lib/components/app/Connect";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import Icon from "@/src/lib/components/custom/Icon";
 import { usePrivy } from "@privy-io/react-auth";
-import ProfileButton from "@/src/lib/components/app/ProfileButton";
 
 export function Navbar() {
   const api = useHaitheApi();
@@ -83,9 +82,9 @@ export function Navbar() {
           ))}
         </div>
         {/* Desktop Actions */}
-        <div className="hidden lg:flex items-center">
+        <div className="hidden lg:flex items-center space-x-3 lg:space-x-4">
           {ready && authenticated && user?.wallet?.address && isHaitheLoggedIn() && profileQuery.isSuccess &&
-            <Button asChild variant="outline" size="lg" className="rounded-sm mr-2">
+            <Button asChild variant="outline" size="lg" className="rounded-sm mx-4">
               <Link to="/dashboard">
                 <Icon name="LayoutDashboard" className="size-4" />
                 Dashboard
@@ -93,10 +92,6 @@ export function Navbar() {
             </Button>}
           <div className="flex items-center justify-center">
             <Connect />
-          </div>
-
-          <div className="ml-2">
-            <ProfileButton />
           </div>
         </div>
         {/* Hamburger for md and below using Sheet */}
@@ -162,9 +157,8 @@ export function Navbar() {
                       </Link>
                     </Button>}
 
-                  <Connect />
+                    <Connect />
                 </div>
-                <ProfileButton />
               </div>
             </SheetContent>
           </Sheet>
