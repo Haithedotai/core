@@ -4,10 +4,16 @@ import { Button } from "@/src/lib/components/ui/button";
 import { Card, CardContent } from "@/src/lib/components/ui/card";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Image } from "@/src/lib/components/custom/Image";
-import { cn } from "@/src/lib/utils";
+import { cn, truncateAddress } from "@/src/lib/utils";
 import { getSpecificRelativeTime } from "@/src/lib/utils/date";
 import moment from "moment";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
+import { usePrivy } from "@privy-io/react-auth";
+import { copyToClipboard } from "@/utils";
+import { toast } from "sonner";
+import { useBalance } from "wagmi";
+import Balance from "@/src/lib/components/app/Balance";
+import Address from "@/src/lib/components/app/Address";
 
 interface FaucetOption {
   id: string;
@@ -60,30 +66,30 @@ const useFaucetCooldown = (faucetInfo: any) => {
     const currentMoment = moment();
     const timeElapsed = currentMoment.diff(lastRequestMoment, 'milliseconds');
     const sixtyMinutesInMs = 60 * 60 * 1000;
-    
+
     return timeElapsed >= sixtyMinutesInMs;
   };
 
   const getRemainingCooldownTime = () => {
     if (!faucetInfo.data?.last_request?.requested_at) return 0;
-    
+
     const lastRequestMoment = moment.utc(faucetInfo.data.last_request.requested_at);
     if (!lastRequestMoment.isValid()) return 0;
-    
+
     const currentMoment = moment();
     const timeElapsed = currentMoment.diff(lastRequestMoment, 'milliseconds');
     const sixtyMinutesInMs = 60 * 60 * 1000;
-    
+
     const remaining = sixtyMinutesInMs - timeElapsed;
     return Math.max(0, remaining);
   };
 
   const formatRemainingTime = (ms: number) => {
     if (ms <= 0) return '';
-    
+
     const minutes = Math.floor(ms / (1000 * 60));
     const seconds = Math.floor((ms % (1000 * 60)) / 1000);
-    
+
     return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   };
 
@@ -103,7 +109,7 @@ const useFaucetCooldown = (faucetInfo: any) => {
 
 // Faucet Selection Card Component
 const FaucetSelectionCard = ({ faucet, onSelect }: { faucet: FaucetOption; onSelect: (faucet: FaucetOption) => void }) => (
-  <Card 
+  <Card
     className="cursor-pointer hover:shadow-md transition-all duration-100 hover:bg-accent/50"
     onClick={() => onSelect(faucet)}
   >
@@ -183,19 +189,19 @@ const FaucetStatus = ({ faucetInfo, canRequestTokens, remainingCooldown, formatR
 };
 
 // Faucet Action Button Component
-const FaucetActionButton = ({ 
-  faucet, 
-  canRequestTokens, 
-  remainingCooldown, 
-  formatRemainingTime, 
-  onRequestTokens, 
-  isPending 
+const FaucetActionButton = ({
+  faucet,
+  canRequestTokens,
+  remainingCooldown,
+  formatRemainingTime,
+  onRequestTokens,
+  isPending
 }: any) => {
   if (faucet.id === "usdt") {
     return (
-      <Button 
-        variant="default" 
-        size="sm" 
+      <Button
+        variant="default"
+        size="sm"
         className="w-full"
         onClick={onRequestTokens}
         disabled={isPending || !canRequestTokens()}
@@ -220,99 +226,111 @@ const FaucetActionButton = ({
     );
   }
 
-  if (faucet.id === "metis") {
-    return (
-      <Button 
-        variant="default" 
-        size="sm" 
-        className="w-full"
-        onClick={() => window.open(faucet.address, '_blank')}
-      >
-        <Icon name="MessageCircle" className="size-4 mr-2" />
-        Open Telegram Bot
-      </Button>
-    );
-  }
-
   return null;
 };
 
 // Faucet Details View Component
-const FaucetDetailsView = ({ 
-  faucet, 
-  onBack, 
-  faucetInfo, 
-  canRequestTokens, 
-  remainingCooldown, 
-  formatRemainingTime, 
-  onRequestTokens, 
-  isPending 
-}: any) => (
-  <div className="space-y-6">
-    <Button variant="ghost" onClick={onBack} className="justify-start h-auto">
-      <Icon name="ArrowLeft" className="size-4" />
-      Back to faucets
-    </Button>
+const FaucetDetailsView = ({
+  faucet,
+  onBack,
+  faucetInfo,
+  canRequestTokens,
+  remainingCooldown,
+  formatRemainingTime,
+  onRequestTokens,
+  isPending
+}: any) => {
+  return (
+    <div className="space-y-6">
+      <Button variant="ghost" onClick={onBack} className="justify-start h-auto">
+        <Icon name="ArrowLeft" className="size-4" />
+        Back to faucets
+      </Button>
 
-    <div className="flex items-center p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg border border-border/50">
-      <div className={cn("w-16 h-16 rounded-xl flex items-center justify-center border", faucet.color)}>
-        <Image src={faucet.icon} alt={faucet.symbol} className="size-8" />
-      </div>
-      <div className="flex-1 ml-4">
-        <h3 className="text-xl font-semibold text-foreground">{faucet.name}</h3>
-        <p className="text-sm text-muted-foreground">{faucet.description}</p>
-      </div>
-    </div>
-
-    {faucet.id === "metis" && (
-      <div className="space-y-3">
-        <div className="text-sm font-medium text-foreground">Telegram Bot:</div>
-        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <code className="text-sm font-mono text-foreground flex-1 break-all">
-            {faucet.address}
-          </code>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => window.open(faucet.address, '_blank')}
-            className="size-8"
-          >
-            <Icon name="ExternalLink" className="size-4" />
-          </Button>
+      <div className="flex items-center p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg border border-border/50">
+        <div className={cn("w-16 h-16 rounded-xl flex items-center justify-center border", faucet.color)}>
+          <Image src={faucet.icon} alt={faucet.symbol} className="size-8" />
+        </div>
+        <div className="flex-1 ml-4">
+          <h3 className="text-xl font-semibold text-foreground">{faucet.name}</h3>
+          <p className="text-sm text-muted-foreground">{faucet.description}</p>
         </div>
       </div>
-    )}
 
-    {faucet.id === "usdt" && (
+      <div>
+        <Address />
+        <Balance />
+      </div>
+
+      {faucet.id === "metis" && (
+        <div>
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-foreground">Metis Faucet:</div>
+            <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
+              <code className="text-sm font-mono text-foreground flex-1 break-all">
+                https://hype-faucet.metis.io
+              </code>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.open('https://hype-faucet.metis.io', '_blank')}
+                className="size-8"
+              >
+                <Icon name="ExternalLink" className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-3 mt-3">
+            <div className="text-sm font-medium text-foreground">Telegram Bot:</div>
+            <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
+              <code className="text-sm font-mono text-foreground flex-1 break-all">
+                {faucet.address}
+              </code>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.open(faucet.address, '_blank')}
+                className="size-8"
+              >
+                <Icon name="ExternalLink" className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {faucet.id === "usdt" && (
+        <div className="space-y-3">
+          <div className="text-sm font-medium text-foreground">Faucet Status:</div>
+          <FaucetStatus
+            faucetInfo={faucetInfo}
+            canRequestTokens={canRequestTokens}
+            remainingCooldown={remainingCooldown}
+            formatRemainingTime={formatRemainingTime}
+          />
+        </div>
+      )}
+
       <div className="space-y-3">
-        <div className="text-sm font-medium text-foreground">Faucet Status:</div>
-        <FaucetStatus 
-          faucetInfo={faucetInfo}
+        <FaucetActionButton
+          faucet={faucet}
           canRequestTokens={canRequestTokens}
           remainingCooldown={remainingCooldown}
           formatRemainingTime={formatRemainingTime}
+          onRequestTokens={onRequestTokens}
+          isPending={isPending}
         />
       </div>
-    )}
-
-    <div className="space-y-3">
-      <FaucetActionButton 
-        faucet={faucet}
-        canRequestTokens={canRequestTokens}
-        remainingCooldown={remainingCooldown}
-        formatRemainingTime={formatRemainingTime}
-        onRequestTokens={onRequestTokens}
-        isPending={isPending}
-      />
     </div>
-  </div>
-);
+  );
+};
 
 // Main FaucetDialog Component
 export default function FaucetDialog() {
   const [selectedFaucet, setSelectedFaucet] = useState<FaucetOption | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   const { getFaucetInfo, requestFaucetTokens } = useHaitheApi();
   const faucetInfo = getFaucetInfo();
   const { canRequestTokens, remainingCooldown, formatRemainingTime } = useFaucetCooldown(faucetInfo);
@@ -351,16 +369,16 @@ export default function FaucetDialog() {
               <div className="text-sm font-medium text-foreground">Select a faucet:</div>
               <div className="grid gap-3">
                 {faucetOptions.map((faucet) => (
-                  <FaucetSelectionCard 
-                    key={faucet.id} 
-                    faucet={faucet} 
-                    onSelect={handleFaucetSelect} 
+                  <FaucetSelectionCard
+                    key={faucet.id}
+                    faucet={faucet}
+                    onSelect={handleFaucetSelect}
                   />
                 ))}
               </div>
             </div>
           ) : (
-            <FaucetDetailsView 
+            <FaucetDetailsView
               faucet={selectedFaucet}
               onBack={() => setSelectedFaucet(null)}
               faucetInfo={faucetInfo}
