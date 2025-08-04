@@ -20,8 +20,7 @@ export function Navbar() {
   const profileQuery = api.profile();
 
   const navLinks = [
-    ["Problem", "#problem"],
-    ["Solution", "#solution"],
+    ["Overview", "#overview"],
     ["How It Works", "#how-it-works"],
     ["Features", "#features"],
     ["Community", "#community"],

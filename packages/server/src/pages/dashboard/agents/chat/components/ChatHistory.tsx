@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/src/lib/components/ui/button";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
 } from "@/src/lib/components/ui/sheet";
 import Icon from "@/src/lib/components/custom/Icon";
 import { Badge } from "@/src/lib/components/ui/badge";
@@ -24,23 +24,23 @@ interface ChatHistoryProps {
   onNewConversation: () => void;
 }
 
-export default function ChatHistory({ 
-  conversations, 
-  currentConversationId, 
+export default function ChatHistory({
+  conversations,
+  currentConversationId,
   onSelectConversation,
-  onNewConversation 
+  onNewConversation
 }: ChatHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Sort conversations by timestamp (latest first)
-  const sortedConversations = [...conversations].sort((a, b) => 
+  const sortedConversations = [...conversations].sort((a, b) =>
     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
   const formatTimestamp = (date: Date) => {
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 1) {
       return 'Just now';
     } else if (diffInHours < 24) {
@@ -53,8 +53,8 @@ export default function ChatHistory({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Icon name="History" className="size-4" />
+        <Button variant="ghost" className="gap-2">
+          <Icon name="GalleryVerticalEnd" className="size-4" />
           History
         </Button>
       </SheetTrigger>
@@ -72,7 +72,7 @@ export default function ChatHistory({
 
           {/* New Conversation Button */}
           <div className="flex-shrink-0 p-6 pb-4">
-            <Button 
+            <Button
               onClick={() => {
                 onNewConversation();
                 setIsOpen(false);
@@ -107,39 +107,36 @@ export default function ChatHistory({
                       onSelectConversation(conversation.id);
                       setIsOpen(false);
                     }}
-                    className={`group relative p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                      currentConversationId === conversation.id
+                    className={`group relative p-3 rounded-lg cursor-pointer transition-all duration-200 ${currentConversationId === conversation.id
                         ? 'bg-primary/10 border border-primary/20 shadow-sm'
                         : 'hover:bg-muted/60 border border-transparent hover:border-border/50'
-                    }`}
+                      }`}
                   >
                     {/* Active indicator */}
                     {currentConversationId === conversation.id && (
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full" />
                     )}
-                    
+
                     <div className="flex items-start gap-3">
                       {/* Conversation icon */}
-                      <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
-                        currentConversationId === conversation.id
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${currentConversationId === conversation.id
                           ? 'bg-primary/20 text-primary'
                           : 'bg-muted text-muted-foreground group-hover:bg-muted/80'
-                      }`}>
+                        }`}>
                         <Icon name="MessageSquare" className="size-4" />
                       </div>
-                      
+
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <h4 className={`font-medium text-sm truncate ${
-                            currentConversationId === conversation.id
+                          <h4 className={`font-medium text-sm truncate ${currentConversationId === conversation.id
                               ? 'text-foreground'
                               : 'text-foreground group-hover:text-foreground'
-                          }`}>
+                            }`}>
                             {conversation.title}
                           </h4>
                         </div>
-                        
+
                         <p className="text-xs text-muted-foreground truncate mb-1 leading-relaxed">
                           {conversation.lastMessage}
                         </p>
@@ -148,7 +145,7 @@ export default function ChatHistory({
                   </div>
                 ))}
               </div>
-                          )}
+            )}
           </div>
         </div>
       </SheetContent>
