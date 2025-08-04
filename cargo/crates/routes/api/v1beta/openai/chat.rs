@@ -305,9 +305,12 @@ async fn get_completions_handler(
 
             let tx = contract_call.send().await?;
             let tx_hash = tx.tx_hash();
+
+            // Wait for transaction to be mined before proceeding
+            let receipt = tx.await?;
             println!(
-                "Payment collected for product {} - Transaction: {:?}",
-                product_address, tx_hash
+                "Payment collected for product {} - Transaction: {:?} - Block: {:?}",
+                product_address, tx_hash, receipt.block_number
             );
         }
     }
@@ -344,9 +347,12 @@ async fn get_completions_handler(
 
         let tx = contract_call.send().await?;
         let tx_hash = tx.tx_hash();
+
+        // Wait for transaction to be mined before proceeding
+        let receipt = tx.await?;
         println!(
-            "Payment collected for LLM usage - Transaction: {:?}",
-            tx_hash
+            "Payment collected for LLM usage - Transaction: {:?} - Block: {:?}",
+            tx_hash, receipt.block_number
         );
     }
 
