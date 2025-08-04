@@ -70,12 +70,12 @@ export default function Connect() {
 
     const handleDisconnect = async () => {
         try {
-            // First logout from Haithe if logged in
             if (isHaitheLoggedIn) {
                 await logoutMutation.mutateAsync();
             }
-            // Then disconnect wallet
             await privyLogout();
+            localStorage.clear();
+            window.location.href = "/";
         } catch (error) {
             console.error('Failed to disconnect:', error);
         }

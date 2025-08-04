@@ -22,6 +22,9 @@ export default function CreatorSheet() {
   const { isCreator, isLoggedIn } = useHaitheApi();
   const { data: isCreatorData, isFetching: isCreatorLoading } = isCreator();
   const { data: walletClient } = useWalletClient();
+  const haithe = useHaitheApi();
+  const { data: products, isLoading: isLoadingProducts } = haithe.getAllProducts();
+  const totalProducts = products?.length || 0;
 
   const handleStartCreating = () => {
     if (!authenticated) {
@@ -137,18 +140,9 @@ export default function CreatorSheet() {
             </div>
 
             {/* Stats */}
-            <div className="bg-muted/50 rounded-xl p-6 text-center border">
-              <div className="flex justify-center items-center gap-8">
-                <div>
-                  <div className="text-2xl font-bold text-foreground">1,200+</div>
-                  <div className="text-sm text-muted-foreground">Creators</div>
-                </div>
-                <div className="h-8 w-px bg-border"></div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">15K+</div>
-                  <div className="text-sm text-muted-foreground">Models</div>
-                </div>
-              </div>
+            <div className="bg-muted/50 w-full rounded-xl p-6 text-center border">
+              <div className="text-2xl font-bold text-foreground">{totalProducts}</div>
+              <div className="text-sm text-muted-foreground">Products</div>
             </div>
           </div>
 
