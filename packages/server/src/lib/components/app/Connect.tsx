@@ -5,22 +5,23 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
-import { Link } from "@tanstack/react-router";
+import { truncateAddress } from "../../utils";
+import { copyToClipboard } from "@/utils";
 
 // Define Hyperion testnet chain
 const hyperion = {
-  id: 133717,
-  name: "Hyperion Testnet",
-  nativeCurrency: {
-    name: "tMetis",
-    symbol: "TMETIS",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://hyperion-testnet.metisdevops.link"],
+    id: 133717,
+    name: "Hyperion Testnet",
+    nativeCurrency: {
+        name: "tMetis",
+        symbol: "TMETIS",
+        decimals: 18,
     },
-  },
+    rpcUrls: {
+        default: {
+            http: ["https://hyperion-testnet.metisdevops.link"],
+        },
+    },
 };
 
 const isProd = process.env.NODE_ENV === "production";
@@ -34,7 +35,7 @@ export default function Connect() {
     const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
 
     // Get authentication state
-    const isWalletConnected = ready && authenticated && user?.wallet?.address;
+    const isWalletConnected = ready && authenticated && (user?.wallet?.address || user?.google?.email);
     const isHaitheLoggedIn = api.isLoggedIn();
 
     // Check if on correct network - also handle case where currentChainId might be undefined
@@ -106,11 +107,11 @@ export default function Connect() {
 
     // Stage 2: Wallet connected but wrong network or network not detected
     if (!isOnCorrectNetwork) {
-        const currentNetworkName = currentChainId === mainnet.id ? "Ethereum Mainnet" : 
-                                  currentChainId === hardhat.id ? "Hardhat" :
-                                  currentChainId === hyperion.id ? "Hyperion Testnet" :
-                                  `Chain ID ${currentChainId}`;
-        
+        const currentNetworkName = currentChainId === mainnet.id ? "Ethereum Mainnet" :
+            currentChainId === hardhat.id ? "Hardhat" :
+                currentChainId === hyperion.id ? "Hyperion Testnet" :
+                    `Chain ID ${currentChainId}`;
+
         return (
             <div className="flex items-center gap-3">
                 <Button
@@ -214,30 +215,4 @@ export default function Connect() {
             </div>
         );
     }
-
-    // Stage 6: Fully authenticated and on correct network - show disconnect button
-    return (
-        <div>
-            <Button
-                onClick={handleDisconnect}
-                variant="outline"
-                disabled={logoutMutation.isPending}
-                className="py-2 px-4 rounded-md"
-            >
-                {logoutMutation.isPending ? (
-                    <div className="flex items-center">
-                        <Icon name="Loader" className="size-4 animate-spin mr-2" />
-                        Disconnecting...
-                    </div>
-                ) : (
-                    <div className="flex items-center">
-                        <Icon name="LogOut" className="size-4" />
-                        <div className="hidden sm:block ml-2">
-                            Disconnect
-                        </div>
-                    </div>
-                )}
-            </Button>
-        </div>
-    );
 }

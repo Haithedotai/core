@@ -3,6 +3,7 @@ import Connect from "@/src/lib/components/app/Connect";
 import OrganizationSelector from "./OrganizationSelector";
 import MobileNav from "./SidebarMobile";
 import FaucetDialog from "./FaucetDialog";
+import ProfileButton from "@/src/lib/components/app/ProfileButton";
 
 export default function Navbar() {
   return (
@@ -28,6 +29,7 @@ export default function Navbar() {
         <OrganizationSelector />
         <FaucetDialog />
         <Connect />
+        <ProfileButton />
       </div>
     </nav>
   );

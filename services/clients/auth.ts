@@ -204,6 +204,33 @@ export class HaitheAuthClient extends BaseClient {
     });
   }
 
+  async tMetisBalance(): Promise<bigint> {
+    if (!this.isLoggedIn()) {
+      throw new Error("Not logged in");
+    }
+    if (!HaitheAuthClient.ensureWeb3Ready(this.walletClient)) {
+      throw new Error("Wallet client is not ready");
+    }
+
+    // tMETIS contract address on Sepolia
+    const tMetisContractAddress = "0x7f49160EB9BB068101d445fe77e17ecDb37D0B47" as `0x${string}`;
+
+    return this.publicClient.readContract({
+      address: tMetisContractAddress,
+      abi: [
+        {
+          inputs: [{ name: "account", type: "address" }],
+          name: "balanceOf",
+          outputs: [{ name: "", type: "uint256" }],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      functionName: "balanceOf",
+      args: [this.walletClient.account.address],
+    });
+  }
+
   async transferUSDT(
     recipient: viem.Address,
     amount: bigint

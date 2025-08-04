@@ -362,6 +362,10 @@ export class HaitheClient {
     return this.auth.usdtBalance();
   }
 
+  tMetisBalance(): Promise<bigint> {
+    return this.auth.tMetisBalance();
+  }
+
   transferUSDT(recipient: viem.Address, amount: bigint): Promise<`0x${string}`> {
     return this.auth.transferUSDT(recipient, amount);
   }
