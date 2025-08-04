@@ -14,6 +14,26 @@ const config: HardhatUserConfig = {
   paths: {
     sources: "./src",
   },
+  networks: {
+    "metis-hyperion-testnet": {
+      url: "https://hyperion-testnet.metisdevops.link",
+    },
+  },
+  etherscan: {
+    apiKey: {
+      "metis-hyperion-testnet": "empty",
+    },
+    customChains: [
+      {
+        network: "metis-hyperion-testnet",
+        chainId: 133717,
+        urls: {
+          apiURL: "https://hyperion-testnet-explorer-api.metisdevops.link/api",
+          browserURL: "https://hyperion-testnet-explorer.metisdevops.link",
+        },
+      },
+    ],
+  },
 };
 
 export default config;
