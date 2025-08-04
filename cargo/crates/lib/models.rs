@@ -34,7 +34,7 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-pro".to_string(),
             display_name: "Gemini 2.5 Pro".to_string(),
             provider: "Google".to_string(),
-            is_active: true,
+            is_active: false,
             price_per_call: (0.0015_f64 * 1e18) as u64,
         },
         Model {
@@ -42,7 +42,7 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-flash".to_string(),
             display_name: "Gemini 2.5 Flash".to_string(),
             provider: "Google".to_string(),
-            is_active: true,
+            is_active: false,
             price_per_call: (0.001_f64 * 1e18) as u64,
         },
         Model {
@@ -50,7 +50,7 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-flash-lite".to_string(),
             display_name: "Gemini 2.5 Flash Lite".to_string(),
             provider: "Google".to_string(),
-            is_active: true,
+            is_active: false,
             price_per_call: (0.0008_f64 * 1e18) as u64,
         },
         Model {
@@ -115,7 +115,7 @@ pub fn get_models() -> Vec<Model> {
             name: "kimi-k2-0711-preview".to_string(),
             display_name: "Kimi K2".to_string(),
             provider: "Haithe".to_string(),
-            is_active: true,
+            is_active: false,
             price_per_call: 0,
         },
     ];
