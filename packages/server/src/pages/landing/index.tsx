@@ -2,7 +2,6 @@ import { Button } from "@/src/lib/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/src/lib/components/ui/card";
@@ -16,10 +15,17 @@ import {
   CheckCircle,
   Star,
   Play,
+  Bot,
+  ShoppingCart,
+  Wallet,
+  BarChart3,
+  MessageSquare,
 } from "lucide-react";
 import { useEffect, useRef, useCallback } from "react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { Link } from "@tanstack/react-router";
+import Icon from "@/src/lib/components/custom/Icon";
 
 export default function Landing() {
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
@@ -72,45 +78,49 @@ export default function Landing() {
             <div className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm mb-8 lg:mb-12 backdrop-blur-sm hover:bg-white/8 transition-all duration-300">
               <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse" />
               <span className="text-white/80 font-medium">
-                Decentralized Protocol for Verifiable AI
+                Decentralized AI Platform with Web3 Integration
               </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-7xl xl:text-8xl tracking-tighter mb-6 lg:mb-8 leading-none">
-              Building Trust in AI, <br className="hidden sm:block" />
+              Build, Deploy & Monetize <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">
-                One Verified Claim at a Time
+                AI Agents on Blockchain
               </span>
             </h1>
 
             <p className="text-lg sm:text-xl lg:text-2xl text-white/60 mb-12 lg:mb-16 max-w-4xl mx-auto leading-relaxed font-light px-4">
-              Haithe creates a transparent, verifiable ecosystem for AI that
-              moves beyond simple integrity checks to substantive verification
-              through expert auditors.
+              Haithe combines Web3 blockchain technology with advanced AI capabilities to create a decentralized ecosystem for AI development, deployment, and marketplace commerce.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center px-4">
               <Button
+                asChild
                 size="lg"
                 className="text-base lg:text-lg bg-white text-black hover:bg-white/90 border-0 px-8 lg:px-10 py-4 h-auto font-semibold transition-all duration-100 hover:scale-102 hover:shadow-2xl hover:shadow-white/20 w-full sm:w-auto"
               >
-                Explore the Ecosystem
-                <ArrowRight className="ml-1 h-5 w-5" />
+                <Link to="/marketplace" className="flex items-center">
+                  Explore Marketplace
+                  <Icon name="ArrowRight" className="ml-1 h-5 w-5" />
+                </Link>
               </Button>
               <Button
+                asChild
                 variant="outline"
                 size="lg"
                 className="text-base lg:text-lg bg-black border-white/20 text-white/80 hover:bg-white/5 hover:text-white px-8 lg:px-10 py-4 h-auto backdrop-blur-sm transition-all duration-100 hover:scale-102 hover:border-white/30 w-full sm:w-auto"
               >
-                <Play className="mr-1 h-5 w-5" />
-                Watch Demo
+                <a href="https://forum.ceg.vote/t/haithe-decentralized-protocol-for-verifiable-ai/5533" target="_blank" className="flex items-center">
+                  <Play className="mr-1 h-5 w-5" />
+                  Learn More
+                </a>
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Hero Images Section - Simplified */}
+      {/* Hero Images Section - Updated */}
       <section
         ref={(el) => addToRefs(el, 0)}
         className="pt-16 lg:pt-20 opacity-0 translate-y-8 transition-all duration-700 my-16"
@@ -120,18 +130,18 @@ export default function Landing() {
             {[
               {
                 src: "/static/aiAbstract.webp",
-                title: "AI Infrastructure",
-                description: "Building the foundation for trusted AI systems"
+                title: "AI Agent Management",
+                description: "Create, configure, and deploy AI agents with custom capabilities"
               },
               {
                 src: "/static/transparentAbstract.webp",
-                title: "Transparency",
-                description: "Clear insights into AI training and capabilities"
+                title: "Web3 Integration",
+                description: "Blockchain-based authentication, payments, and decentralized marketplace"
               },
               {
                 src: "/static/verificationAbstract.webp",
-                title: "Verification Process",
-                description: "Expert auditors ensuring quality and trust"
+                title: "Marketplace Ecosystem",
+                description: "Buy, sell, and share AI products, knowledge bases, and tools"
               }
             ].map((item, index) => (
               <div key={index} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
@@ -153,9 +163,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Problem Section - Simplified */}
+      {/* Platform Overview Section - Updated */}
       <section
-        id="problem"
+        id="overview"
         ref={(el) => addToRefs(el, 1)}
         className="pt-20 lg:pt-24 relative opacity-0 translate-y-8 transition-all duration-700 my-16"
       >
@@ -164,11 +174,10 @@ export default function Landing() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16 lg:mb-20">
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 text-white tracking-tight">
-                The Trust Vacuum
+                Comprehensive AI Platform
               </h2>
               <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
-                The core challenge for AI in Web3 isn't just proving that data
-                hasn't been tampered with
+                Everything you need to build, deploy, and monetize AI applications in a decentralized ecosystem
               </p>
             </div>
 
@@ -177,38 +186,35 @@ export default function Landing() {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   <div className="space-y-6 lg:space-y-8">
                     <h3 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
-                      The Semantic Gap
+                      Complete AI Development Stack
                     </h3>
                     <div className="space-y-4 lg:space-y-6 text-white/70 text-base lg:text-lg leading-relaxed">
                       <p>
-                        A cryptographic hash can guarantee a dataset's
-                        integrity, but it cannot verify its origin, quality,
-                        or content. A creator could claim their AI is trained
-                        on financial data when it was actually trained on
-                        irrelevant information, and the hash would still be
-                        valid.
+                        Haithe provides a full-stack solution for AI development, from agent creation and model orchestration to marketplace commerce and team collaboration.
                       </p>
                       <p>
-                        This creates a trust vacuum, preventing developers
-                        from confidently building high-stakes applications
-                        that rely on third-party AI agents.
+                        Built on blockchain technology, Haithe ensures transparency, security, and decentralized control while providing the tools needed for modern AI applications.
                       </p>
                     </div>
                   </div>
-                  <div className="bg-red-500/5 rounded-2xl p-6 lg:p-8 border border-red-500/20 backdrop-blur-sm">
-                    <h4 className="font-bold text-red-400 mb-4 lg:mb-6 text-lg lg:text-xl">
-                      Current Issues:
+                  <div className="bg-blue-500/5 rounded-2xl p-6 lg:p-8 border border-blue-500/20 backdrop-blur-sm">
+                    <h4 className="font-bold text-blue-400 mb-4 lg:mb-6 text-lg lg:text-xl">
+                      Platform Features:
                     </h4>
                     <ul className="space-y-3 lg:space-y-4 text-white/70 text-sm lg:text-base">
                       {[
-                        "No verification of data origin",
-                        "Quality claims cannot be validated",
-                        "Content misrepresentation is undetectable",
-                        "Trust relies on creator reputation alone",
-                      ].map((issue, index) => (
+                        "AI Agent Management & Deployment",
+                        "Web3 Wallet Authentication",
+                        "Decentralized Marketplace",
+                        "Multi-tenant Organizations",
+                        "USDT-based Financial System",
+                        "Real-time AI Chat Interface",
+                        "API Access & Integration",
+                        "Role-based Access Control",
+                      ].map((feature, index) => (
                         <li key={index} className="flex items-start">
-                          <div className="w-2 h-2 bg-red-400 rounded-full mr-3 lg:mr-4 mt-2 flex-shrink-0" />
-                          {issue}
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 lg:mr-4 mt-2 flex-shrink-0" />
+                          {feature}
                         </li>
                       ))}
                     </ul>
@@ -220,7 +226,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works Section - Simplified */}
+      {/* How It Works Section - Updated */}
       <section
         id="how-it-works"
         ref={(el) => addToRefs(el, 3)}
@@ -234,8 +240,7 @@ export default function Landing() {
                 How Haithe Works
               </h2>
               <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
-                A three-part ecosystem with checks and balances between all
-                participants
+                A complete workflow from development to deployment and monetization
               </p>
             </div>
 
@@ -243,18 +248,18 @@ export default function Landing() {
               {[
                 {
                   number: "1",
-                  title: "Creators Submit Claims",
-                  description: "Build AI agents and submit detailed claim manifests about training data, including source, date range, and content specifications."
+                  title: "Connect & Create",
+                  description: "Connect your Web3 wallet, create an organization, and start building AI agents with custom capabilities and configurations."
                 },
                 {
                   number: "2",
-                  title: "Auditors Verify",
-                  description: "Domain experts stake tokens and investigate claims through secure dataset access, publishing detailed verification reports."
+                  title: "Deploy & Configure",
+                  description: "Deploy your AI agents, configure models, enable marketplace products, and set up team collaboration with role-based access."
                 },
                 {
                   number: "3",
-                  title: "Consumers Integrate",
-                  description: "Browse verified agents, review audit reports, and integrate with confidence knowing exactly what you're getting."
+                  title: "Monetize & Scale",
+                  description: "Publish products to the marketplace, earn USDT from usage, and scale your AI applications across the decentralized ecosystem."
                 }
               ].map((step, index) => (
                 <Card key={index} className="p-6 lg:p-8 bg-black/50 border border-white/10 backdrop-blur-sm rounded-2xl h-full">
@@ -276,7 +281,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section - Simplified */}
+      {/* Features Section - Updated */}
       <section
         id="features"
         ref={(el) => addToRefs(el, 4)}
@@ -285,44 +290,59 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 text-white tracking-tight">
-              Key Features of Haithe
+              Platform Features
             </h2>
             <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
-              Built for performance, security, and trust
+              Everything you need for AI development and deployment
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {[
               {
-                icon: CheckCircle,
-                title: "On-Chain Claim Manifests",
-                description: "Creators make specific, verifiable claims about their AI's data foundation"
+                icon: Bot,
+                title: "AI Agent Management",
+                description: "Create, configure, and deploy AI agents with custom capabilities and settings"
               },
               {
-                icon: Shield,
-                title: "Expert-Led Audits",
-                description: "Audits performed by staked domain experts, not just automated checkers"
-              },
-              {
-                icon: Database,
-                title: "Granular Audit Reports",
-                description: "Detailed reports that verify individual claims, not just pass/fail"
+                icon: Wallet,
+                title: "Web3 Integration",
+                description: "Blockchain-based authentication, payments, and decentralized marketplace"
               },
               {
                 icon: Users,
-                title: "Decentralized Access Control",
-                description: "Secure mechanism for temporary, private dataset access for verification"
+                title: "Organization Management",
+                description: "Multi-tenant workspace with role-based access control and team collaboration"
               },
               {
-                icon: Star,
-                title: "Incentive-Aligned Ecosystem",
-                description: "Rewards for creators and auditors that align with quality and trust"
+                icon: Database,
+                title: "AI Model Orchestration",
+                description: "Enable and manage various AI models for your projects with flexible configuration"
               },
               {
-                icon: Zap,
-                title: "Built for Performance",
-                description: "Powered by Alith AI framework and Hyperion blockchain for speed"
+                icon: ShoppingCart,
+                title: "Marketplace Ecosystem",
+                description: "Buy, sell, and share AI products including knowledge bases, tools, and prompt sets"
+              },
+              {
+                icon: BarChart3,
+                title: "Financial Management",
+                description: "USDT-based payments, faucet system, and comprehensive expenditure tracking"
+              },
+              {
+                icon: MessageSquare,
+                title: "Real-time Chat",
+                description: "Interactive AI conversations with configurable models and marketplace products"
+              },
+              {
+                icon: Code,
+                title: "API Access",
+                description: "Programmatic access to all platform features with secure API key management"
+              },
+              {
+                icon: Shield,
+                title: "Security & Privacy",
+                description: "Enterprise-grade security with decentralized access control and data protection"
               },
             ].map((feature, index) => (
               <Card key={index} className="bg-black/30 border border-white/10 backdrop-blur-sm rounded-2xl p-6 lg:p-8 h-full">
@@ -343,7 +363,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Community Section - Simplified */}
+      {/* Community Section - Updated */}
       <section
         id="community"
         ref={(el) => addToRefs(el, 5)}
@@ -352,11 +372,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl text-center mb-16 lg:mb-20">
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 text-white tracking-tight">
-              Join the Haithe Community
+              Join the Haithe Ecosystem
             </h2>
             <p className="text-xl lg:text-2xl text-white/60 max-w-4xl mx-auto font-light px-4">
-              Participate in our testnet and help build the foundation of trust
-              for AI
+              Whether you're building AI applications, creating marketplace products, or integrating AI into your projects
             </p>
           </div>
 
@@ -364,21 +383,21 @@ export default function Landing() {
             {[
               {
                 icon: Code,
-                title: "Become a Creator",
-                description: "Build AI agents with Alith, deploy on our platform, and create Claim Manifests.",
+                title: "AI Developers",
+                description: "Build and deploy AI agents, create marketplace products, and monetize your AI applications.",
                 buttonText: "Start Building"
               },
               {
-                icon: Users,
-                title: "Act as a Consumer",
-                description: "Browse the marketplace, review audit reports, and integrate verified agents.",
-                buttonText: "Explore Marketplace"
+                icon: ShoppingCart,
+                title: "Product Creators",
+                description: "Create knowledge bases, prompt sets, and tools to sell in the decentralized marketplace.",
+                buttonText: "Become Creator"
               },
               {
-                icon: Shield,
-                title: "Join the Auditor Program",
-                description: "Apply with your domain expertise to help verify claims and build trust.",
-                buttonText: "Apply Now"
+                icon: Users,
+                title: "Organizations",
+                description: "Set up teams, manage AI projects, and integrate marketplace products into your workflows.",
+                buttonText: "Create Organization"
               },
             ].map((community, index) => (
               <Card key={index} className="p-6 lg:p-8 text-center bg-black/30 border border-white/10 backdrop-blur-sm rounded-2xl h-full">
