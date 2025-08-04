@@ -305,10 +305,22 @@ async fn get_completions_handler(
 
             let tx = contract_call.send().await?;
             let tx_hash = tx.tx_hash();
-            println!(
-                "Payment collected for product {} - Transaction: {:?}",
-                product_address, tx_hash
-            );
+
+            // Wait for transaction to be mined before proceeding
+            let receipt = tx
+                .await
+                .map_err(|e| ApiError::BadRequest(format!("Transaction failed: {}", e)))?;
+
+            match receipt {
+                Some(receipt) => println!(
+                    "Payment collected for product {} - Transaction: {:?} - Block: {:?}",
+                    product_address, tx_hash, receipt.block_number
+                ),
+                None => println!(
+                    "Payment collected for product {} - Transaction: {:?} - Receipt not available",
+                    product_address, tx_hash
+                ),
+            }
         }
     }
 
@@ -344,10 +356,22 @@ async fn get_completions_handler(
 
         let tx = contract_call.send().await?;
         let tx_hash = tx.tx_hash();
-        println!(
-            "Payment collected for LLM usage - Transaction: {:?}",
-            tx_hash
-        );
+
+        // Wait for transaction to be mined before proceeding
+        let receipt = tx
+            .await
+            .map_err(|e| ApiError::BadRequest(format!("Transaction failed: {}", e)))?;
+
+        match receipt {
+            Some(receipt) => println!(
+                "Payment collected for LLM usage - Transaction: {:?} - Block: {:?}",
+                tx_hash, receipt.block_number
+            ),
+            None => println!(
+                "Payment collected for LLM usage - Transaction: {:?} - Receipt not available",
+                tx_hash
+            ),
+        }
     }
 
     let mut agent = Agent::new("Haithe Agent", llm).preamble(&preamble);
