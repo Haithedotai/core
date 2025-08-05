@@ -10,6 +10,7 @@ import "./globals.css";
 import { PrivyProvider } from "./lib/context/privy-provider";
 import { WagmiProvider } from "./lib/context/wagmi-provider";
 import { ServicesProvider } from "./lib/context/services-provider";
+import { Buffer as BufferI } from "buffer";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -34,6 +35,8 @@ const app = (
     </ErrorBoundary>
   </StrictMode>
 );
+
+window.Buffer = window.Buffer || BufferI; 
 
 // Hot module replacement
 if (import.meta.hot) {
