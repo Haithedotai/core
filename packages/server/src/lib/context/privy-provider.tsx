@@ -29,7 +29,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
             config={{
                 defaultChain: isProd ? hyperion : hardhat,
                 supportedChains: isProd ? [hyperion, mainnet] : [hardhat, hyperion, mainnet],
-                loginMethods: ["wallet"],
+                loginMethods: ["wallet", "google", "twitter"],
                 appearance: {
                     theme: theme === "dark" ? "dark" : "light",
                     landingHeader: "Sign in to Haithe",
