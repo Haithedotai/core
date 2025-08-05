@@ -3,10 +3,11 @@ import path from "path";
 import { serve } from "bun";
 import { existsSync, statSync } from "fs";
 import { getMimeType } from "./utils";
+import { env } from "./env";
 
 const server = serve({
   development: false,
-  port: 3000,
+  port: parseInt(env.PORT),
 
   routes: {
     "/api": new Response(
