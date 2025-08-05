@@ -1,12 +1,15 @@
 import hono from "./api";
 import html from "./src/index.html";
 import { serve } from "bun";
+import { env } from "./env";
 
 const server = serve({
   development: {
     hmr: true,
     console: true,
   },
+
+  port: parseInt(env.PORT),
 
   idleTimeout: 60,
 

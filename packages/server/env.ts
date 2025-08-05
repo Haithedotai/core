@@ -5,6 +5,7 @@ const envKeys = [
   "BUN_PUBLIC_RUST_SERVER_URL",
   "PINATA_JWT",
   "BUN_PUBLIC_PINATA_GATEWAY_URL",
+  "PORT",
 ] as const;
 
 type ENV = Record<(typeof envKeys)[number], string>;
