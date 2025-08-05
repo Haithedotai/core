@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useStore } from '@/src/lib/hooks/use-store';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
+import { truncateText } from '@/src/lib/utils';
 
 interface MarketplaceItemCardProps {
   item: Product;
@@ -116,7 +117,7 @@ export default function MarketplaceItemCard({
               {categoryEmoji}
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold truncate leading-tight">{item.name}</CardTitle>
+              <CardTitle className="text-lg font-semibold truncate leading-tight">{truncateText(item.name, 20)}</CardTitle>
               <CardDescription className="text-sm mt-1">
                 {categoryLabel} • #{item.id}
               </CardDescription>
