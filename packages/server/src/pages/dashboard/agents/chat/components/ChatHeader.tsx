@@ -55,7 +55,7 @@ export default function ChatHeader({
   };
 
   return (
-    <div className="border-b border-border/50 px-4 py-3 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="border-b sticky top-20 z-50 border-border/50 px-4 py-3 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 
       <div className="flex items-center gap-3">
         <Button variant="ghost" asChild>
@@ -72,36 +72,29 @@ export default function ChatHeader({
           </div>
           <div>
             <h2 className="font-semibold text-sm">{agent.name}</h2>
-            <div className="flex items-center gap-2">
-              {agent.description && (
-                <span className="text-xs text-muted-foreground truncate max-w-32">
-                  {agent.description}
-                </span>
-              )}
-            </div>
           </div>
+
+          {/* Organization Balance */}
+          {balance && (
+            <div className="flex items-center gap-2 px-3 ml-1 py-1.5 bg-accent rounded-md">
+              <Icon name="Wallet" className="size-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {formatEther(BigInt(balance.balance))} USDT
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <ModelSelector />
-
-        {/* Organization Balance */}
-        {balance && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md">
-            <Icon name="Wallet" className="size-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              ${formatEther(BigInt(balance.balance))}
-            </span>
-          </div>
-        )}
-
         <ChatHistory
           conversations={conversations}
           currentConversationId={currentConversationId}
           onSelectConversation={onSelectConversation}
           onNewConversation={onNewConversation}
         />
+
+        <ModelSelector />
       </div>
     </div>
   );

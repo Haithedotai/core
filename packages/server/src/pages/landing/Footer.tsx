@@ -8,15 +8,15 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8 lg:gap-12">
           <div>
             <div className="flex items-center space-x-3 mb-6 lg:mb-8">
-              <div className="h-9 w-9 lg:h-10 lg:w-10 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm">
-                <Shield className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
+              <div className="h-9 w-9 lg:h-10 lg:w-10 rounded-md bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm">
+                <img src="/static/haitheLogo.webp" className="text-white rounded-md" />
               </div>
-              <span className="font-bold text-xl lg:text-2xl text-white tracking-tight">
+              <span className=" text-xl lg:text-2xl text-white tracking-tight">
                 Haithe
               </span>
             </div>
             <p className="text-white/60 text-sm lg:text-base leading-relaxed">
-              Building trust in AI through decentralized verification
+              Build, deploy & monetize AI agents on blockchain
             </p>
           </div>
 
@@ -25,9 +25,9 @@ export function Footer() {
               title: "Product",
               links: [
                 "Marketplace",
+                "AI Agents",
+                "Organizations",
                 "Documentation",
-                "API Reference",
-                "Testnet",
               ],
             },
             {
@@ -40,7 +40,7 @@ export function Footer() {
             },
           ].map((section, index) => (
             <div key={index}>
-              <h4 className="font-bold mb-4 lg:mb-6 text-white text-base lg:text-lg">{section.title}</h4>
+              <h4 className=" mb-4 lg:mb-6 text-white text-base lg:text-lg">{section.title}</h4>
               <ul className="space-y-2 lg:space-y-3 text-white/60 text-sm lg:text-base">
                 {section.links.map((link, linkIndex) => (
                   <li

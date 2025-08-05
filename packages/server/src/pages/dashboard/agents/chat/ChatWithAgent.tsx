@@ -93,18 +93,29 @@ export default function ChatWithAgent() {
         throw new Error('No model selected');
       }
 
+      // Get message history for context (last 10 messages)
+      const messageHistory = messagesQuery.data || [];
+      const recentMessages = messageHistory.slice(-10); // Get last 10 messages
+      
+      // Convert message history to OpenAI format
+      const messagesForCompletion = recentMessages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.message
+      }));
+
+      // Add the current user message
+      messagesForCompletion.push({
+        role: 'user',
+        content: content.trim()
+      });
+
       // Get AI completion
       const completion = await getCompletionsMutation.mutateAsync({
         orgUid: selectedOrg.organization_uid,
         projectUid: agent.project_uid,
         body: {
           model: selectedModel,
-          messages: [
-            {
-              role: 'user',
-              content: content.trim()
-            }
-          ],
+          messages: messagesForCompletion,
           temperature: 1
         }
       });
@@ -239,7 +250,7 @@ export default function ChatWithAgent() {
         />
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 sm:px-6">
+        <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 ">
           <ChatArea
             messages={messages}
             isLoading={isLoading}

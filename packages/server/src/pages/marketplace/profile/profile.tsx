@@ -7,17 +7,11 @@ import type { Product } from "services";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
-import { truncateText } from "@/src/lib/utils";
 import { useWalletClient } from "wagmi";
-import Icon from "@/src/lib/components/custom/Icon";
+import MarkdownRenderer from "@/src/lib/components/custom/MarkdownRenderer";
 
 export default function ProfilePage() {
-    // Mock data for AI marketplace creator - replace with actual data from your backend
-    const creator = {
-        name: "Alex Chen",
-        description: "Full-stack developer and AI enthusiast. Building scalable AI solutions and sharing knowledge through practical implementations. Specializing in natural language processing and multi-agent systems.",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    };
+
     const { id } = useParams({ from: "/marketplace/profile/$id" });
     const { data: creatorData, isFetching: isCreatorFetching } = useHaitheApi().getCreatorByAddress(id);
     const { data: creatorProducts, isFetching: isProductsFetching } = useHaitheApi().getCreatorProducts(id);
@@ -73,9 +67,16 @@ export default function ProfilePage() {
                                 <div className="flex w-full justify-between">
                                     <div className="flex-1 mt-4">
                                         <CardTitle className="text-2xl font-bold text-foreground mb-1">{creatorData?.name}</CardTitle>
-                                        <p className="text-muted-foreground leading-relaxed max-w-2xl">
-                                            {truncateText(creatorData?.description || "No description provided", 100)}
-                                        </p>
+                                        <div className="text-muted-foreground leading-relaxed">
+                                            {creatorData?.description ? (
+                                                <MarkdownRenderer 
+                                                    content={creatorData.description} 
+                                                    className="text-muted-foreground prose-p:text-muted-foreground prose-strong:text-muted-foreground prose-em:text-muted-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground"
+                                                />
+                                            ) : (
+                                                <p>No description provided</p>
+                                            )}
+                                        </div>
 
                                     </div>
                                 </div>

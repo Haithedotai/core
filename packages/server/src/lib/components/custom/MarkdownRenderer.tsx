@@ -90,14 +90,14 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     // Customize lists
     ul({ children, ...props }: any) {
       return (
-        <ul className="list-disc list-inside space-y-1" {...props}>
+        <ul className="list-disc list-outside ml-4 space-y-1" {...props}>
           {children}
         </ul>
       );
     },
     ol({ children, ...props }: any) {
       return (
-        <ol className="list-decimal list-inside space-y-1" {...props}>
+        <ol className="list-decimal list-outside ml-4 space-y-1" {...props}>
           {children}
         </ol>
       );

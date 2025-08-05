@@ -56,3 +56,5 @@ llm_logs
 coverage/
 
 **/*.db
+definitions.ts
+definitions.json

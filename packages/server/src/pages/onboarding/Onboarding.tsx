@@ -14,7 +14,7 @@ import { useOnboardingFlow } from "./useOnboardingFlow";
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { ready, authenticated } = usePrivy();
+  const { ready, authenticated, user } = usePrivy();
   
   const {
     currentStep,

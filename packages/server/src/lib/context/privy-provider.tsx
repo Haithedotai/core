@@ -33,6 +33,11 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
                 appearance: {
                     theme: theme === "dark" ? "dark" : "light",
                     landingHeader: "Sign in to Haithe",
+                },
+                embeddedWallets: {
+                  ethereum: {
+                    createOnLogin: 'users-without-wallets',
+                  }
                 }
             }}
         >

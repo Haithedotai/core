@@ -992,11 +992,13 @@ export default function AgentsConfigurationPage() {
                   <p className="text-sm text-muted-foreground">
                     Enable web search capabilities for this agent
                   </p>
+                  <Badge variant="secondary" className="text-xs">Unavailable</Badge>
                 </div>
                 <Switch
                   id="search-enabled"
                   checked={searchEnabled}
                   onCheckedChange={setSearchEnabled}
+                  disabled={true}
                 />
               </div>
 

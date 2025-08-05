@@ -32,12 +32,12 @@ export default function ChatInput({
   };
 
   return (
-    <div className="border-t border-border/50 pt-4 sm:pt-6 pb-4 sm:pb-6">
-      <div className="flex gap-2 sm:gap-3">
+    <div className="border rounded-xl py-4 sticky bottom-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex gap-2 sm:gap-3 px-6">
         <Textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           placeholder={placeholder}
           className="flex-1 min-h-[50px] sm:min-h-[60px] max-h-[100px] sm:max-h-[120px] resize-none text-sm sm:text-base"
           disabled={disabled || isLoading}
