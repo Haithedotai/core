@@ -200,10 +200,12 @@ export default function ProfilePage() {
                         <Icon name="Wallet" className="size-4" />
                         <span className="font-mono text-sm">{shortAddress}</span>
                       </div>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-2 py-0.5 text-xs">
-                        <Icon name="User" className="size-3 mr-1" />
-                        {(profile as any)?.role || 'Member'}
-                      </Badge>
+                      <Button variant="outline" size="icon" className="" onClick={() => {
+                        navigator.clipboard.writeText(walletAddress);
+                        toast.success('Wallet address copied to clipboard');
+                      }}>
+                        <Icon name="Copy" className="size-3" />
+                      </Button>
                     </div>
                   </div>
                 </div>
