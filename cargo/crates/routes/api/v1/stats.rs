@@ -38,26 +38,6 @@ where
     }
 }
 
-#[derive(Debug, Deserialize)]
-struct ContractInfoResponse {
-    creation_transaction: Option<CreationTransaction>,
-}
-
-#[derive(Debug, Deserialize)]
-struct CreationTransaction {
-    block_number: Option<i64>,
-}
-
-#[derive(Debug, Deserialize)]
-struct TransactionsResponse {
-    items: Option<Vec<TransactionItem>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct TransactionItem {
-    from: Option<String>,
-}
-
 #[derive(Debug, Clone, FromRow)]
 pub struct Organization {
     pub id: i64,
@@ -77,11 +57,6 @@ struct ContractStats {
     contract_type: String,
     #[serde(rename = "transactionsCount")]
     transactions_count: u64,
-    #[serde(rename = "deployedAtBlock")]
-    deployed_at_block: Option<i64>,
-    interactors: Vec<String>,
-    #[serde(rename = "interactorsCount")]
-    interactors_count: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -89,7 +64,9 @@ struct StatsResponse {
     contracts: Vec<ContractStats>,
     server: ServerStats,
     #[serde(rename = "transactionCount")]
-    transaction_count: u64,
+    transaction_count_contracts: u64,
+    #[serde(rename = "transactionCountWithServer")]
+    transaction_count_with_server: u64,
 }
 
 #[derive(Debug, Serialize)]
@@ -123,52 +100,6 @@ async fn txn_count(address: &str) -> Result<u64, Box<dyn std::error::Error>> {
     Ok(data.transactions_count.unwrap_or(0))
 }
 
-async fn get_deployment_block(address: &str) -> Result<Option<i64>, Box<dyn std::error::Error>> {
-    let url = format!(
-        "https://hyperion-testnet-explorer-api.metisdevops.link/api/v2/contracts/{}",
-        address
-    );
-
-    let client = reqwest::Client::new();
-    let res = client.get(&url).send().await?;
-    let data: ContractInfoResponse = res.json().await?;
-
-    Ok(data.creation_transaction.and_then(|ct| ct.block_number))
-}
-
-async fn get_interactors(
-    contract_address: &str,
-) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let mut interactors = std::collections::HashSet::new();
-    let mut page = 1;
-    let limit = 50;
-
-    loop {
-        let url = format!(
-            "https://hyperion-testnet-explorer-api.metisdevops.link/api/v2/addresses/{}/transactions?page={}&limit={}",
-            contract_address, page, limit
-        );
-
-        let client = reqwest::Client::new();
-        let res = client.get(&url).send().await?;
-        let data: TransactionsResponse = res.json().await?;
-
-        match data.items {
-            Some(items) if !items.is_empty() => {
-                for tx in items {
-                    if let Some(from) = tx.from {
-                        interactors.insert(from.to_lowercase());
-                    }
-                }
-                page += 1;
-            }
-            _ => break,
-        }
-    }
-
-    Ok(interactors.into_iter().collect())
-}
-
 #[get("")]
 async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder, ApiError> {
     let mut response = StatsResponse {
@@ -177,7 +108,8 @@ async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder,
             address: "0xcd4E9682172f67f2eA8cf0a9eCF199F3b78e57aD".to_string(),
             transactions_count: 0,
         },
-        transaction_count: 0,
+        transaction_count_contracts: 0,
+        transaction_count_with_server: 0,
     };
 
     // Get server transaction count
@@ -203,16 +135,11 @@ async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder,
                     org.name, org.address
                 );
                 let transactions_count = txn_count(&org.address).await.unwrap_or(0);
-                let deployed_at_block = get_deployment_block(&org.address).await.unwrap_or(None);
-                let interactors = get_interactors(&org.address).await.unwrap_or_default();
 
                 response.contracts.push(ContractStats {
                     address: org.address,
                     contract_type: "haithe.user.organization".to_string(),
                     transactions_count,
-                    deployed_at_block,
-                    interactors_count: interactors.len(),
-                    interactors,
                 });
             }
         }
@@ -233,34 +160,80 @@ async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder,
                     product.name, product.address
                 );
                 let transactions_count = txn_count(&product.address).await.unwrap_or(0);
-                let deployed_at_block =
-                    get_deployment_block(&product.address).await.unwrap_or(None);
-                let interactors = get_interactors(&product.address).await.unwrap_or_default();
 
                 response.contracts.push(ContractStats {
                     address: product.address,
                     contract_type: "haithe.marketplace.product".to_string(),
                     transactions_count,
-                    deployed_at_block,
-                    interactors_count: interactors.len(),
-                    interactors,
                 });
             }
         }
         Err(e) => println!("Warning: Failed to fetch products: {}", e),
     }
 
-    // Calculate total transaction count
-    response.transaction_count = response
+    // Add creator identity NFT contract (from orchestrator)
+    match contracts::get_contract("HaitheOrchestrator", None) {
+        Ok(orchestrator_contract) => {
+            // Get creator identity NFT address
+            match orchestrator_contract.method::<_, ethers::types::Address>("creatorIdentity", ()) {
+                Ok(call) => match call.call().await {
+                    Ok(creator_identity_address) => {
+                        let creator_identity_addr = format!("{:#x}", creator_identity_address);
+                        println!(
+                            "Processing creator identity NFT at address: {}",
+                            creator_identity_addr
+                        );
+
+                        let transactions_count =
+                            txn_count(&creator_identity_addr).await.unwrap_or(0);
+
+                        response.contracts.push(ContractStats {
+                            address: creator_identity_addr,
+                            contract_type: "haithe.core.creator-nft".to_string(),
+                            transactions_count,
+                        });
+                    }
+                    Err(e) => println!("Warning: Failed to get creator identity address: {}", e),
+                },
+                Err(e) => println!(
+                    "Warning: Failed to create creator identity method call: {}",
+                    e
+                ),
+            }
+
+            // Add orchestrator contract itself
+            let orchestrator_address = format!("{:#x}", orchestrator_contract.address());
+            println!(
+                "Processing orchestrator at address: {}",
+                orchestrator_address
+            );
+
+            let transactions_count = txn_count(&orchestrator_address).await.unwrap_or(0);
+
+            response.contracts.push(ContractStats {
+                address: orchestrator_address,
+                contract_type: "haithe.core.orchestrator".to_string(),
+                transactions_count,
+            });
+        }
+        Err(e) => println!("Warning: Failed to get orchestrator contract: {}", e),
+    }
+
+    // Calculate transaction counts
+    response.transaction_count_contracts = response
         .contracts
         .iter()
         .map(|c| c.transactions_count)
-        .sum();
+        .sum::<u64>();
+
+    response.transaction_count_with_server =
+        response.server.transactions_count + response.transaction_count_contracts;
 
     println!(
-        "Final response: {} contracts, total transactions: {}",
+        "Final response: {} contracts, contracts transactions: {}, total with server: {}",
         response.contracts.len(),
-        response.transaction_count
+        response.transaction_count_contracts,
+        response.transaction_count_with_server
     );
 
     Ok(respond::ok("Statistics retrieved successfully", response))
