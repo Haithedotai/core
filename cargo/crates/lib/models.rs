@@ -55,6 +55,22 @@ pub fn get_models() -> Vec<Model> {
         },
         Model {
             id: 6,
+            name: "openai/gpt-oss-20b".to_string(),
+            display_name: "GPT-OSS 20B".to_string(),
+            provider: "Haithe".to_string(),
+            is_active: true,
+            price_per_call: (0.0001_f64 * 1e18) as u64,
+        },
+        Model {
+            id: 7,
+            name: "openai/gpt-oss-120b".to_string(),
+            display_name: "GPT-OSS 120B".to_string(),
+            provider: "Haithe".to_string(),
+            is_active: false,
+            price_per_call: (0.00035_f64 * 1e18) as u64,
+        },
+        Model {
+            id: 8,
             name: "gpt-o3".to_string(),
             display_name: "GPT-o3".to_string(),
             provider: "OpenAI".to_string(),
@@ -63,7 +79,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 7,
+            id: 9,
             name: "gpt-o3-mini".to_string(),
             display_name: "GPT-o3 Mini".to_string(),
             provider: "OpenAI".to_string(),
@@ -71,7 +87,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 8,
+            id: 10,
             name: "gpt-o4-mini".to_string(),
             display_name: "GPT-o4 Mini".to_string(),
             provider: "OpenAI".to_string(),
@@ -79,7 +95,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 9,
+            id: 11,
             name: "gpt-4.1-nano".to_string(),
             display_name: "GPT-4.1 Nano".to_string(),
             provider: "OpenAI".to_string(),
@@ -87,7 +103,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 10,
+            id: 12,
             name: "gpt-4.1-mini".to_string(),
             display_name: "GPT-4.1 Mini".to_string(),
             provider: "OpenAI".to_string(),
@@ -95,7 +111,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 11,
+            id: 13,
             name: "deepseek-chat".to_string(),
             display_name: "DeepSeek Chat".to_string(),
             provider: "DeepSeek".to_string(),
@@ -103,7 +119,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 12,
+            id: 14,
             name: "deepseek-reasoner".to_string(),
             display_name: "DeepSeek Reasoner".to_string(),
             provider: "DeepSeek".to_string(),
@@ -111,7 +127,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 13,
+            id: 15,
             name: "moonshotai/kimi-k2-instruct".to_string(),
             display_name: "Kimi K2".to_string(),
             provider: "Haithe".to_string(),
