@@ -17,7 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from "@/src/lib/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription, DialogClose } from "@/src/lib/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ import DashboardHeader from "../../Header";
 import { toast } from "sonner";
 import { formatEther } from "viem";
 import FundOrgDialog from "../../FundOrg";
+import { Image } from "@/src/lib/components/custom/Image";
 
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
@@ -44,8 +45,8 @@ export default function AgentsConfigurationPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
-  const [agentName, setAgentName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState("");
   const [deleteAgent, setDeleteAgent] = useState<any>(null);
 
   // Project members state
@@ -62,6 +63,8 @@ export default function AgentsConfigurationPage() {
   const profileQuery = api.profile();
   const orgId = useStore((s) => s.selectedOrganizationId);
   const { data: project, isLoading: isLoadingProject, refetch: refetchProject } = api.getProject(parseInt(params.id));
+
+  console.log({ project });
 
   // Get organization data
   const { data: organization } = api.getOrganization(orgId);
@@ -203,6 +206,51 @@ export default function AgentsConfigurationPage() {
     }
   };
 
+  // Model selector helper functions
+  const getProviderIcon = (provider: string) => {
+    switch (provider) {
+      case "Google": return "Sparkles";
+      case "OpenAI": return "Zap";
+      case "DeepSeek": return "Brain";
+      case "Haithe": return "Star";
+      default: return "Bot";
+    }
+  };
+
+  const getProviderLogo = (provider: string) => {
+    switch (provider) {
+      case "Google":
+        return "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.svg";
+      case "OpenAI":
+        return "https://plugins.jetbrains.com/files/21671/668761/icon/default.svg";
+      case "DeepSeek":
+        return "https://cdn.worldvectorlogo.com/logos/deepseek-2.svg";
+      case "Haithe":
+        return "https://pbs.twimg.com/media/Gv-AY7eXEAAIM-l.jpg";
+      default:
+        return null;
+    }
+  };
+
+  const renderProviderLogo = (provider: string, className: string) => {
+    const logoUrl = getProviderLogo(provider);
+    if (logoUrl) {
+      return (
+        <img
+          src={logoUrl}
+          alt={`${provider} logo`}
+          className={className}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            target.nextElementSibling?.classList.remove('hidden');
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   // Handle extension toggle
   const handleExtensionToggle = async (productId: number, enabled: boolean) => {
     try {
@@ -233,22 +281,32 @@ export default function AgentsConfigurationPage() {
     setSaveDialogOpen(false);
   };
 
-  // Handle edit agent
-  const handleEdit = async () => {
+  // Handle edit agent name
+  const handleEditName = async () => {
     try {
-      if (!project || !agentName) return;
+      if (!project || !editingName.trim()) return;
       await api.updateProject.mutateAsync({
         id: project.id,
         updates: {
-          name: agentName
+          name: editingName.trim()
         }
       });
-      setEditOpen(false);
-      setAgentName("");
+      setIsEditingName(false);
+      setEditingName("");
       refetchProject();
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleStartEditName = () => {
+    setEditingName(project.name);
+    setIsEditingName(true);
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setEditingName("");
   };
 
   // Handle delete agent
@@ -393,11 +451,57 @@ export default function AgentsConfigurationPage() {
     <div className="min-h-full bg-background">
       {/* Header */}
       <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-        <DashboardHeader
-          title={project.name}
-          subtitle="Manage your agent"
-          iconName="Settings"
-        />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Icon name="Settings" className="size-8 text-primary" />
+            <div className="space-y-1">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleEditName();
+                      } else if (e.key === "Escape") {
+                        handleCancelEditName();
+                      }
+                    }}
+                    className="text-2xl font-bold h-8 px-2"
+                    autoFocus
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEditName}
+                    disabled={!editingName.trim() || api.updateProject.isPending}
+                  >
+                    <Icon name="Check" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelEditName}
+                  >
+                    <Icon name="X" className="size-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{project.name}</h1>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleStartEditName}
+                  >
+                    <Icon name="Pencil" className="size-4" />
+                  </Button>
+                </div>
+              )}
+              <p className="text-muted-foreground">Manage your agent</p>
+            </div>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <Button variant="outline" asChild>
@@ -452,17 +556,6 @@ export default function AgentsConfigurationPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setAgentName(project.name);
-                        setEditOpen(true);
-                      }}
-                    >
-                      <Icon name="Pencil" className="size-4" />
-                      <span className="hidden md:block">Edit Agent</span>
-                    </Button>
-
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -496,18 +589,111 @@ export default function AgentsConfigurationPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="gap-2">
                     <p className="text-sm font-medium text-muted-foreground">Project ID</p>
-                    <p className="text-sm">{project.id}</p>
+                    <p className="text-sm mt-1">{project.id}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Created</p>
-                    <p className="text-sm">{new Date(project.created_at).toLocaleDateString()}</p>
+                    <p className="text-sm mt-1">{new Date(project.created_at).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Enabled Extensions</p>
-                    <p className="text-sm">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
+                    <p className="text-sm mt-1">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Default Model</p>
+                    <div className="flex items-center gap-4 mt-1">
+                      {enabledModels && enabledModels.length > 0 ? (
+                        <Select
+                          value={project.default_model_id?.toString() || ""}
+                          onValueChange={async (value) => {
+                            try {
+                              const modelId = value ? parseInt(value) : undefined;
+                              await api.updateProject.mutateAsync({
+                                id: project.id,
+                                updates: {
+                                  default_model_id: modelId
+                                }
+                              });
+                              refetchProject();
+                            } catch (error) {
+                              console.error(error);
+                            }
+                          }}
+                          disabled={api.updateProject.isPending}
+                        >
+                          <SelectTrigger className="w-auto gap-2">
+                            <div className="flex items-center gap-2">
+                              {project.default_model_id && enabledModels && (
+                                renderProviderLogo(
+                                  enabledModels.find(m => m.id === project.default_model_id)?.provider || "",
+                                  "size-3"
+                                )
+                              )}
+                              <SelectValue placeholder="Select default model">
+                                {project.default_model_id && enabledModels ? (
+                                  <span className="font-medium">
+                                    {enabledModels.find(m => m.id === project.default_model_id)?.display_name || 'Unknown Model'}
+                                  </span>
+                                ) : (
+                                  "Select default model"
+                                )}
+                              </SelectValue>
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="mt-2 w-80">
+                            <div className="space-y-1 p-1">
+                              {enabledModels.map((model) => (
+                                <SelectItem
+                                  key={model.id}
+                                  value={model.id.toString()}
+                                  className="p-3 rounded-lg cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-3 w-full">
+                                    <div className="p-1.5 rounded-md bg-muted flex items-center justify-center min-w-[28px] min-h-[28px]">
+                                      {renderProviderLogo(model.provider, "size-3.5")}
+                                      <Icon name={getProviderIcon(model.provider)} className="size-3.5 text-muted-foreground hidden" />
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-sm text-foreground truncate">
+                                          {model.display_name}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">({model.provider})</span>
+                                      </div>
+
+                                      <div className="flex items-center justify-between mt-1">
+                                        <p className="text-xs text-muted-foreground">
+                                          ${formatEther(BigInt(model.price_per_call))} per call
+                                        </p>
+                                        {!model.is_active && (
+                                          <Badge variant="outline" className="text-xs bg-amber-500/20 border-muted/50">
+                                            Unavailable
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </div>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Icon name="TriangleAlert" className="size-4" />
+                          <span>No models enabled for this organization</span>
+                          <Button variant="link" size="sm" asChild>
+                            <Link to="/dashboard/settings">
+                              Go to Settings
+                            </Link>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -572,8 +758,9 @@ export default function AgentsConfigurationPage() {
 
                 {/* Telegram Integration */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center gap-3">
+                    <Image src="/static/telegram.webp" alt="Telegram" className="size-6" />
+                    <div className="flex flex-col">
                       <p className="text-sm font-medium text-muted-foreground">Telegram Integration</p>
                       <p className="text-xs text-muted-foreground">Connect your agent to Telegram</p>
                     </div>
@@ -784,11 +971,18 @@ export default function AgentsConfigurationPage() {
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <Icon name="Bot" className="h-5 w-5 text-primary" />
-                              Configure Telegram Bot
+                            <DialogTitle className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Image src="/static/telegram.webp" alt="Telegram" className="size-5" />
+                                Configure Telegram Bot
+                              </div>
+                              <DialogClose asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Icon name="X" className="size-4" />
+                                </Button>
+                              </DialogClose>
                             </DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="hidden">
                               Connect your agent to Telegram by setting up a bot token.
                             </DialogDescription>
                           </DialogHeader>
@@ -822,13 +1016,13 @@ export default function AgentsConfigurationPage() {
                               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                                 <div className="flex items-start gap-3">
                                   <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
-                                  <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center justify-between w-full gap-10">
                                     <div>
                                       <h4 className="text-sm font-medium text-red-800">
                                         Insufficient balance
                                       </h4>
                                       <p className="text-sm text-red-700 mt-1">
-                                        Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per message (${formatEther(BigInt(totalPricePerCall))}).
+                                        Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
                                       </p>
                                     </div>
                                     {organization && <FundOrgDialog organization={organization} refetchBalance={refetchBalance} />}
@@ -1382,39 +1576,6 @@ export default function AgentsConfigurationPage() {
             </Button>
             <Button onClick={handleSaveChanges}>
               Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Agent Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleEdit();
-          }
-        }}>
-          <DialogHeader>
-            <DialogTitle>Edit Agent</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="agent-name">Agent Name</Label>
-              <Input
-                id="agent-name"
-                placeholder="Agent name"
-                value={agentName}
-                onChange={e => setAgentName(e.target.value)}
-                className="mt-2"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEdit} disabled={!agentName || api.updateProject.isPending}>
-              {api.updateProject.isPending ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

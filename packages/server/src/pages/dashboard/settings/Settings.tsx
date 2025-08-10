@@ -33,6 +33,8 @@ export default function SettingsPage() {
   const { selectedOrganizationId } = useStore();
   const { data: availableModels, isLoading: isLoadingAvailable } = haithe.getAvailableModels();
   const { data: enabledModels, isLoading: isLoadingEnabled, refetch: refetchEnabled } = haithe.getEnabledModels(selectedOrganizationId);
+
+  console.log({ availableModels });
   
   // Organization members state
   const { data: organizationMembers, isLoading: isLoadingMembers, refetch: refetchMembers } = haithe.getOrganizationMembers(selectedOrganizationId);
@@ -152,7 +154,7 @@ export default function SettingsPage() {
   // Process API data to add recommended flag
   const processedModels = availableModels?.map((model: LLMModel) => ({
     ...model,
-    recommended: model.name === "kimi-k2-0711-preview" // Mark Kimi K2 as recommended
+    recommended: model.name === "moonshotai/kimi-k2-instruct" // Mark Kimi K2 as recommended
   })) || [];
 
   const featuredModel = processedModels.find((model: LLMModel) => model.recommended);
@@ -236,7 +238,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
         <DashboardHeader 
           title="Settings"
           subtitle="Manage your organization settings and LLM model preferences"
@@ -279,11 +281,12 @@ export default function SettingsPage() {
               <Card className="relative overflow-hidden bg-gradient-to-r from-orange-400/10 via-red-500/10 to-sky-400/10 border-2 border-transparent bg-clip-padding">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 opacity-20 rounded-xl"></div>
                 <div className="absolute inset-[2px] bg-card rounded-[10px]"></div>
-                <CardContent className="relative pt-4 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
+                <CardContent className="relative p-4">
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
                           <h3 className="font-semibold bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">
                             {featuredModel.display_name}
                           </h3>
@@ -296,12 +299,14 @@ export default function SettingsPage() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground">Model ID: {featuredModel.name}</p>
+                        <p className="text-xs text-muted-foreground break-all">Model ID: {featuredModel.name}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-foreground">${featuredModel.price_per_call.toFixed(2)}</p>
+                    
+                    {/* Price and Toggle */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground">${formatEther(BigInt(featuredModel.price_per_call))}</p>
                         <p className="text-xs text-muted-foreground">per call</p>
                       </div>
                       <Switch
@@ -315,7 +320,7 @@ export default function SettingsPage() {
               </Card>
             )}
 
-            {/* Other Models - Compact Grid */}
+            {/* Other Models - Mobile Native Layout */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Other Available Models</CardTitle>
@@ -324,37 +329,41 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid gap-2">
+                <div className="space-y-3">
                   {otherModels.map((model, index) => (
-                    <div key={model.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="p-1.5 rounded-md bg-muted flex items-center justify-center min-w-[28px] min-h-[28px]">
-                          {renderProviderLogo(model.provider, "size-3.5", isModelEnabled(model.id))}
-                          <Icon name={getProviderIcon(model.provider)} className={`size-3.5 text-muted-foreground transition-all duration-300 hidden ${isModelEnabled(model.id) ? '' : 'grayscale opacity-60'}`} />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-foreground truncate">{model.display_name}</span>
-                            <span className="text-xs text-muted-foreground">({model.provider})</span>
-                            {!model.is_active && (
-                              <Badge variant="outline" className="text-xs bg-amber-500/20 border-muted/50">
-                                Temporarily Unavailable
-                              </Badge>
-                            )}
+                    <div key={model.id} className="p-4 rounded-lg border border-border/50 hover:bg-accent/30 transition-colors">
+                      <div className="space-y-3">
+                        {/* Model Info */}
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                            {renderProviderLogo(model.provider, "size-5", isModelEnabled(model.id))}
+                            <Icon name={getProviderIcon(model.provider)} className={`size-5 text-muted-foreground transition-all duration-300 hidden ${isModelEnabled(model.id) ? '' : 'grayscale opacity-60'}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <h4 className="font-medium text-foreground">{model.display_name}</h4>
+                              <span className="text-xs text-muted-foreground">({model.provider})</span>
+                              {!model.is_active && (
+                                <Badge variant="outline" className="text-xs bg-amber-500/20 border-muted/50">
+                                  Temporarily Unavailable
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-foreground">${formatEther(BigInt(model.price_per_call))}</p>
-                          <p className="text-xs text-muted-foreground">per call</p>
+                        
+                        {/* Price and Toggle */}
+                        <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                          <div>
+                            <p className="text-lg font-semibold text-foreground">${formatEther(BigInt(model.price_per_call))}</p>
+                            <p className="text-xs text-muted-foreground">per call</p>
+                          </div>
+                          <Switch
+                            checked={isModelEnabled(model.id)}
+                            onCheckedChange={() => toggleModel(model.id)}
+                            disabled={haithe.enableModel.isPending || haithe.disableModel.isPending || !model.is_active}
+                          />
                         </div>
-                        <Switch
-                          checked={isModelEnabled(model.id)}
-                          onCheckedChange={() => toggleModel(model.id)}
-                          disabled={haithe.enableModel.isPending || haithe.disableModel.isPending || !model.is_active}
-                          className="scale-75"
-                        />
                       </div>
                     </div>
                   ))}

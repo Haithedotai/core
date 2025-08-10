@@ -210,6 +210,7 @@ export class HaitheClient {
     name?: string;
     search_enabled?: boolean;
     memory_enabled?: boolean;
+    default_model_id?: number;
   }): Promise<Project> {
     return this.projects.updateProject(id, updates);
   }
