@@ -205,6 +205,51 @@ export default function AgentsConfigurationPage() {
     }
   };
 
+  // Model selector helper functions
+  const getProviderIcon = (provider: string) => {
+    switch (provider) {
+      case "Google": return "Sparkles";
+      case "OpenAI": return "Zap";
+      case "DeepSeek": return "Brain";
+      case "Haithe": return "Star";
+      default: return "Bot";
+    }
+  };
+
+  const getProviderLogo = (provider: string) => {
+    switch (provider) {
+      case "Google":
+        return "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.svg";
+      case "OpenAI":
+        return "https://plugins.jetbrains.com/files/21671/668761/icon/default.svg";
+      case "DeepSeek":
+        return "https://cdn.worldvectorlogo.com/logos/deepseek-2.svg";
+      case "Haithe":
+        return "https://pbs.twimg.com/media/Gv-AY7eXEAAIM-l.jpg";
+      default:
+        return null;
+    }
+  };
+
+  const renderProviderLogo = (provider: string, className: string) => {
+    const logoUrl = getProviderLogo(provider);
+    if (logoUrl) {
+      return (
+        <img
+          src={logoUrl}
+          alt={`${provider} logo`}
+          className={className}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            target.nextElementSibling?.classList.remove('hidden');
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   // Handle extension toggle
   const handleExtensionToggle = async (productId: number, enabled: boolean) => {
     try {
@@ -543,18 +588,111 @@ export default function AgentsConfigurationPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="gap-2">
                     <p className="text-sm font-medium text-muted-foreground">Project ID</p>
-                    <p className="text-sm">{project.id}</p>
+                    <p className="text-sm mt-1">{project.id}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Created</p>
-                    <p className="text-sm">{new Date(project.created_at).toLocaleDateString()}</p>
+                    <p className="text-sm mt-1">{new Date(project.created_at).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Enabled Extensions</p>
-                    <p className="text-sm">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
+                    <p className="text-sm mt-1">{projectProductIds?.length || 0} of {enabledProducts.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Default Model</p>
+                    <div className="flex items-center gap-4 mt-1">
+                      {enabledModels && enabledModels.length > 0 ? (
+                        <Select
+                          value={project.default_model_id?.toString() || ""}
+                          onValueChange={async (value) => {
+                            try {
+                              const modelId = value ? parseInt(value) : undefined;
+                              await api.updateProject.mutateAsync({
+                                id: project.id,
+                                updates: {
+                                  default_model_id: modelId
+                                }
+                              });
+                              refetchProject();
+                            } catch (error) {
+                              console.error(error);
+                            }
+                          }}
+                          disabled={api.updateProject.isPending}
+                        >
+                          <SelectTrigger className="w-auto gap-2">
+                            <div className="flex items-center gap-2">
+                              {project.default_model_id && enabledModels && (
+                                renderProviderLogo(
+                                  enabledModels.find(m => m.id === project.default_model_id)?.provider || "",
+                                  "size-3"
+                                )
+                              )}
+                              <SelectValue placeholder="Select default model">
+                                {project.default_model_id && enabledModels ? (
+                                  <span className="font-medium">
+                                    {enabledModels.find(m => m.id === project.default_model_id)?.display_name || 'Unknown Model'}
+                                  </span>
+                                ) : (
+                                  "Select default model"
+                                )}
+                              </SelectValue>
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="mt-2 w-80">
+                            <div className="space-y-1 p-1">
+                              {enabledModels.map((model) => (
+                                <SelectItem
+                                  key={model.id}
+                                  value={model.id.toString()}
+                                  className="p-3 rounded-lg cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-3 w-full">
+                                    <div className="p-1.5 rounded-md bg-muted flex items-center justify-center min-w-[28px] min-h-[28px]">
+                                      {renderProviderLogo(model.provider, "size-3.5")}
+                                      <Icon name={getProviderIcon(model.provider)} className="size-3.5 text-muted-foreground hidden" />
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-sm text-foreground truncate">
+                                          {model.display_name}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">({model.provider})</span>
+                                      </div>
+
+                                      <div className="flex items-center justify-between mt-1">
+                                        <p className="text-xs text-muted-foreground">
+                                          ${formatEther(BigInt(model.price_per_call))} per call
+                                        </p>
+                                        {!model.is_active && (
+                                          <Badge variant="outline" className="text-xs bg-amber-500/20 border-muted/50">
+                                            Unavailable
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </div>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Icon name="TriangleAlert" className="size-4" />
+                          <span>No models enabled for this organization</span>
+                          <Button variant="link" size="sm" asChild>
+                            <Link to="/dashboard/settings">
+                              Go to Settings
+                            </Link>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
