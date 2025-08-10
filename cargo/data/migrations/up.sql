@@ -50,6 +50,7 @@ CREATE TABLE
         search_enabled BOOLEAN NOT NULL DEFAULT FALSE,
         memory_enabled BOOLEAN NOT NULL DEFAULT FALSE,
         teloxide_token TEXT,
+        default_model_id INTEGER,
         UNIQUE (name, org_id),
         UNIQUE (project_uid)
     );

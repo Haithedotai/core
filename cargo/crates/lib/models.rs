@@ -42,7 +42,7 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-flash".to_string(),
             display_name: "Gemini 2.5 Flash".to_string(),
             provider: "Google".to_string(),
-            is_active: false,
+            is_active: true,
             price_per_call: (0.001_f64 * 1e18) as u64,
         },
         Model {
@@ -50,7 +50,7 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-flash-lite".to_string(),
             display_name: "Gemini 2.5 Flash Lite".to_string(),
             provider: "Google".to_string(),
-            is_active: false,
+            is_active: true,
             price_per_call: (0.0008_f64 * 1e18) as u64,
         },
         Model {
