@@ -295,7 +295,7 @@ export default function ChatWithAgent() {
                       Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
                     </p>
                   </div>
-                  {selectedOrg && <FundOrgDialog organization={selectedOrg} />}
+                  {selectedOrg && <FundOrgDialog organization={selectedOrg} refetchBalance={balanceQuery.refetch} />}
                 </div>
               </div>
             </div>

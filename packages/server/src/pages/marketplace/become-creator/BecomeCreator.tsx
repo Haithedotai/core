@@ -202,6 +202,8 @@ export default function BecomeCreatorPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4">
+            
+
             {step === 0 && !isSuccess && (
                 <CreatorFormStep
                     name={name}
@@ -226,9 +228,20 @@ export default function BecomeCreatorPage() {
             {isSuccess && (
                 <SuccessStep name={name} />
             )}
+
             {!isSuccess && (
-                <Link to="/marketplace" className="mt-6 underline underline-offset-2 text-muted-foreground text-sm">Go Back</Link>
+                <Button variant="link" className="justify-start h-auto mt-4 text-muted-foreground" onClick={() => navigate({ to: "/marketplace" })}>
+                    <Icon name="ArrowLeft" className="size-4" />
+                    Back to marketplace
+                </Button>
             )}
+
+            {/* add a warning box below the success step */}
+            <div className="mt-4 w-full max-w-md mx-auto bg-yellow-500/10 p-4 rounded-lg">
+                <p className="text-sm text-yellow-500">
+                    This action will mint a creator NFT to your wallet. Make sure you double check your details before submitting. You can not edit your creator profile after submitting.
+                </p>
+            </div>
         </div>
     );
 }

@@ -9,7 +9,7 @@ import QRCode from "qrcode";
 import type { Organization } from "services";
 import { Image } from "@/src/lib/components/custom/Image";
 
-export default function FundOrgDialog({ organization }: { organization: Organization }) {
+export default function FundOrgDialog({ organization, refetchBalance }: { organization: Organization, refetchBalance: () => void }) {
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [amount, setAmount] = useState<string>("1");
@@ -24,6 +24,7 @@ export default function FundOrgDialog({ organization }: { organization: Organiza
                 recipient: organization.address,
                 amount: amountInWei,
             });
+            refetchBalance();
         } catch (error) {
             console.error(error);
         }
