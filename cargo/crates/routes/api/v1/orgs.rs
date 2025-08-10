@@ -100,7 +100,7 @@ async fn post_index_handler(
             .execute(&state.db)
             .await?;
 
-        sqlx::query_as::<_, Organization>(
+        let org = sqlx::query_as::<_, Organization>(
             "INSERT INTO organizations (name, owner, organization_uid, orchestrator_idx, address) VALUES (?, ?, ?, ?, ?) RETURNING *",
         )
         .bind(&organization_name)
@@ -110,6 +110,13 @@ async fn post_index_handler(
         .bind(&format!("{:#x}", organization_address))
         .fetch_one(&state.db)
         .await?;
+
+        sqlx::query("INSERT OR IGNORE INTO org_model_enrollments (org_id, model_id) VALUES (?, ?)")
+            .bind(org.id)
+            .bind("1")
+            .execute(&state.db)
+            .await?;
+
         synced_count += 1;
     }
 

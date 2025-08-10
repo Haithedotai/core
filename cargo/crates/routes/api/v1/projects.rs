@@ -16,6 +16,7 @@ pub struct Project {
     pub created_at: String,
     pub search_enabled: bool,
     pub memory_enabled: bool,
+    pub default_model_id: Option<i64>,
     pub teloxide_token: Option<String>,
 }
 
@@ -37,6 +38,7 @@ struct UpdateProjectQuery {
     name: Option<String>,
     search_enabled: Option<bool>,
     memory_enabled: Option<bool>,
+    default_model_id: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -141,12 +143,16 @@ async fn create_project_handler(
 
     let project_uid = Uuid::new_v4().to_string().replace("-", "");
 
+    // Set default model to gemini-2.0-flash (model ID 1) if none specified
+    let default_model_id = Some(1i64);
+
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name, project_uid) VALUES (?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, teloxide_token",
+        "INSERT INTO projects (org_id, name, project_uid, default_model_id) VALUES (?, ?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token",
     )
     .bind(&query.org_id)
     .bind(&query.name)
     .bind(&project_uid)
+    .bind(default_model_id)
     .fetch_one(&state.db)
     .await?;
 
@@ -162,7 +168,7 @@ async fn get_project_handler(
     let project_id = path.into_inner();
 
     let project = sqlx::query_as::<_, Project>(
-        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, teloxide_token FROM projects WHERE id = ?"
+        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token FROM projects WHERE id = ?"
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -185,39 +191,58 @@ async fn update_project_handler(
         return Err(ApiError::Forbidden);
     }
 
-    let mut updates = Vec::new();
-    let mut params = Vec::new();
+    let mut update_parts = Vec::new();
+    let mut any_updates = false;
 
-    if let Some(name) = &query.name {
-        updates.push("name = ?");
-        params.push(name.as_str());
+    if query.name.is_some() {
+        update_parts.push("name = ?");
+        any_updates = true;
     }
 
-    if let Some(search_enabled) = query.search_enabled {
-        updates.push("search_enabled = ?");
-        params.push(if search_enabled { "1" } else { "0" });
+    if query.search_enabled.is_some() {
+        update_parts.push("search_enabled = ?");
+        any_updates = true;
     }
 
-    if let Some(memory_enabled) = query.memory_enabled {
-        updates.push("memory_enabled = ?");
-        params.push(if memory_enabled { "1" } else { "0" });
+    if query.memory_enabled.is_some() {
+        update_parts.push("memory_enabled = ?");
+        any_updates = true;
     }
 
-    if updates.is_empty() {
+    if query.default_model_id.is_some() {
+        update_parts.push("default_model_id = ?");
+        any_updates = true;
+    }
+
+    if !any_updates {
         return Err(ApiError::BadRequest(
             "No fields provided to update".to_string(),
         ));
     }
 
     let sql = format!(
-        "UPDATE projects SET {} WHERE id = ? RETURNING *",
-        updates.join(", ")
+        "UPDATE projects SET {} WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token",
+        update_parts.join(", ")
     );
 
     let mut query_builder = sqlx::query_as::<_, Project>(&sql);
-    for param in params {
-        query_builder = query_builder.bind(param);
+
+    if let Some(ref name) = query.name {
+        query_builder = query_builder.bind(name);
     }
+
+    if let Some(search_enabled) = query.search_enabled {
+        query_builder = query_builder.bind(search_enabled);
+    }
+
+    if let Some(memory_enabled) = query.memory_enabled {
+        query_builder = query_builder.bind(memory_enabled);
+    }
+
+    if let Some(default_model_id) = query.default_model_id {
+        query_builder = query_builder.bind(default_model_id);
+    }
+
     query_builder = query_builder.bind(project_id);
 
     let project = query_builder
@@ -241,7 +266,7 @@ async fn delete_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, teloxide_token"
+        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token"
     )
     .bind(project_id)
     .fetch_one(&state.db)
