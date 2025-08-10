@@ -42,7 +42,6 @@ pub async fn generate_llm_response(
 ) -> Result<LlmResponse, ApiError> {
     let models = models::get_models();
 
-    // Get organization and project IDs
     let org_id: i64 = sqlx::query_scalar("SELECT id FROM organizations WHERE organization_uid = ?")
         .bind(&params.org_uid)
         .fetch_one(&state.db)
@@ -53,7 +52,6 @@ pub async fn generate_llm_response(
         .fetch_one(&state.db)
         .await?;
 
-    // Get project settings
     let (search_enabled, memory_enabled): (bool, bool) = sqlx::query_as::<_, (bool, bool)>(
         "SELECT search_enabled, memory_enabled FROM projects WHERE id = ?",
     )
@@ -61,7 +59,6 @@ pub async fn generate_llm_response(
     .fetch_one(&state.db)
     .await?;
 
-    // Validate model permissions
     let enabled_models: Vec<u64> =
         sqlx::query_scalar::<_, u64>("SELECT model_id FROM org_model_enrollments WHERE org_id = ?")
             .bind(org_id)
@@ -84,13 +81,11 @@ pub async fn generate_llm_response(
         ));
     }
 
-    // Get organization address
     let org_address: String = sqlx::query_scalar("SELECT address FROM organizations WHERE id = ?")
         .bind(org_id)
         .fetch_one(&state.db)
         .await?;
 
-    // Get enabled products
     let contract = contracts::get_contract("HaitheOrganization", Some(org_address.as_str()))
         .map_err(|e| ApiError::Internal(format!("Failed to get contract: {}", e)))?;
 
@@ -142,7 +137,6 @@ pub async fn generate_llm_response(
             enabled_products
         };
 
-    // Initialize LLM and cost tracking
     let llm = models::resolve_model(&params.model);
     let mut knowledges: Vec<Box<dyn Knowledge>> = vec![Box::new(StringKnowledge::new(
         "You are an AI assistant integrated with the Haithe platform. You can use the attached knowledge to answer context aware questions when the user asks about them, else you can answer in general.",
@@ -156,7 +150,6 @@ pub async fn generate_llm_response(
 
     let mut product_payments: Vec<(String, String, u64)> = Vec::new();
 
-    // Process enabled products
     for p in final_enabled_products {
         let (uri, _encrypted_key, _price_per_call, category, creator): (String, String, i64, String, String) =
             sqlx::query_as::<_, (String, String, i64, String, String)>("SELECT uri, encrypted_key, price_per_call, category, creator FROM products WHERE address = ?")
@@ -242,7 +235,6 @@ pub async fn generate_llm_response(
         }
     }
 
-    // Process payments for products
     for (product_address, creator_address, cost) in product_payments {
         if cost > 0 {
             let formatted_organization_address: Address = org_address
@@ -282,7 +274,6 @@ pub async fn generate_llm_response(
         }
     }
 
-    // Process LLM payment
     let llm_cost = models
         .iter()
         .find(|m| m.name == params.model)
@@ -311,7 +302,6 @@ pub async fn generate_llm_response(
             .map_err(|e| ApiError::BadRequest(format!("Transaction failed: {}", e)))?;
     }
 
-    // Setup agent
     let mut agent = Agent::new("Haithe Agent", llm).preamble(&preamble);
     agent.temperature = Some(params.temperature);
     agent.max_tokens = Some(1024);
@@ -331,7 +321,6 @@ pub async fn generate_llm_response(
         agent = agent.memory(WindowBufferMemory::new(30));
     }
 
-    // Generate prompt and responses
     let prompt = params
         .messages
         .iter()
@@ -354,7 +343,6 @@ pub async fn generate_llm_response(
         }));
     }
 
-    // Check balance and update expenditure
     let formatted_organization_address: Address = org_address
         .parse()
         .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
