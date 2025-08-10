@@ -4,6 +4,7 @@ use crate::lib::{error::ApiError, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, put, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use teloxide::prelude::*;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -468,6 +469,85 @@ async fn put_project_telegram_handler(
     Ok(respond::ok("Telegram token updated", serde_json::json!({})))
 }
 
+#[get("/{id}/telegram")]
+async fn get_project_telegram_info_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = path.into_inner();
+
+    if !can_manage_project(&user.wallet_address, project_id, &state.db).await? {
+        return Err(ApiError::Forbidden);
+    }
+
+    #[derive(FromRow)]
+    struct Row {
+        project_uid: String,
+        org_uid: String,
+        teloxide_token: Option<String>,
+    }
+    let row = sqlx::query_as::<_, Row>(
+        r#"SELECT pr.project_uid as project_uid, o.organization_uid as org_uid, pr.teloxide_token
+           FROM projects pr
+           JOIN organizations o ON o.id = pr.org_id
+           WHERE pr.id = ?"#,
+    )
+    .bind(project_id)
+    .fetch_optional(&state.db)
+    .await?;
+
+    let row = match row {
+        Some(r) => r,
+        None => return Err(ApiError::NotFound("Project not found".into())),
+    };
+
+    let token_opt = row
+        .teloxide_token
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty());
+    let configured = token_opt.is_some();
+    let mut running = false;
+    if let Some(token) = token_opt {
+        running = state
+            .get_ref()
+            .telegram_bots
+            .lock()
+            .unwrap()
+            .contains_key(token);
+    }
+
+    let mut me_json = None;
+    if let Some(token) = token_opt {
+        let bot = Bot::new(token.to_string());
+        if let Ok(me) = bot.get_me().await {
+            let username = Some(me.username().to_string());
+            me_json = Some(serde_json::json!({
+                "id": me.id.0,
+                "is_bot": me.is_bot,
+                "first_name": me.first_name,
+                "username": username,
+                "can_join_groups": me.can_join_groups,
+                "can_read_all_group_messages": me.can_read_all_group_messages,
+                "supports_inline_queries": me.supports_inline_queries,
+                "link": username.as_ref().map(|u| format!("https://t.me/{}", u)),
+            }));
+        }
+    }
+
+    Ok(respond::ok(
+        "Telegram bot info",
+        serde_json::json!({
+            "configured": configured,
+            "running": running,
+            "org_uid": row.org_uid,
+            "project_uid": row.project_uid,
+            "me": me_json,
+        }),
+    ))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(create_project_handler)
         .service(get_project_handler)
@@ -479,5 +559,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(remove_project_member_handler)
         .service(get_project_products_handler)
         .service(get_project_price_per_call_handler)
+        .service(get_project_telegram_info_handler)
         .service(put_project_telegram_handler);
 }
