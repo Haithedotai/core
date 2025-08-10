@@ -29,6 +29,7 @@ export class HaitheProjectsClient extends BaseClient {
       name?: string;
       search_enabled?: boolean;
       memory_enabled?: boolean;
+      default_model_id?: number;
     }
   ): Promise<Project> {
     const queryParams = new URLSearchParams();
@@ -41,6 +42,12 @@ export class HaitheProjectsClient extends BaseClient {
     }
     if (updates.memory_enabled !== undefined) {
       queryParams.append("memory_enabled", updates.memory_enabled.toString());
+    }
+    if (updates.default_model_id !== undefined) {
+      queryParams.append(
+        "default_model_id",
+        updates.default_model_id.toString()
+      );
     }
 
     return this.fetch(

@@ -29,6 +29,7 @@ export interface Project {
   created_at: string;
   search_enabled: boolean;
   memory_enabled: boolean;
+  default_model_id?: number | null;
   teloxide_token?: string | null;
 }
 
