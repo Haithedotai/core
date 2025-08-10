@@ -67,7 +67,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-16">
           <div className="mx-auto max-w-6xl text-center">
             <div className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm mb-8 lg:mb-12 backdrop-blur-sm hover:bg-white/8 transition-all duration-200">
-              <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse" />
+              <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse hidden md:block" />
               <span className="text-white/80 font-medium">
                 Powered by Hyperion Testnet & Alith AI Framework
               </span>
