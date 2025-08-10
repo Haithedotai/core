@@ -49,6 +49,7 @@ CREATE TABLE
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         search_enabled BOOLEAN NOT NULL DEFAULT FALSE,
         memory_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+        teloxide_token TEXT,
         UNIQUE (name, org_id),
         UNIQUE (project_uid)
     );
@@ -90,7 +91,6 @@ CREATE TABLE
         uri TEXT NOT NULL,
         encrypted_key TEXT NOT NULL,
         category TEXT NOT NULL,
-        teloxide_token TEXT,
         price_per_call INTEGER NOT NULL CHECK (price_per_call >= 0),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name, creator)
