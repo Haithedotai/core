@@ -187,7 +187,7 @@ export default function Connect() {
                 className="py-2 px-4 rounded-md"
             >
                 <Icon name="Wallet" className="size-4" />
-                Sign in
+                Connect Wallet
             </Button>
         );
     }
