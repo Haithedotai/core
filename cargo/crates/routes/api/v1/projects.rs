@@ -141,7 +141,7 @@ async fn create_project_handler(
     let project_uid = Uuid::new_v4().to_string().replace("-", "");
 
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name, project_uid) VALUES (?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled",
+        "INSERT INTO projects (org_id, name, project_uid) VALUES (?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, teloxide_token",
     )
     .bind(&query.org_id)
     .bind(&query.name)
