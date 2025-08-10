@@ -1,6 +1,7 @@
 use crate::lib::extractors::AuthUser;
+use crate::lib::telegram::sync_bots;
 use crate::lib::{error::ApiError, respond, state::AppState};
-use actix_web::{Responder, delete, get, patch, post, web};
+use actix_web::{Responder, delete, get, patch, post, put, web};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -51,6 +52,11 @@ struct UpdateMemberQuery {
 #[derive(Deserialize)]
 struct RemoveMemberQuery {
     wallet_address: String,
+}
+
+#[derive(Deserialize)]
+struct PutProjectTelegramBody {
+    teloxide_token: Option<String>,
 }
 
 async fn can_manage_org(
@@ -427,6 +433,41 @@ async fn get_project_price_per_call_handler(
     ))
 }
 
+#[put("/{id}/telegram")]
+async fn put_project_telegram_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    body: web::Json<PutProjectTelegramBody>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = path.into_inner();
+
+    if !can_manage_project(&user.wallet_address, project_id, &state.db).await? {
+        return Err(ApiError::Forbidden);
+    }
+
+    let token_opt = body
+        .teloxide_token
+        .as_ref()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty());
+
+    sqlx::query("UPDATE projects SET teloxide_token = ? WHERE id = ?")
+        .bind(token_opt)
+        .bind(project_id)
+        .execute(&state.db)
+        .await?;
+
+    if let Err(e) = sync_bots(state.clone()).await {
+        eprintln!(
+            "Failed to sync Telegram bots after project token update: {}",
+            e
+        );
+    }
+
+    Ok(respond::ok("Telegram token updated", serde_json::json!({})))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(create_project_handler)
         .service(get_project_handler)
@@ -437,5 +478,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(update_project_member_handler)
         .service(remove_project_member_handler)
         .service(get_project_products_handler)
-        .service(get_project_price_per_call_handler);
+        .service(get_project_price_per_call_handler)
+        .service(put_project_telegram_handler);
 }
