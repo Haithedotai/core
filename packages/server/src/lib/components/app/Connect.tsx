@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
 import { Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 
 // Define Hyperion testnet chain
 const hyperion = {
@@ -36,6 +37,10 @@ export default function Connect() {
     // Get authentication state
     const isWalletConnected = ready && authenticated && user?.wallet?.address;
     const isHaitheLoggedIn = api.isLoggedIn();
+    const isClientInitialized = api.isClientInitialized();
+    
+    // Check if wallet client is ready for signing (important for embedded wallets)
+    const isWalletClientReady = api.isWeb3Ready();
 
     // Check if on correct network - also handle case where currentChainId might be undefined
     const isOnCorrectNetwork = currentChainId && currentChainId === correctChainId;
@@ -46,6 +51,89 @@ export default function Connect() {
     // Mutations
     const loginMutation = api.login;
     const logoutMutation = api.logout;
+
+    // Ref to prevent multiple auto-login attempts
+    const autoLoginAttempted = useRef(false);
+    const retryLoginTimer = useRef<NodeJS.Timeout | null>(null);
+
+    // Auto-login effect: when wallet is connected, on correct network, and wallet client is ready
+    useEffect(() => {
+        const shouldAutoLogin = isWalletConnected && 
+                              isOnCorrectNetwork && 
+                              isClientInitialized &&
+                              isWalletClientReady &&
+                              !isHaitheLoggedIn && 
+                              !loginMutation.isPending &&
+                              !autoLoginAttempted.current;
+
+        if (shouldAutoLogin) {
+            console.log('Auto-triggering Haithe login after wallet connection and readiness...');
+            autoLoginAttempted.current = true;
+            
+            // Longer delay for embedded wallets to ensure they're fully ready
+            const timeoutId = setTimeout(() => {
+                // Double-check that wallet client is still ready and we need to login
+                if (autoLoginAttempted.current && !loginMutation.isPending && api.isWeb3Ready()) {
+                    loginMutation.mutate(undefined, {
+                        onError: (error) => {
+                            console.error('Auto-login failed:', error);
+                            
+                            // Check if it's a wallet readiness issue (common with embedded wallets)
+                            if (error.message?.includes('Wallet client is not ready') && !retryLoginTimer.current) {
+                                console.log('Auto-login failed due to wallet not ready, retrying in 2 seconds...');
+                                
+                                // Retry once after a longer delay for embedded wallets
+                                retryLoginTimer.current = setTimeout(() => {
+                                    if (api.isWeb3Ready() && !api.isLoggedIn()) {
+                                        console.log('Retrying auto-login for embedded wallet...');
+                                        loginMutation.mutate(undefined, {
+                                            onError: () => {
+                                                autoLoginAttempted.current = false;
+                                                console.log('Auto-login retry failed - user can login manually');
+                                            }
+                                        });
+                                    }
+                                    retryLoginTimer.current = null;
+                                }, 2000);
+                            } else {
+                                // Reset the flag so user can try again manually
+                                autoLoginAttempted.current = false;
+                            }
+                        }
+                    });
+                } else if (!api.isWeb3Ready()) {
+                    // Reset flag if wallet client is not ready
+                    autoLoginAttempted.current = false;
+                    console.log('Auto-login postponed: wallet client not ready');
+                }
+            }, 500); // Increased delay for embedded wallets
+
+            // Cleanup timeout on unmount or deps change
+            return () => clearTimeout(timeoutId);
+        }
+    }, [isWalletConnected, isOnCorrectNetwork, isClientInitialized, isHaitheLoggedIn]); // Removed isWalletClientReady from deps to prevent re-triggers
+
+    // Reset auto-login flag when wallet disconnects or user logs in
+    useEffect(() => {
+        if (!isWalletConnected || isHaitheLoggedIn) {
+            autoLoginAttempted.current = false;
+            // Clear retry timer if user disconnects or logs in
+            if (retryLoginTimer.current) {
+                clearTimeout(retryLoginTimer.current);
+                retryLoginTimer.current = null;
+            }
+        }
+    }, [isWalletConnected, isHaitheLoggedIn]);
+
+    // Cleanup retry timer on unmount
+    useEffect(() => {
+        return () => {
+            if (retryLoginTimer.current) {
+                clearTimeout(retryLoginTimer.current);
+                retryLoginTimer.current = null;
+            }
+        };
+    }, []);
 
     const handleWalletConnect = async () => {
         try {
@@ -99,7 +187,7 @@ export default function Connect() {
                 className="py-2 px-4 rounded-md"
             >
                 <Icon name="Wallet" className="size-4" />
-                Connect Wallet
+                Sign in
             </Button>
         );
     }
@@ -148,17 +236,20 @@ export default function Connect() {
 
     // Stage 3: Wallet connected and on correct network but not logged into Haithe
     if (!isHaitheLoggedIn) {
+        // Show loading state during auto-login or if manual login is pending
+        const isLoggingIn = loginMutation.isPending;
+        
         return (
             <div className="flex justify-center items-center gap-3">
                 <Button
                     onClick={handleHaitheLogin}
-                    disabled={loginMutation.isPending}
+                    disabled={isLoggingIn}
                     className="py-2 px-4 rounded-md w-f"
                 >
-                    {loginMutation.isPending ? (
+                    {isLoggingIn ? (
                         <div className="flex items-center">
                             <Icon name="Loader" className="size-4 mr-2 animate-spin" />
-                            Logging in...
+                            Signing in...
                         </div>
                     ) : (
                         <div className="flex items-center">
