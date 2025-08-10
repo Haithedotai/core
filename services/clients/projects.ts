@@ -104,6 +104,15 @@ export class HaitheProjectsClient extends BaseClient {
     );
   }
 
+  setTelegramToken(projectId: number, token: string | null): Promise<{}> {
+    const body = { teloxide_token: token };
+    return this.fetch(
+      `/v1/projects/${projectId}/telegram`,
+      this.authClient.getAuthToken(),
+      { method: "PUT", body: JSON.stringify(body) }
+    );
+  }
+
   getProjects(orgId: number): Promise<Project[]> {
     return this.fetch(
       `/v1/orgs/${orgId}/projects`,
