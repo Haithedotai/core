@@ -845,5 +845,20 @@ export function useHaitheApi() {
                 toast.error('Could not get AI completion. Please try again.');
             }
         }),
+
+        setTelegramToken: useMutation({
+            mutationKey: ['setTelegramToken'],
+            mutationFn: ({ projectId, token }: { projectId: number; token: string | null }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.setTelegramToken(projectId, token);
+            },
+            onSuccess: () => {
+                toast.success('Telegram token set successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not set Telegram token. Please try again.');
+            }
+        }),
     };
 } 

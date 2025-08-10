@@ -72,7 +72,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(
                 Cors::default()
                     .allow_any_origin()
-                    .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "OPTIONS"])
+                    .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"])
                     .allowed_headers(vec![
                         actix_web::http::header::AUTHORIZATION,
                         actix_web::http::header::CONTENT_TYPE,
