@@ -297,7 +297,7 @@ export default function ItemDetailPage() {
               <Card className="overflow-hidden">
                 <div className="h-64 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5 flex items-center justify-center relative">
                   <div className="absolute inset-0 bg-grid-white/10" />
-                  <div className="relative text-center space-y-4">
+                  <div className="relative text-center space-y-4 p-4">
                     <div className="text-8xl mb-4">{categoryIcon}</div>
                     <h2 className="text-2xl font-semibold">{item.name}</h2>
                     <p className="text-muted-foreground max-w-md">
