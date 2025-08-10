@@ -32,7 +32,7 @@ async fn start_bot(
                         model: "gemini-2.0-flash".to_string(),
                         messages: vec![json!({
                             "role": "user",
-                            "content": text
+                            "content": format!("You are a bot with access to telegram, always send plain text as if you were responding to a user message, please do not use markdown only use telegram supported formatting\n {}", text)
                         })],
                         temperature: 0.7,
                         n: 1,
