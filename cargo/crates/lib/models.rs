@@ -137,6 +137,7 @@ pub fn resolve_model(name: &str) -> LLM {
         ),
         "DeepSeek" => ("https://api.deepseek.com/v1", "DEEPSEEK_API_KEY"),
         "Moonshot" => ("https://api.moonshot.com/v1", "MOONSHOT_API_KEY"),
+        "Haithe" => ("https://api.groq.com/openai/v1", "GROQ_API_KEY"),
         _ => panic!("Unsupported provider: {}", model.provider),
     };
 
