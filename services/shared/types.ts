@@ -29,6 +29,7 @@ export interface Project {
   created_at: string;
   search_enabled: boolean;
   memory_enabled: boolean;
+  teloxide_token?: string | null;
 }
 
 export interface ProjectMember {
