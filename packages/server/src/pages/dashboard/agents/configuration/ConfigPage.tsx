@@ -17,7 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { useParams } from "@tanstack/react-router";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { useStore } from "@/src/lib/hooks/use-store";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from "@/src/lib/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription, DialogClose } from "@/src/lib/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ import DashboardHeader from "../../Header";
 import { toast } from "sonner";
 import { formatEther } from "viem";
 import FundOrgDialog from "../../FundOrg";
+import { Image } from "@/src/lib/components/custom/Image";
 
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
@@ -757,8 +758,9 @@ export default function AgentsConfigurationPage() {
 
                 {/* Telegram Integration */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center gap-3">
+                    <Image src="/static/telegram.webp" alt="Telegram" className="size-6" />
+                    <div className="flex flex-col">
                       <p className="text-sm font-medium text-muted-foreground">Telegram Integration</p>
                       <p className="text-xs text-muted-foreground">Connect your agent to Telegram</p>
                     </div>
@@ -969,11 +971,18 @@ export default function AgentsConfigurationPage() {
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <Icon name="Bot" className="h-5 w-5 text-primary" />
-                              Configure Telegram Bot
+                            <DialogTitle className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Image src="/static/telegram.webp" alt="Telegram" className="size-5" />
+                                Configure Telegram Bot
+                              </div>
+                              <DialogClose asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Icon name="X" className="size-4" />
+                                </Button>
+                              </DialogClose>
                             </DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="hidden">
                               Connect your agent to Telegram by setting up a bot token.
                             </DialogDescription>
                           </DialogHeader>
@@ -1007,13 +1016,13 @@ export default function AgentsConfigurationPage() {
                               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                                 <div className="flex items-start gap-3">
                                   <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
-                                  <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center justify-between w-full gap-10">
                                     <div>
                                       <h4 className="text-sm font-medium text-red-800">
                                         Insufficient balance
                                       </h4>
                                       <p className="text-sm text-red-700 mt-1">
-                                        Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per message (${formatEther(BigInt(totalPricePerCall))}).
+                                        Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
                                       </p>
                                     </div>
                                     {organization && <FundOrgDialog organization={organization} refetchBalance={refetchBalance} />}

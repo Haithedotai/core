@@ -286,7 +286,7 @@ export default function ChatWithAgent() {
             <div className="mb-10 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-start gap-3">
                 <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center justify-between w-full gap-10">
                   <div>
                     <h4 className="text-sm font-medium text-red-800">
                       Insufficient balance
