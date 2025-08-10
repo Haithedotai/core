@@ -44,8 +44,8 @@ export default function AgentsConfigurationPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
-  const [agentName, setAgentName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState("");
   const [deleteAgent, setDeleteAgent] = useState<any>(null);
 
   // Project members state
@@ -62,6 +62,8 @@ export default function AgentsConfigurationPage() {
   const profileQuery = api.profile();
   const orgId = useStore((s) => s.selectedOrganizationId);
   const { data: project, isLoading: isLoadingProject, refetch: refetchProject } = api.getProject(parseInt(params.id));
+
+  console.log({ project });
 
   // Get organization data
   const { data: organization } = api.getOrganization(orgId);
@@ -233,22 +235,32 @@ export default function AgentsConfigurationPage() {
     setSaveDialogOpen(false);
   };
 
-  // Handle edit agent
-  const handleEdit = async () => {
+  // Handle edit agent name
+  const handleEditName = async () => {
     try {
-      if (!project || !agentName) return;
+      if (!project || !editingName.trim()) return;
       await api.updateProject.mutateAsync({
         id: project.id,
         updates: {
-          name: agentName
+          name: editingName.trim()
         }
       });
-      setEditOpen(false);
-      setAgentName("");
+      setIsEditingName(false);
+      setEditingName("");
       refetchProject();
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleStartEditName = () => {
+    setEditingName(project.name);
+    setIsEditingName(true);
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setEditingName("");
   };
 
   // Handle delete agent
@@ -393,11 +405,57 @@ export default function AgentsConfigurationPage() {
     <div className="min-h-full bg-background">
       {/* Header */}
       <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12">
-        <DashboardHeader
-          title={project.name}
-          subtitle="Manage your agent"
-          iconName="Settings"
-        />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Icon name="Settings" className="size-8 text-primary" />
+            <div className="space-y-1">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleEditName();
+                      } else if (e.key === "Escape") {
+                        handleCancelEditName();
+                      }
+                    }}
+                    className="text-2xl font-bold h-8 px-2"
+                    autoFocus
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEditName}
+                    disabled={!editingName.trim() || api.updateProject.isPending}
+                  >
+                    <Icon name="Check" className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelEditName}
+                  >
+                    <Icon name="X" className="size-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{project.name}</h1>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleStartEditName}
+                  >
+                    <Icon name="Pencil" className="size-4" />
+                  </Button>
+                </div>
+              )}
+              <p className="text-muted-foreground">Manage your agent</p>
+            </div>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <Button variant="outline" asChild>
@@ -452,17 +510,6 @@ export default function AgentsConfigurationPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setAgentName(project.name);
-                        setEditOpen(true);
-                      }}
-                    >
-                      <Icon name="Pencil" className="size-4" />
-                      <span className="hidden md:block">Edit Agent</span>
-                    </Button>
-
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -1382,39 +1429,6 @@ export default function AgentsConfigurationPage() {
             </Button>
             <Button onClick={handleSaveChanges}>
               Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Agent Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleEdit();
-          }
-        }}>
-          <DialogHeader>
-            <DialogTitle>Edit Agent</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="agent-name">Agent Name</Label>
-              <Input
-                id="agent-name"
-                placeholder="Agent name"
-                value={agentName}
-                onChange={e => setAgentName(e.target.value)}
-                className="mt-2"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEdit} disabled={!agentName || api.updateProject.isPending}>
-              {api.updateProject.isPending ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

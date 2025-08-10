@@ -432,6 +432,7 @@ export function useHaitheApi() {
                 name?: string;
                 search_enabled?: boolean;
                 memory_enabled?: boolean;
+                default_model_id?: number;
             } }) => {
                 if (!client) throw new Error("Wallet not connected");
                 return client.updateProject(id, updates);
