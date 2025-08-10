@@ -10,18 +10,18 @@ import { useEffect, useRef } from "react";
 
 // Define Hyperion testnet chain
 const hyperion = {
-  id: 133717,
-  name: "Hyperion Testnet",
-  nativeCurrency: {
-    name: "tMetis",
-    symbol: "TMETIS",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://hyperion-testnet.metisdevops.link"],
+    id: 133717,
+    name: "Hyperion Testnet",
+    nativeCurrency: {
+        name: "tMetis",
+        symbol: "TMETIS",
+        decimals: 18,
     },
-  },
+    rpcUrls: {
+        default: {
+            http: ["https://hyperion-testnet.metisdevops.link"],
+        },
+    },
 };
 
 const isProd = process.env.NODE_ENV === "production";
@@ -38,7 +38,7 @@ export default function Connect() {
     const isWalletConnected = ready && authenticated && user?.wallet?.address;
     const isHaitheLoggedIn = api.isLoggedIn();
     const isClientInitialized = api.isClientInitialized();
-    
+
     // Check if wallet client is ready for signing (important for embedded wallets)
     const isWalletClientReady = api.isWeb3Ready();
 
@@ -58,18 +58,18 @@ export default function Connect() {
 
     // Auto-login effect: when wallet is connected, on correct network, and wallet client is ready
     useEffect(() => {
-        const shouldAutoLogin = isWalletConnected && 
-                              isOnCorrectNetwork && 
-                              isClientInitialized &&
-                              isWalletClientReady &&
-                              !isHaitheLoggedIn && 
-                              !loginMutation.isPending &&
-                              !autoLoginAttempted.current;
+        const shouldAutoLogin = isWalletConnected &&
+            isOnCorrectNetwork &&
+            isClientInitialized &&
+            isWalletClientReady &&
+            !isHaitheLoggedIn &&
+            !loginMutation.isPending &&
+            !autoLoginAttempted.current;
 
         if (shouldAutoLogin) {
             console.log('Auto-triggering Haithe login after wallet connection and readiness...');
             autoLoginAttempted.current = true;
-            
+
             // Longer delay for embedded wallets to ensure they're fully ready
             const timeoutId = setTimeout(() => {
                 // Double-check that wallet client is still ready and we need to login
@@ -77,11 +77,11 @@ export default function Connect() {
                     loginMutation.mutate(undefined, {
                         onError: (error) => {
                             console.error('Auto-login failed:', error);
-                            
+
                             // Check if it's a wallet readiness issue (common with embedded wallets)
                             if (error.message?.includes('Wallet client is not ready') && !retryLoginTimer.current) {
                                 console.log('Auto-login failed due to wallet not ready, retrying in 2 seconds...');
-                                
+
                                 // Retry once after a longer delay for embedded wallets
                                 retryLoginTimer.current = setTimeout(() => {
                                     if (api.isWeb3Ready() && !api.isLoggedIn()) {
@@ -194,11 +194,11 @@ export default function Connect() {
 
     // Stage 2: Wallet connected but wrong network or network not detected
     if (!isOnCorrectNetwork) {
-        const currentNetworkName = currentChainId === mainnet.id ? "Ethereum Mainnet" : 
-                                  currentChainId === hardhat.id ? "Hardhat" :
-                                  currentChainId === hyperion.id ? "Hyperion Testnet" :
-                                  `Chain ID ${currentChainId}`;
-        
+        const currentNetworkName = currentChainId === mainnet.id ? "Ethereum Mainnet" :
+            currentChainId === hardhat.id ? "Hardhat" :
+                currentChainId === hyperion.id ? "Hyperion Testnet" :
+                    `Chain ID ${currentChainId}`;
+
         return (
             <div className="flex items-center gap-3">
                 <Button
@@ -238,7 +238,7 @@ export default function Connect() {
     if (!isHaitheLoggedIn) {
         // Show loading state during auto-login or if manual login is pending
         const isLoggingIn = loginMutation.isPending;
-        
+
         return (
             <div className="flex justify-center items-center gap-3">
                 <Button

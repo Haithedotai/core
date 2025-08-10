@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "../../../lib/components/ui/button";
-import { Badge } from "../../../lib/components/ui/badge";
 import { Separator } from "../../../lib/components/ui/separator";
 import { Checkbox } from "../../../lib/components/ui/checkbox";
 
@@ -12,10 +11,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../../../lib/components/ui/sheet";
-import { categories } from "../mockData";
 import Icon from "@/src/lib/components/custom/Icon";
 import { FileText, Code, Database, Link as LinkIcon, MessageSquare } from "lucide-react";
 import { useMarketplaceStore } from "../../../lib/hooks/use-store";
+import CreatorSheet from "@/src/lib/components/app/CreatorSheet";
 
 export default function MarketplaceMobileSidebar() {
   const [isOpen, setIsOpen] = useState(false);

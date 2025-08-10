@@ -63,7 +63,7 @@ export default function CreatorSheet() {
       <SheetTrigger asChild>
         <Button variant="outline" className="rounded-sm">
           <Icon name="Zap" className="h-4 w-4 text-orange-400" />
-          <span className="hidden sm:inline bg-gradient-to-r from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Become a Creator</span>
+          <span className="bg-gradient-to-r text-xs md:text-base from-orange-400 via-red-500 to-sky-400 bg-clip-text text-transparent">Become a Creator</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="px-0 w-full sm:w-[480px]">
