@@ -27,7 +27,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.0 Flash Lite".to_string(),
             provider: "Google".to_string(),
             is_active: true,
-            price_per_call: 0,
+            price_per_call: (0.0001_f64 * 1e18) as u64,
         },
         Model {
             id: 3,
@@ -112,11 +112,11 @@ pub fn get_models() -> Vec<Model> {
         },
         Model {
             id: 13,
-            name: "kimi-k2-0711-preview".to_string(),
+            name: "moonshotai/kimi-k2-instruct".to_string(),
             display_name: "Kimi K2".to_string(),
             provider: "Haithe".to_string(),
-            is_active: false,
-            price_per_call: 0,
+            is_active: true,
+            price_per_call: (0.005_f64 * 1e18) as u64,
         },
     ];
 
@@ -137,6 +137,7 @@ pub fn resolve_model(name: &str) -> LLM {
         ),
         "DeepSeek" => ("https://api.deepseek.com/v1", "DEEPSEEK_API_KEY"),
         "Moonshot" => ("https://api.moonshot.com/v1", "MOONSHOT_API_KEY"),
+        "Haithe" => ("https://api.groq.com/openai/v1", "GROQ_API_KEY"),
         _ => panic!("Unsupported provider: {}", model.provider),
     };
 
