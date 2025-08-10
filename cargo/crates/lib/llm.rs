@@ -91,11 +91,24 @@ pub async fn generate_llm_response(
         .await?;
 
     // Get enabled products
-    let enabled_products_for_organization: Vec<ethers::types::Address> =
-        contracts::get_contract("HaitheOrganization", Some(org_address.as_str()))?
-            .method::<_, Vec<ethers::types::Address>>("getEnabledProducts", ())?
-            .call()
-            .await?;
+    let contract = contracts::get_contract("HaitheOrganization", Some(org_address.as_str()))
+        .map_err(|e| ApiError::Internal(format!("Failed to get contract: {}", e)))?;
+
+    let method_result = contract.method::<_, Vec<ethers::types::Address>>("getEnabledProducts", ());
+    let method = match method_result {
+        Ok(m) => m,
+        Err(e) => {
+            return Err(ApiError::Internal(format!(
+                "Failed to create method call: {}",
+                e
+            )));
+        }
+    };
+
+    let enabled_products_for_organization: Vec<ethers::types::Address> = method
+        .call()
+        .await
+        .map_err(|e| ApiError::Internal(format!("Failed to call contract method: {}", e)))?;
 
     let enabled_products_for_project: Vec<String> = sqlx::query_scalar::<_, String>(
         "SELECT p.address FROM products p 
@@ -346,10 +359,25 @@ pub async fn generate_llm_response(
         .parse()
         .map_err(|_| ApiError::BadRequest("Invalid wallet address format".into()))?;
 
-    let balance = contracts::get_contract("tUSDT", None)?
-        .method::<_, u64>("balanceOf", (formatted_organization_address))?
+    let balance_contract = contracts::get_contract("tUSDT", None)
+        .map_err(|e| ApiError::Internal(format!("Failed to get tUSDT contract: {}", e)))?;
+
+    let balance_method_result =
+        balance_contract.method::<_, u64>("balanceOf", (formatted_organization_address));
+    let balance_method = match balance_method_result {
+        Ok(m) => m,
+        Err(e) => {
+            return Err(ApiError::Internal(format!(
+                "Failed to create balanceOf method: {}",
+                e
+            )));
+        }
+    };
+
+    let balance = balance_method
         .call()
-        .await?;
+        .await
+        .map_err(|e| ApiError::Internal(format!("Failed to call balanceOf: {}", e)))?;
 
     let current_expenditure: i64 =
         sqlx::query_scalar("SELECT expenditure FROM organizations WHERE id = ?")
