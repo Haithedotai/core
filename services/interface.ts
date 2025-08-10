@@ -42,6 +42,10 @@ export class HaitheClient {
     });
   }
 
+  setProjectTelegramToken(projectId: number, token: string | null): Promise<{}> {
+    return this.projects.setTelegramToken(projectId, token);
+  }
+
   get fetch() {
     return this.auth.fetch.bind(this.auth);
   }
