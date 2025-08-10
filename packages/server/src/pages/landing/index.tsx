@@ -90,9 +90,9 @@ export default function Landing() {
                 size="lg"
                 className="text-base lg:text-lg bg-white/90 text-black hover:bg-white border-0 px-8 lg:px-10 py-4 h-auto font-semibold transition-all duration-100 w-full sm:w-auto"
               >
-                <Link to="/marketplace" className="flex items-center">
-                  Explore Marketplace
-                  <Icon name="ArrowRight" className="ml-1 h-5 w-5" />
+                <Link to="/docs" className="flex items-center">
+                  <Icon name="Book" className="ml-1 h-5 w-5" />
+                  <span>See Documentation</span>
                 </Link>
               </Button>
               <Button

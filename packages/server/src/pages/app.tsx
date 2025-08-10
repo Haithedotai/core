@@ -28,6 +28,7 @@ import Loader from '../lib/components/app/Loader';
 import AgentsConfiguration from './dashboard/agents/configuration';
 import GenerateAPIKey from './dashboard/generateAPIKey';
 import { ChatWithAgent, ChatList, ChatSettings } from './dashboard/agents/chat';
+import Docs from './docs';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -315,6 +316,14 @@ const chatSettingsRoute = createRoute({
   },
 })
 
+const docsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/docs',
+  component: function DocsRoute() {
+    return withPageErrorBoundary(Docs)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   onboardingRoute,
@@ -336,7 +345,8 @@ const routeTree = rootRoute.addChildren([
   generateAPIKeyRoute,
   chatListRoute,
   chatWithAgentRoute,
-  chatSettingsRoute
+  chatSettingsRoute,
+  docsRoute
 ])
 
 const router = createRouter({

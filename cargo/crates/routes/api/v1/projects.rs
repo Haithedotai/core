@@ -15,6 +15,7 @@ pub struct Project {
     pub created_at: String,
     pub search_enabled: bool,
     pub memory_enabled: bool,
+    pub teloxide_token: Option<String>,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -160,7 +161,7 @@ async fn get_project_handler(
     let project_id = path.into_inner();
 
     let project = sqlx::query_as::<_, Project>(
-        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled FROM projects WHERE id = ?"
+        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, teloxide_token FROM projects WHERE id = ?"
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -239,7 +240,7 @@ async fn delete_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled"
+        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, teloxide_token"
     )
     .bind(project_id)
     .fetch_one(&state.db)

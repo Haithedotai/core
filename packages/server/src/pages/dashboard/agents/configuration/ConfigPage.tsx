@@ -44,14 +44,15 @@ export default function AgentsConfigurationPage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [agentName, setAgentName] = useState("");
-  const [searchEnabled, setSearchEnabled] = useState(false);
-  const [memoryEnabled, setMemoryEnabled] = useState(false);
   const [deleteAgent, setDeleteAgent] = useState<any>(null);
   
   // Project members state
   const [isAddProjectMemberDialogOpen, setIsAddProjectMemberDialogOpen] = useState(false);
   const [newProjectMemberAddress, setNewProjectMemberAddress] = useState("");
   const [newProjectMemberRole, setNewProjectMemberRole] = useState<"admin" | "developer" | "viewer">("viewer");
+
+  // Telegram token state
+  const [telegramToken, setTelegramToken] = useState("");
 
   // Get profile data
   const profileQuery = api.profile();
@@ -226,15 +227,11 @@ export default function AgentsConfigurationPage() {
       await api.updateProject.mutateAsync({
         id: project.id,
         updates: {
-          name: agentName,
-          search_enabled: searchEnabled,
-          memory_enabled: memoryEnabled
+          name: agentName
         }
       });
       setEditOpen(false);
       setAgentName("");
-      setSearchEnabled(false);
-      setMemoryEnabled(false);
       refetchProject();
     } catch (error) {
       console.error(error);
@@ -320,6 +317,27 @@ export default function AgentsConfigurationPage() {
     }
   };
 
+  // Telegram token management functions
+  const handleSetTelegramToken = async () => {
+    if (!project) {
+      toast.error('No project selected');
+      return;
+    }
+
+    try {
+      await api.setTelegramToken.mutateAsync({
+        projectId: project.id,
+        token: telegramToken.trim() || null
+      });
+      
+      setTelegramToken("");
+      refetchProject();
+    } catch (error) {
+      console.error('Failed to set Telegram token:', error);
+      // Error handling is already done in the mutation hooks
+    }
+  };
+
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
@@ -387,8 +405,6 @@ export default function AgentsConfigurationPage() {
                       variant="ghost"
                       onClick={() => {
                         setAgentName(project.name);
-                        setSearchEnabled(project.search_enabled || false);
-                        setMemoryEnabled(project.memory_enabled || false);
                         setEditOpen(true);
                       }}
                     >
@@ -451,17 +467,26 @@ export default function AgentsConfigurationPage() {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Search Enabled</p>
                       <p className="text-sm text-muted-foreground">Web search capabilities</p>
+                      <Badge variant="secondary" className="text-xs">Unavailable</Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      {project.search_enabled ? (
-                        <>
-                          <Badge variant="secondary" className="text-sm font-medium text-green-600">Enabled</Badge>
-                        </>
-                      ) : (
-                        <>
-                          <Badge variant="secondary" className="text-sm font-medium text-muted-foreground">Disabled</Badge>
-                        </>
-                      )}
+                      <Switch
+                        checked={project.search_enabled || false}
+                        onCheckedChange={async (checked) => {
+                          try {
+                            await api.updateProject.mutateAsync({
+                              id: project.id,
+                              updates: {
+                                search_enabled: checked
+                              }
+                            });
+                            refetchProject();
+                          } catch (error) {
+                            console.error(error);
+                          }
+                        }}
+                        disabled={true}
+                      />
                     </div>
                   </div>
 
@@ -471,15 +496,70 @@ export default function AgentsConfigurationPage() {
                       <p className="text-sm text-muted-foreground">Conversation memory</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {project.memory_enabled ? (
-                        <>
-                          <Badge variant="secondary" className="text-sm font-medium text-green-600">Enabled</Badge>
-                        </>
-                      ) : (
-                        <>
-                          <Badge variant="secondary" className="text-sm font-medium text-muted-foreground">Disabled</Badge>
-                        </>
-                      )}
+                      <Switch
+                        checked={project.memory_enabled || false}
+                        onCheckedChange={async (checked) => {
+                          try {
+                            await api.updateProject.mutateAsync({
+                              id: project.id,
+                              updates: {
+                                memory_enabled: checked
+                              }
+                            });
+                            refetchProject();
+                          } catch (error) {
+                            console.error(error);
+                          }
+                        }}
+                        disabled={api.updateProject.isPending}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Telegram Integration */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Telegram Integration</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="telegram-token" className="text-sm">Bot Token</Label>
+                      <Input
+                        id="telegram-token"
+                        placeholder={project.teloxide_token || "e.g. 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"}
+                        value={telegramToken}
+                        onChange={e => setTelegramToken(e.target.value)}
+                        className="font-mono text-sm mt-2"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        You can get a bot token from @BotFather on Telegram.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={handleSetTelegramToken}
+                        disabled={api.setTelegramToken.isPending}
+                      >
+                        {api.setTelegramToken.isPending ? (
+                          <>
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Token'
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setTelegramToken("");
+                          handleSetTelegramToken();
+                        }}
+                      >
+                        Clear
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -984,38 +1064,6 @@ export default function AgentsConfigurationPage() {
                 className="mt-2"
               />
             </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="search-enabled">Search Enabled</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable web search capabilities for this agent
-                  </p>
-                  <Badge variant="secondary" className="text-xs">Unavailable</Badge>
-                </div>
-                <Switch
-                  id="search-enabled"
-                  checked={searchEnabled}
-                  onCheckedChange={setSearchEnabled}
-                  disabled={true}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="memory-enabled">Memory Enabled</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable conversation memory for this agent
-                  </p>
-                </div>
-                <Switch
-                  id="memory-enabled"
-                  checked={memoryEnabled}
-                  onCheckedChange={setMemoryEnabled}
-                />
-              </div>
-            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditOpen(false)}>
@@ -1027,6 +1075,8 @@ export default function AgentsConfigurationPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+
     </div>
   );
 }

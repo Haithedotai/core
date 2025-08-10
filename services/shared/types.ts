@@ -71,6 +71,8 @@ export interface Product {
   price_per_call: number;
   category: string;
   created_at: string;
+  description?: string;
+  photo_url?: string;
 }
 
 export interface Conversation {

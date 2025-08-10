@@ -402,6 +402,10 @@ export class HaitheClient {
     return this.projects.createMessage(conversationId, message, sender, orgUid, projectUid);
   }
 
+  setTelegramToken(projectId: number, token: string | null): Promise<{}> {
+    return this.projects.setTelegramToken(projectId, token);
+  }
+
   getCompletions(
     orgUid: string, 
     projectUid: string, 
