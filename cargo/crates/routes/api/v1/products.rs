@@ -1,6 +1,6 @@
 use crate::lib::extractors::AuthUser;
 use crate::lib::{contracts, error::ApiError, respond, state::AppState};
-use actix_web::{Responder, delete, get, post, web};
+use actix_web::{Responder, delete, get, post, patch, web};
 use alith::data::crypto::{DecodeRsaPublicKey, Pkcs1v15Encrypt, RsaPublicKey};
 use alith::lazai::{ProofRequest, U256};
 use reqwest;
@@ -17,6 +17,8 @@ pub struct Product {
     pub uri: String,
     pub encrypted_key: String,
     pub price_per_call: i64,
+    pub description: Option<String>,
+    pub photo_url: Option<String>,
     pub created_at: String,
 }
 
@@ -292,13 +294,15 @@ pub struct ProductSummary {
     pub name: String,
     pub price_per_call: i64,
     pub category: String,
+    pub description: Option<String>,
+    pub photo_url: Option<String>,
     pub created_at: String,
 }
 
 #[get("")]
 async fn get_all_products(state: web::Data<AppState>) -> Result<impl Responder, ApiError> {
     let products = sqlx::query_as::<_, ProductSummary>(
-        "SELECT id, address, creator, name, price_per_call, category, created_at FROM products ORDER BY created_at DESC"
+        "SELECT id, address, creator, name, price_per_call, category, description, photo_url, created_at FROM products ORDER BY created_at DESC"
     )
     .fetch_all(&state.db)
     .await
@@ -320,7 +324,7 @@ async fn get_product_by_id(
     let product_id = path.into_inner();
 
     let product = sqlx::query_as::<_, ProductSummary>(
-        "SELECT id, address, creator, name, price_per_call, category, created_at FROM products WHERE id = ?"
+        "SELECT id, address, creator, name, price_per_call, category, description, photo_url, created_at FROM products WHERE id = ?"
     )
     .bind(product_id)
     .fetch_optional(&state.db)
@@ -338,10 +342,100 @@ async fn get_product_by_id(
     }
 }
 
+#[derive(Deserialize)]
+struct PatchProductRequest {
+    description: Option<String>,
+    photo_url: Option<String>,
+}
+
+#[patch("/{id}")]
+async fn patch_product_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    body: web::Json<PatchProductRequest>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let product_id = path.into_inner();
+
+    // Check if user is the creator of the product
+    let is_creator = sqlx::query_scalar::<_, i64>(
+        "SELECT EXISTS(SELECT 1 FROM products WHERE id = ? AND creator = ?) as \"exists!\""
+    )
+    .bind(product_id)
+    .bind(&user.wallet_address)
+    .fetch_one(&state.db)
+    .await?;
+
+    if is_creator == 0 {
+        return Err(ApiError::BadRequest(
+            "You can only update products you created".to_string(),
+        ));
+    }
+
+    // Build dynamic update query based on provided fields
+    let mut query_parts = Vec::new();
+    let mut bind_values = Vec::new();
+
+    if let Some(description) = &body.description {
+        query_parts.push("description = ?");
+        bind_values.push(description);
+    }
+
+    if let Some(photo_url) = &body.photo_url {
+        query_parts.push("photo_url = ?");
+        bind_values.push(photo_url);
+    }
+
+    if query_parts.is_empty() {
+        return Err(ApiError::BadRequest(
+            "At least one field must be provided for update".to_string(),
+        ));
+    }
+
+    // Build and execute the update query
+    let update_query = format!(
+        "UPDATE products SET {} WHERE id = ? AND creator = ?",
+        query_parts.join(", ")
+    );
+
+    let mut query = sqlx::query(&update_query);
+    
+    // Bind all the update values
+    for value in &bind_values {
+        query = query.bind(value);
+    }
+    
+    // Bind the WHERE clause values
+    query = query.bind(product_id).bind(&user.wallet_address);
+
+    let rows_affected = query.execute(&state.db).await?.rows_affected();
+
+    if rows_affected == 0 {
+        return Err(ApiError::NotFound("Product not found or you don't have permission to update it".into()));
+    }
+
+    // Fetch the updated product
+    let updated_product = sqlx::query_as::<_, ProductSummary>(
+        "SELECT id, address, creator, name, price_per_call, category, created_at FROM products WHERE id = ?"
+    )
+    .bind(product_id)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|e| {
+        ApiError::Internal("Failed to fetch updated product".into())
+    })?;
+
+    Ok(respond::ok(
+        "Product updated successfully",
+        serde_json::json!({ "product": updated_product }),
+    ))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_all_products)
         .service(get_product_by_id)
         .service(post_index_handler)
         .service(post_enable_handler)
-        .service(delete_disable_handler);
+        .service(delete_disable_handler)
+        .service(patch_product_handler);
 }

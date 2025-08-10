@@ -42,4 +42,19 @@ export class HaitheProductsClient extends BaseClient {
       { method: "DELETE" }
     );
   }
+
+  async updateProduct(
+    id: number, 
+    updates: { description?: string; photo_url?: string }
+  ): Promise<Product> {
+    const response = await this.fetch<{ product: Product }>(
+      `/v1/products/${id}`,
+      this.authClient.getAuthToken(),
+      {
+        method: "PATCH",
+        body: JSON.stringify(updates),
+      }
+    );
+    return response.product;
+  }
 }

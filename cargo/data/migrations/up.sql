@@ -92,6 +92,8 @@ CREATE TABLE
         category TEXT NOT NULL,
         teloxide__token TEXT,
         price_per_call INTEGER NOT NULL CHECK (price_per_call >= 0),
+        description TEXT,
+        photo_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (name, creator)
     );

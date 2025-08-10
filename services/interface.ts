@@ -313,6 +313,13 @@ export class HaitheClient {
     return this.products.disableProjectProduct(projectId, productId);
   }
 
+  updateProduct(
+    id: number, 
+    updates: { description?: string; photo_url?: string }
+  ): Promise<Product> {
+    return this.products.updateProduct(id, updates);
+  }
+
   getProjectProducts(projectId: number): Promise<number[]> {
     return this.projects.getProjectProducts(projectId);
   }

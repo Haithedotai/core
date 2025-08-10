@@ -206,7 +206,7 @@ export function useHaitheApi() {
             },
             onError: (error) => {
                 console.error(error?.toString?.() || error);
-                toast.error('Could not create organization. Please try again.');
+                toast.error('Could not create organization. Try with a different name.');
             }
         }),
 
@@ -623,6 +623,26 @@ export function useHaitheApi() {
                 return client.getProductById(id);
             },
             enabled: !!client && !!id,
+        }),
+
+        updateProduct: useMutation({
+            mutationKey: ['updateProduct'],
+            mutationFn: ({ id, updates }: { 
+                id: number; 
+                updates: { description?: string; photo_url?: string } 
+            }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.updateProduct(id, updates);
+            },
+            onSuccess: (_, { id }) => {
+                toast.success('Product updated successfully');
+                queryClient.invalidateQueries({ queryKey: ['product', id] });
+                queryClient.invalidateQueries({ queryKey: ['allProducts'] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update product. Please try again.');
+            }
         }),
 
         // Project product management

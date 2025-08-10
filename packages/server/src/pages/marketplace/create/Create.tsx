@@ -629,7 +629,12 @@ export default function CreatePage() {
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} onKeyDown={(e) => {
+                if (e.ctrlKey && e.key === "Enter") {
+                    e.preventDefault();
+                    handleSubmit(e);
+                }
+            }} className="space-y-8">
                 <Card>
                     <CardHeader>
                         <CardTitle>Basic Information</CardTitle>
