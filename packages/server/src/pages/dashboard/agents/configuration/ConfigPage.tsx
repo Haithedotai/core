@@ -317,7 +317,7 @@ export default function AgentsConfigurationPage() {
     }
   };
 
-  // Telegram token management functions
+  // Telegram token management function
   const handleSetTelegramToken = async () => {
     if (!project) {
       toast.error('No project selected');
