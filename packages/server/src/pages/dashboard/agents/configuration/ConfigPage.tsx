@@ -32,6 +32,8 @@ import {
 import { copyToClipboard } from "../../../../../utils";
 import DashboardHeader from "../../Header";
 import { toast } from "sonner";
+import { formatEther } from "viem";
+import FundOrgDialog from "../../FundOrg";
 
 export default function AgentsConfigurationPage() {
   const params = useParams({ from: "/dashboard/agents/$id" });
@@ -45,7 +47,7 @@ export default function AgentsConfigurationPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [agentName, setAgentName] = useState("");
   const [deleteAgent, setDeleteAgent] = useState<any>(null);
-  
+
   // Project members state
   const [isAddProjectMemberDialogOpen, setIsAddProjectMemberDialogOpen] = useState(false);
   const [newProjectMemberAddress, setNewProjectMemberAddress] = useState("");
@@ -53,6 +55,8 @@ export default function AgentsConfigurationPage() {
 
   // Telegram token state
   const [telegramToken, setTelegramToken] = useState("");
+  const [isTelegramDialogOpen, setIsTelegramDialogOpen] = useState(false);
+  const { data: telegramInfo, isLoading: isLoadingTelegramInfo, refetch: refetchTelegramInfo } = api.getTelegramInfo(parseInt(params.id));
 
   // Get profile data
   const profileQuery = api.profile();
@@ -70,9 +74,18 @@ export default function AgentsConfigurationPage() {
 
   // Get project-specific enabled products
   const { data: projectProductIds, isLoading: isLoadingProjectProducts, refetch: refetchProjectProducts } = api.getProjectProducts(parseInt(params.id));
-  
+
   // Get project members
   const { data: projectMembers, isLoading: isLoadingProjectMembers, refetch: refetchProjectMembers } = api.getProjectMembers(parseInt(params.id));
+
+  // Get enabled models for the organization (for Telegram prerequisites)
+  const { data: enabledModels } = api.getEnabledModels(Number(orgId));
+
+  // Get organization balance (for Telegram prerequisites)
+  const { data: balanceData, refetch: refetchBalance } = api.organizationBalance(Number(orgId));
+
+  // Get total price per call for all enabled products of this agent (for Telegram prerequisites)
+  const { data: pricePerCallData } = api.pricePerCall(parseInt(params.id));
 
   // Loading state
   if (profileQuery.isPending || isLoadingProject || isLoadingEnabledProducts || isLoadingAllProducts || isLoadingProjectProducts || isLoadingProjectMembers || !api.isClientInitialized()) {
@@ -269,7 +282,7 @@ export default function AgentsConfigurationPage() {
         address: newProjectMemberAddress.trim(),
         role: newProjectMemberRole
       });
-      
+
       setNewProjectMemberAddress("");
       setNewProjectMemberRole("viewer");
       setIsAddProjectMemberDialogOpen(false);
@@ -317,7 +330,7 @@ export default function AgentsConfigurationPage() {
     }
   };
 
-  // Telegram token management function
+  // Telegram token management functions
   const handleSetTelegramToken = async () => {
     if (!project) {
       toast.error('No project selected');
@@ -329,14 +342,52 @@ export default function AgentsConfigurationPage() {
         projectId: project.id,
         token: telegramToken.trim() || null
       });
-      
+
       setTelegramToken("");
+      setIsTelegramDialogOpen(false);
+      refetchTelegramInfo();
       refetchProject();
     } catch (error) {
       console.error('Failed to set Telegram token:', error);
       // Error handling is already done in the mutation hooks
     }
   };
+
+  const handleClearTelegramToken = async () => {
+    if (!project) {
+      toast.error('No project selected');
+      return;
+    }
+
+    try {
+      await api.setTelegramToken.mutateAsync({
+        projectId: project.id,
+        token: null
+      });
+
+      setTelegramToken("");
+      setIsTelegramDialogOpen(false);
+      refetchTelegramInfo();
+      refetchProject();
+    } catch (error) {
+      console.error('Failed to clear Telegram token:', error);
+      // Error handling is already done in the mutation hooks
+    }
+  };
+
+  // Telegram prerequisites checks
+  const hasEnabledModels = enabledModels && enabledModels.length > 0;
+  const organizationBalance = balanceData?.balance || 0;
+  const agentPricePerCall = pricePerCallData?.total_price_per_call || 0;
+
+  // Calculate total price per call (agent products + cheapest model)
+  const cheapestModelPrice = enabledModels && enabledModels.length > 0
+    ? Math.min(...enabledModels.map(model => model.price_per_call))
+    : 0;
+  const totalPricePerCall = agentPricePerCall + cheapestModelPrice;
+  const hasSufficientBalance = organizationBalance !== 0 && organizationBalance >= totalPricePerCall;
+
+  const telegramPrerequisitesMet = hasEnabledModels && hasSufficientBalance;
 
   return (
     <div className="min-h-full bg-background">
@@ -521,46 +572,339 @@ export default function AgentsConfigurationPage() {
 
                 {/* Telegram Integration */}
                 <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Telegram Integration</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Telegram Integration</p>
+                      <p className="text-xs text-muted-foreground">Connect your agent to Telegram</p>
+                    </div>
                   </div>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="telegram-token" className="text-sm">Bot Token</Label>
-                      <Input
-                        id="telegram-token"
-                        placeholder={project.teloxide_token || "e.g. 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"}
-                        value={telegramToken}
-                        onChange={e => setTelegramToken(e.target.value)}
-                        className="font-mono text-sm mt-2"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        You can get a bot token from @BotFather on Telegram.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={handleSetTelegramToken}
-                        disabled={api.setTelegramToken.isPending}
-                      >
-                        {api.setTelegramToken.isPending ? (
-                          <>
-                            Saving...
-                          </>
-                        ) : (
-                          'Save Token'
+
+                  <div className="rounded-lg bg-muted/50 p-4">
+                    {telegramInfo?.configured ? (
+                      <div className="space-y-4">
+                        <div className="flex items-start space-x-3">
+                          <Icon name="CircleCheck" className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                          <div className="text-sm">
+                            <p className="font-medium text-foreground mb-1">Bot Configured</p>
+                            <p className="text-muted-foreground">Your Telegram bot is active and ready to use.</p>
+                          </div>
+                        </div>
+
+                        {telegramInfo.me && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-border/50">
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Bot Name</p>
+                              <p className="text-sm font-medium">{telegramInfo.me.first_name}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Username</p>
+                              <p className="text-sm font-mono">@{telegramInfo.me.username}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Bot ID</p>
+                              <p className="text-sm font-mono">{telegramInfo.me.id}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Status</p>
+                              <div className="flex items-center gap-2">
+                                <div className={`h-2 w-2 rounded-full ${telegramInfo.running ? 'bg-green-500' : 'bg-red-500'}`} />
+                                <span className="text-sm">{telegramInfo.running ? 'Running' : 'Stopped'}</span>
+                              </div>
+                            </div>
+                            {telegramInfo.me.link && (
+                              <div className="md:col-span-2">
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Bot Link</p>
+                                <a
+                                  href={telegramInfo.me.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline font-mono"
+                                >
+                                  {telegramInfo.me.link}
+                                </a>
+                              </div>
+                            )}
+                          </div>
                         )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setTelegramToken("");
-                          handleSetTelegramToken();
-                        }}
-                      >
-                        Clear
-                      </Button>
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start space-x-3">
+                        <Icon name="TriangleAlert" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm">
+                          <p className="font-medium text-foreground mb-1">No Bot Configured</p>
+                          <p className="text-muted-foreground">Set up your Telegram bot token to enable integration.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {telegramInfo?.configured ? (
+                      <>
+                        <Dialog open={isTelegramDialogOpen} onOpenChange={setIsTelegramDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline">
+                              <Icon name="Settings" className="h-4 w-4" />
+                              Reconfigure Token
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <Icon name="Bot" className="h-5 w-5 text-primary" />
+                                Reconfigure Telegram Bot
+                              </DialogTitle>
+                              <DialogDescription>
+                                Update your Telegram bot token. Your bot will be immediately updated with the new configuration.
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-6">
+                              {/* Warning when no models are enabled */}
+                              {!hasEnabledModels && enabledModels !== undefined && (
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <div className="flex items-start gap-3">
+                                    <Icon name="TriangleAlert" className="size-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                    <div className="flex-1">
+                                      <h4 className="text-sm font-medium text-yellow-800">
+                                        No models enabled
+                                      </h4>
+                                      <p className="text-sm text-yellow-700 mt-1">
+                                        Your organization needs to enable at least one model to use Telegram bots.
+                                        <Link
+                                          to="/dashboard/settings"
+                                          className="text-yellow-800 underline hover:text-yellow-900 ml-1"
+                                        >
+                                          Go to settings
+                                        </Link>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Warning when balance is insufficient */}
+                              {hasEnabledModels && !hasSufficientBalance && balanceData !== undefined && (
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                  <div className="flex items-start gap-3">
+                                    <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                    <div className="flex items-center justify-between w-full">
+                                      <div>
+                                        <h4 className="text-sm font-medium text-red-800">
+                                          Insufficient balance
+                                        </h4>
+                                        <p className="text-sm text-red-700 mt-1">
+                                          Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per message (${formatEther(BigInt(totalPricePerCall))}).
+                                        </p>
+                                      </div>
+                                      {organization && <FundOrgDialog organization={organization} refetchBalance={refetchBalance} />}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Token Input */}
+                              <div className="space-y-2">
+                                <Label htmlFor="telegram-token-reconfig" className="text-sm">New Bot Token</Label>
+                                <Input
+                                  id="telegram-token-reconfig"
+                                  placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+                                  value={telegramToken}
+                                  onChange={(e) => setTelegramToken(e.target.value)}
+                                  className="font-mono text-sm"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                  This will replace your current bot configuration and may cause brief service interruption.
+                                </p>
+                              </div>
+
+                              {/* Warning */}
+                              <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 dark:bg-amber-950/20 dark:border-amber-800">
+                                <div className="flex items-start space-x-3">
+                                  <Icon name="TriangleAlert" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                                  <div className="text-sm">
+                                    <p className="font-medium text-amber-800 dark:text-amber-200 mb-1">Important!</p>
+                                    <p className="text-amber-700 dark:text-amber-300">
+                                      Changing the bot token will immediately update your bot configuration. The old bot will stop working and the new bot will be activated.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button variant="outline" onClick={() => {
+                                setIsTelegramDialogOpen(false);
+                                setTelegramToken("");
+                              }} className="flex-1">
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleSetTelegramToken}
+                                disabled={api.setTelegramToken.isPending || !telegramToken.trim() || !telegramPrerequisitesMet}
+                                className="flex-1"
+                              >
+                                {api.setTelegramToken.isPending ? (
+                                  <>
+                                    <Icon name="LoaderCircle" className="h-4 w-4 animate-spin mr-2" />
+                                    Updating...
+                                  </>
+                                ) : (
+                                  'Update Token'
+                                )}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Button
+                          variant="outline"
+                          onClick={handleClearTelegramToken}
+                          disabled={api.setTelegramToken.isPending}
+                        >
+                          {api.setTelegramToken.isPending ? (
+                            <>
+                              <Icon name="LoaderCircle" className="h-4 w-4 animate-spin" />
+                              Clearing...
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="Trash" className="h-4 w-4 text-red-500" />
+                              Clear Bot Token
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    ) : (
+                      <Dialog open={isTelegramDialogOpen} onOpenChange={setIsTelegramDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Icon name="Plus" className="h-4 w-4" />
+                            Configure Bot Token
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <Icon name="Bot" className="h-5 w-5 text-primary" />
+                              Configure Telegram Bot
+                            </DialogTitle>
+                            <DialogDescription>
+                              Connect your agent to Telegram by setting up a bot token.
+                            </DialogDescription>
+                          </DialogHeader>
+
+                          <div className="space-y-6">
+                            {/* Warning when no models are enabled */}
+                            {!hasEnabledModels && enabledModels !== undefined && (
+                              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <Icon name="TriangleAlert" className="size-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1">
+                                    <h4 className="text-sm font-medium text-yellow-800">
+                                      No models enabled
+                                    </h4>
+                                    <p className="text-sm text-yellow-700 mt-1">
+                                      Your organization needs to enable at least one model to use Telegram bots.
+                                      <Link
+                                        to="/dashboard/settings"
+                                        className="text-yellow-800 underline hover:text-yellow-900 ml-1"
+                                      >
+                                        Go to settings
+                                      </Link>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Warning when balance is insufficient */}
+                            {hasEnabledModels && !hasSufficientBalance && balanceData !== undefined && (
+                              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                  <div className="flex items-center justify-between w-full">
+                                    <div>
+                                      <h4 className="text-sm font-medium text-red-800">
+                                        Insufficient balance
+                                      </h4>
+                                      <p className="text-sm text-red-700 mt-1">
+                                        Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per message (${formatEther(BigInt(totalPricePerCall))}).
+                                      </p>
+                                    </div>
+                                    {organization && <FundOrgDialog organization={organization} refetchBalance={refetchBalance} />}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* BotFather Guide */}
+                            <div className="space-y-3">
+                              <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 dark:bg-blue-950/20 dark:border-blue-800">
+                                <div className="space-y-3">
+                                  <div className="flex items-start space-x-3">
+                                    <div className="text-sm">
+                                      <p className="font-medium text-blue-800 dark:text-blue-200 mb-2">How to create a bot:</p>
+                                      <ol className="space-y-1 text-blue-700 dark:text-blue-300">
+                                        <li><strong>1.</strong> Start a new chat with <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="text-blue-100 underline underline-offset-2 hover:text-blue-300 transition-colors">@BotFather</a></li>
+                                        <li><strong>2.</strong> Send <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">/newbot</code> to create a new bot</li>
+                                        <li><strong>3.</strong> Set a name & username for your bot</li>
+                                        <li><strong>4.</strong> Copy the bot token and paste it below to connect your agent</li>
+                                      </ol>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Token Input */}
+                            <div className="space-y-2">
+                              <Label htmlFor="telegram-token-input" className="text-sm">Bot Token</Label>
+                              <Input
+                                id="telegram-token-input"
+                                placeholder="e.g. 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+                                value={telegramToken}
+                                onChange={(e) => setTelegramToken(e.target.value)}
+                                className="font-mono text-sm mt-1"
+                              />
+                            </div>
+
+                            {/* Security Notice */}
+                            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 dark:bg-amber-950/20 dark:border-amber-800">
+                              <div className="flex items-start space-x-3">
+                                <div className="text-sm">
+                                  <p className="text-amber-700 dark:text-amber-300">
+                                    Your bot token will be encrypted and stored securely. You won't be able to view it after saving.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 mt-2">
+                            <Button variant="outline" onClick={() => {
+                              setIsTelegramDialogOpen(false);
+                              setTelegramToken("");
+                            }} className="flex-1">
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleSetTelegramToken}
+                              disabled={api.setTelegramToken.isPending || !telegramToken.trim() || !telegramPrerequisitesMet}
+                              className="flex-1"
+                            >
+                              {api.setTelegramToken.isPending ? (
+                                <>
+                                  <Icon name="LoaderCircle" className="h-4 w-4 animate-spin mr-2" />
+                                  Saving...
+                                </>
+                              ) : (
+                                'Save Token'
+                              )}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -770,7 +1114,7 @@ export default function AgentsConfigurationPage() {
                           <Button variant="outline" onClick={() => setIsAddProjectMemberDialogOpen(false)}>
                             Cancel
                           </Button>
-                          <Button 
+                          <Button
                             onClick={handleAddProjectMember}
                             disabled={api.addProjectMember.isPending || !newProjectMemberAddress.trim()}
                           >
@@ -809,8 +1153,8 @@ export default function AgentsConfigurationPage() {
                                 <Badge variant={member.role === 'admin' ? 'default' : member.role === 'developer' ? 'secondary' : 'outline'}>
                                   {member.role}
                                 </Badge>
-                                <Select 
-                                  value={member.role} 
+                                <Select
+                                  value={member.role}
                                   onValueChange={(value: "admin" | "developer" | "viewer") => handleUpdateProjectMemberRole(member.address, value)}
                                   disabled={api.updateProjectMemberRole.isPending}
                                 >

@@ -860,5 +860,14 @@ export function useHaitheApi() {
                 toast.error('Could not set Telegram token. Please try again.');
             }
         }),
+
+        getTelegramInfo: (projectId: number) => useQuery({
+            queryKey: ['telegramInfo', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getTelegramInfo(projectId);
+            },
+            enabled: !!client && !!projectId,
+        }),
     };
 } 
