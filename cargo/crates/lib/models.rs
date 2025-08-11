@@ -11,6 +11,10 @@ pub struct Model {
     pub price_per_call: u64,
 }
 
+pub fn get_model_by_id(id: u64) -> Option<Model> {
+    get_models().into_iter().find(|m| m.id == id)
+}
+
 pub fn get_models() -> Vec<Model> {
     let models = vec![
         Model {
