@@ -235,7 +235,7 @@ pub async fn generate_llm_response(
         }
     }
 
-    for (product_address, creator_address, cost) in product_payments {
+    for (_product_address, creator_address, cost) in product_payments {
         if cost > 0 {
             let formatted_organization_address: Address = org_address
                 .parse()
