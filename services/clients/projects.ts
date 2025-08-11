@@ -142,6 +142,44 @@ export class HaitheProjectsClient extends BaseClient {
     );
   }
 
+  getDiscordInfo(projectId: number): Promise<{
+    configured: boolean;
+    running: boolean;
+    org_uid: string;
+    project_uid: string;
+    me: null | {
+      id: string;
+      username: string;
+      discriminator: string;
+      avatar: string | null;
+      bot: boolean;
+      system: boolean;
+      mfa_enabled: boolean;
+      banner: string | null;
+      accent_colour: number | null;
+      locale: string | null;
+      verified: boolean | null;
+      email: string | null;
+      flags: number | null;
+      premium_type: number | null;
+      public_flags: number | null;
+    };
+  }> {
+    return this.fetch(
+      `/v1/projects/${projectId}/discord`,
+      this.authClient.getAuthToken()
+    );
+  }
+
+  setDiscordToken(projectId: number, token: string | null): Promise<{}> {
+    const body = { discord_token: token };
+    return this.fetch(
+      `/v1/projects/${projectId}/discord`,
+      this.authClient.getAuthToken(),
+      { method: "PUT", body: JSON.stringify(body) }
+    );
+  }
+
   getProjects(orgId: number): Promise<Project[]> {
     return this.fetch(
       `/v1/orgs/${orgId}/projects`,

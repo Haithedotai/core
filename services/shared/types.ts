@@ -31,6 +31,7 @@ export interface Project {
   memory_enabled: boolean;
   default_model_id?: number | null;
   teloxide_token?: string | null;
+  discord_token?: string | null;
 }
 
 export interface ProjectMember {
