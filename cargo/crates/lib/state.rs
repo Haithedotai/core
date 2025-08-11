@@ -8,10 +8,14 @@ pub struct TelegramBotHandle {
     pub join: JoinHandle<()>,
 }
 
+pub struct DiscordBotHandle {
+    pub join: tokio::task::JoinHandle<()>,
+}
+
 pub struct AppState {
     pub nonce_registry: Mutex<HashMap<String, String>>,
     pub db: SqlitePool,
     pub window_buffer_memory: Mutex<HashMap<String, WindowBufferMemory>>,
-    // key: bot token
+    pub discord_bots: Mutex<HashMap<String, DiscordBotHandle>>,
     pub telegram_bots: Mutex<HashMap<String, TelegramBotHandle>>,
 }
