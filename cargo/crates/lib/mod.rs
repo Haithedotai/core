@@ -1,4 +1,5 @@
 pub mod contracts;
+pub mod discord;
 pub mod error;
 pub mod extractors;
 pub mod llm;
