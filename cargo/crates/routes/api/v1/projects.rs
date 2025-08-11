@@ -1,8 +1,11 @@
+use crate::lib::discord::sync_discord_bots;
 use crate::lib::extractors::AuthUser;
 use crate::lib::telegram::sync_bots;
 use crate::lib::{error::ApiError, respond, state::AppState};
 use actix_web::{Responder, delete, get, patch, post, put, web};
 use serde::{Deserialize, Serialize};
+use serenity::http::Http;
+use serenity::model::user::User;
 use sqlx::FromRow;
 use teloxide::prelude::*;
 use uuid::Uuid;
@@ -18,6 +21,7 @@ pub struct Project {
     pub memory_enabled: bool,
     pub default_model_id: Option<i64>,
     pub teloxide_token: Option<String>,
+    pub discord_token: Option<String>,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -61,6 +65,11 @@ struct RemoveMemberQuery {
 #[derive(Deserialize)]
 struct PutProjectTelegramBody {
     teloxide_token: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct PutProjectDiscordBody {
+    discord_token: Option<String>,
 }
 
 async fn can_manage_org(
@@ -168,7 +177,7 @@ async fn get_project_handler(
     let project_id = path.into_inner();
 
     let project = sqlx::query_as::<_, Project>(
-        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token FROM projects WHERE id = ?"
+        "SELECT id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token, discord_token FROM projects WHERE id = ?"
     )
     .bind(project_id)
     .fetch_one(&state.db)
@@ -574,6 +583,126 @@ async fn get_project_telegram_info_handler(
     ))
 }
 
+#[put("/{id}/discord")]
+async fn put_project_discord_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    body: web::Json<PutProjectDiscordBody>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = path.into_inner();
+
+    if !can_manage_project(&user.wallet_address, project_id, &state.db).await? {
+        return Err(ApiError::Forbidden);
+    }
+
+    let token_opt = body
+        .discord_token
+        .as_ref()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty());
+
+    sqlx::query("UPDATE projects SET discord_token = ? WHERE id = ?")
+        .bind(token_opt)
+        .bind(project_id)
+        .execute(&state.db)
+        .await?;
+
+    if let Err(e) = sync_discord_bots(state.clone()).await {
+        eprintln!(
+            "Failed to sync Discord bots after project token update: {}",
+            e
+        );
+    }
+
+    Ok(respond::ok("Discord token updated", serde_json::json!({})))
+}
+
+#[get("/{id}/discord")]
+async fn get_project_discord_info_handler(
+    user: AuthUser,
+    path: web::Path<i64>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let project_id = path.into_inner();
+
+    if !can_manage_project(&user.wallet_address, project_id, &state.db).await? {
+        return Err(ApiError::Forbidden);
+    }
+
+    #[derive(FromRow)]
+    struct Row {
+        project_uid: String,
+        org_uid: String,
+        discord_token: Option<String>,
+    }
+    let row = sqlx::query_as::<_, Row>(
+        r#"SELECT pr.project_uid as project_uid, o.organization_uid as org_uid, pr.discord_token
+           FROM projects pr
+           JOIN organizations o ON o.id = pr.org_id
+           WHERE pr.id = ?"#,
+    )
+    .bind(project_id)
+    .fetch_optional(&state.db)
+    .await?;
+
+    let row = match row {
+        Some(r) => r,
+        None => return Err(ApiError::NotFound("Project not found".into())),
+    };
+
+    let token_opt = row
+        .discord_token
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty());
+    let configured = token_opt.is_some();
+    let mut running = false;
+    if let Some(token) = token_opt {
+        running = state
+            .get_ref()
+            .discord_bots
+            .lock()
+            .unwrap()
+            .contains_key(token);
+    }
+
+    let mut me_json = None;
+    if let Some(token) = token_opt {
+        let http = Http::new(token);
+        if let Ok(current_user) = http.get_current_user().await {
+            me_json = Some(serde_json::json!({
+                "id": current_user.id.get(),
+                "username": current_user.name,
+                "discriminator": current_user.discriminator,
+                "avatar": current_user.avatar,
+                "bot": current_user.bot,
+                "system": current_user.system,
+                "mfa_enabled": current_user.mfa_enabled,
+                "banner": current_user.banner,
+                "accent_colour": current_user.accent_colour,
+                "locale": current_user.locale,
+                "verified": current_user.verified,
+                "email": current_user.email,
+                "flags": current_user.flags,
+                "premium_type": current_user.premium_type,
+                "public_flags": current_user.public_flags,
+            }));
+        }
+    }
+
+    Ok(respond::ok(
+        "Discord bot info",
+        serde_json::json!({
+            "configured": configured,
+            "running": running,
+            "org_uid": row.org_uid,
+            "project_uid": row.project_uid,
+            "me": me_json,
+        }),
+    ))
+}
+
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(create_project_handler)
         .service(get_project_handler)
@@ -586,5 +715,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(get_project_products_handler)
         .service(get_project_price_per_call_handler)
         .service(get_project_telegram_info_handler)
-        .service(put_project_telegram_handler);
+        .service(put_project_telegram_handler)
+        .service(get_project_discord_info_handler)
+        .service(put_project_discord_handler);
 }
