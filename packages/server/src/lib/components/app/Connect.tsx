@@ -5,7 +5,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { useHaitheApi } from "../../hooks/use-haithe-api";
 import Icon from "../custom/Icon";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 
 // Define Hyperion testnet chain
@@ -33,6 +33,7 @@ export default function Connect() {
     const api = useHaitheApi();
     const currentChainId = useChainId();
     const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
+    const navigate = useNavigate();
 
     // Get authentication state
     const isWalletConnected = ready && authenticated && user?.wallet?.address;
@@ -137,6 +138,7 @@ export default function Connect() {
 
     const handleWalletConnect = async () => {
         try {
+            localStorage.clear();
             privyLogin();
         } catch (error) {
             console.error('Failed to connect wallet:', error);
@@ -163,7 +165,7 @@ export default function Connect() {
             }
             await privyLogout();
             localStorage.clear();
-            window.location.href = "/";
+            navigate({ to: "/" });
         } catch (error) {
             console.error('Failed to disconnect:', error);
         }
