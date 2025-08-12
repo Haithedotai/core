@@ -156,7 +156,7 @@ async fn create_project_handler(
     let default_model_id = Some(1i64);
 
     let project = sqlx::query_as::<_, Project>(
-        "INSERT INTO projects (org_id, name, project_uid, default_model_id) VALUES (?, ?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token",
+        "INSERT INTO projects (org_id, name, project_uid, default_model_id) VALUES (?, ?, ?, ?) RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token, discord_token",
     )
     .bind(&query.org_id)
     .bind(&query.name)
@@ -230,7 +230,7 @@ async fn update_project_handler(
     }
 
     let sql = format!(
-        "UPDATE projects SET {} WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token",
+        "UPDATE projects SET {} WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token, discord_token",
         update_parts.join(", ")
     );
 
@@ -275,7 +275,7 @@ async fn delete_project_handler(
     }
 
     let project = sqlx::query_as::<_, Project>(
-        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token"
+        "DELETE FROM projects WHERE id = ? RETURNING id, org_id, project_uid, name, created_at, search_enabled, memory_enabled, default_model_id, teloxide_token, discord_token"
     )
     .bind(project_id)
     .fetch_one(&state.db)
