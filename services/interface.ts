@@ -430,6 +430,36 @@ export class HaitheClient {
     return this.projects.getTelegramInfo(projectId);
   }
 
+  setDiscordToken(projectId: number, token: string | null): Promise<{}> {
+    return this.projects.setDiscordToken(projectId, token);
+  }
+
+  getDiscordInfo(projectId: number): Promise<{
+    configured: boolean;
+    running: boolean;
+    org_uid: string;
+    project_uid: string;
+    me: null | {
+      id: string;
+      username: string;
+      discriminator: string;
+      avatar: string | null;
+      bot: boolean;
+      system: boolean;
+      mfa_enabled: boolean;
+      banner: string | null;
+      accent_colour: number | null;
+      locale: string | null;
+      verified: boolean | null;
+      email: string | null;
+      flags: number | null;
+      premium_type: number | null;
+      public_flags: number | null;
+    };
+  }> {
+    return this.projects.getDiscordInfo(projectId);
+  }
+
   getCompletions(
     orgUid: string, 
     projectUid: string, 

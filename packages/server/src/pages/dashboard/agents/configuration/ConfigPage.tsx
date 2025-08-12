@@ -30,7 +30,6 @@ import {
   AlertDialogTrigger,
 } from "@/src/lib/components/ui/alert-dialog";
 import { copyToClipboard } from "../../../../../utils";
-import DashboardHeader from "../../Header";
 import { toast } from "sonner";
 import { formatEther } from "viem";
 import FundOrgDialog from "../../FundOrg";
@@ -58,6 +57,11 @@ export default function AgentsConfigurationPage() {
   const [telegramToken, setTelegramToken] = useState("");
   const [isTelegramDialogOpen, setIsTelegramDialogOpen] = useState(false);
   const { data: telegramInfo, isLoading: isLoadingTelegramInfo, refetch: refetchTelegramInfo } = api.getTelegramInfo(parseInt(params.id));
+
+  // Discord token state
+  const [discordToken, setDiscordToken] = useState("");
+  const [isDiscordDialogOpen, setIsDiscordDialogOpen] = useState(false);
+  const { data: discordInfo, isLoading: isLoadingDiscordInfo, refetch: refetchDiscordInfo } = api.getDiscordInfo(parseInt(params.id));
 
   // Get profile data
   const profileQuery = api.profile();
@@ -429,6 +433,51 @@ export default function AgentsConfigurationPage() {
       refetchProject();
     } catch (error) {
       console.error('Failed to clear Telegram token:', error);
+      // Error handling is already done in the mutation hooks
+    }
+  };
+
+  // Discord token management functions
+  const handleSetDiscordToken = async () => {
+    if (!project) {
+      toast.error('No project selected');
+      return;
+    }
+
+    try {
+      await api.setDiscordToken.mutateAsync({
+        projectId: project.id,
+        token: discordToken.trim() || null
+      });
+
+      setDiscordToken("");
+      setIsDiscordDialogOpen(false);
+      refetchDiscordInfo();
+      refetchProject();
+    } catch (error) {
+      console.error('Failed to set Discord token:', error);
+      // Error handling is already done in the mutation hooks
+    }
+  };
+
+  const handleClearDiscordToken = async () => {
+    if (!project) {
+      toast.error('No project selected');
+      return;
+    }
+
+    try {
+      await api.setDiscordToken.mutateAsync({
+        projectId: project.id,
+        token: null
+      });
+
+      setDiscordToken("");
+      setIsDiscordDialogOpen(false);
+      refetchDiscordInfo();
+      refetchProject();
+    } catch (error) {
+      console.error('Failed to clear Discord token:', error);
       // Error handling is already done in the mutation hooks
     }
   };
@@ -1087,6 +1136,356 @@ export default function AgentsConfigurationPage() {
                               className="flex-1"
                             >
                               {api.setTelegramToken.isPending ? (
+                                <>
+                                  <Icon name="LoaderCircle" className="h-4 w-4 animate-spin mr-2" />
+                                  Saving...
+                                </>
+                              ) : (
+                                'Save Token'
+                              )}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Discord Integration */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Image src="/static/discord.svg" alt="Discord" className="size-6" />
+                    <div className="flex flex-col">
+                      <p className="text-sm font-medium text-muted-foreground">Discord Integration</p>
+                      <p className="text-xs text-muted-foreground">Connect your agent to Discord</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg bg-muted/50 p-4">
+                    {discordInfo?.configured ? (
+                      <div className="space-y-4">
+                        <div className="flex items-start space-x-3">
+                          <Icon name="CircleCheck" className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                          <div className="text-sm">
+                            <p className="font-medium text-foreground mb-1">Bot Configured</p>
+                            <p className="text-muted-foreground">Your Discord bot is active and ready to use.</p>
+                          </div>
+                        </div>
+
+                        {discordInfo.me && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-border/50">
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Bot Username</p>
+                              <p className="text-sm font-medium">{discordInfo.me.username}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Bot ID</p>
+                              <p className="text-sm font-mono">{discordInfo.me.id}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Discriminator</p>
+                              <p className="text-sm font-mono">#{discordInfo.me.discriminator}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Status</p>
+                              <div className="flex items-center gap-2">
+                                <div className={`h-2 w-2 rounded-full ${discordInfo.running ? 'bg-green-500' : 'bg-red-500'}`} />
+                                <span className="text-sm">{discordInfo.running ? 'Running' : 'Stopped'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Bot Type</p>
+                              <div className="flex items-center gap-2">
+                                <Icon name={discordInfo.me.bot ? "Bot" : "User"} className="size-3 text-muted-foreground" />
+                                <span className="text-sm">{discordInfo.me.bot ? 'Bot Account' : 'User Account'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Verified</p>
+                              <div className="flex items-center gap-2">
+                                <Icon name={discordInfo.me.verified ? "Shield" : "ShieldAlert"} className={`size-3 ${discordInfo.me.verified ? 'text-green-500' : 'text-amber-500'}`} />
+                                <span className="text-sm">{discordInfo.me.verified ? 'Verified' : 'Not Verified'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-start space-x-3">
+                        <Icon name="TriangleAlert" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm">
+                          <p className="font-medium text-foreground mb-1">No Bot Configured</p>
+                          <p className="text-muted-foreground">Set up your Discord bot token to enable integration.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {discordInfo?.configured ? (
+                      <>
+                        <Dialog open={isDiscordDialogOpen} onOpenChange={setIsDiscordDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline">
+                              <Icon name="Settings" className="h-4 w-4" />
+                              Reconfigure Token
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <Icon name="Bot" className="h-5 w-5 text-primary" />
+                                Reconfigure Discord Bot
+                              </DialogTitle>
+                              <DialogDescription>
+                                Update your Discord bot token. Your bot will be immediately updated with the new configuration.
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-6">
+                              {/* Warning when no models are enabled */}
+                              {!hasEnabledModels && enabledModels !== undefined && (
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <div className="flex items-start gap-3">
+                                    <Icon name="TriangleAlert" className="size-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                    <div className="flex-1">
+                                      <h4 className="text-sm font-medium text-yellow-800">
+                                        No models enabled
+                                      </h4>
+                                      <p className="text-sm text-yellow-700 mt-1">
+                                        Your organization needs to enable at least one model to use Discord bots.
+                                        <Link
+                                          to="/dashboard/settings"
+                                          className="text-yellow-800 underline hover:text-yellow-900 ml-1"
+                                        >
+                                          Go to settings
+                                        </Link>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Warning when balance is insufficient */}
+                              {hasEnabledModels && !hasSufficientBalance && balanceData !== undefined && (
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                  <div className="flex items-start gap-3">
+                                    <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                    <div className="flex items-center justify-between w-full">
+                                      <div>
+                                        <h4 className="text-sm font-medium text-red-800">
+                                          Insufficient balance
+                                        </h4>
+                                        <p className="text-sm text-red-700 mt-1">
+                                          Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per message (${formatEther(BigInt(totalPricePerCall))}).
+                                        </p>
+                                      </div>
+                                      {organization && <FundOrgDialog organization={organization} refetchBalance={refetchBalance} />}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Token Input */}
+                              <div className="space-y-2">
+                                <Label htmlFor="discord-token-reconfig" className="text-sm">New Bot Token</Label>
+                                <Input
+                                  id="discord-token-reconfig"
+                                  placeholder="NTkz..."
+                                  value={discordToken}
+                                  onChange={(e) => setDiscordToken(e.target.value)}
+                                  className="font-mono text-sm"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                  This will replace your current bot configuration and may cause brief service interruption.
+                                </p>
+                              </div>
+
+                              {/* Warning */}
+                              <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 dark:bg-amber-950/20 dark:border-amber-800">
+                                <div className="flex items-start space-x-3">
+                                  <Icon name="TriangleAlert" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                                  <div className="text-sm">
+                                    <p className="font-medium text-amber-800 dark:text-amber-200 mb-1">Important!</p>
+                                    <p className="text-amber-700 dark:text-amber-300">
+                                      Changing the bot token will immediately update your bot configuration. The old bot will stop working and the new bot will be activated.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button variant="outline" onClick={() => {
+                                setIsDiscordDialogOpen(false);
+                                setDiscordToken("");
+                              }} className="flex-1">
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleSetDiscordToken}
+                                disabled={api.setDiscordToken.isPending || !discordToken.trim() || !telegramPrerequisitesMet}
+                                className="flex-1"
+                              >
+                                {api.setDiscordToken.isPending ? (
+                                  <>
+                                    <Icon name="LoaderCircle" className="h-4 w-4 animate-spin mr-2" />
+                                    Updating...
+                                  </>
+                                ) : (
+                                  'Update Token'
+                                )}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Button
+                          variant="outline"
+                          onClick={handleClearDiscordToken}
+                          disabled={api.setDiscordToken.isPending}
+                        >
+                          {api.setDiscordToken.isPending ? (
+                            <>
+                              <Icon name="LoaderCircle" className="h-4 w-4 animate-spin" />
+                              Clearing...
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="Trash" className="h-4 w-4 text-red-500" />
+                              Clear Bot Token
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    ) : (
+                      <Dialog open={isDiscordDialogOpen} onOpenChange={setIsDiscordDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Icon name="Plus" className="h-4 w-4" />
+                            Configure Bot Token
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Image src="/static/discord.svg" alt="Discord" className="size-5" />
+                                Configure Discord Bot
+                              </div>
+                              <DialogClose asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Icon name="X" className="size-4" />
+                                </Button>
+                              </DialogClose>
+                            </DialogTitle>
+                            <DialogDescription className="hidden">
+                              Connect your agent to Discord by setting up a bot token.
+                            </DialogDescription>
+                          </DialogHeader>
+
+                          <div className="space-y-6">
+                            {/* Warning when no models are enabled */}
+                            {!hasEnabledModels && enabledModels !== undefined && (
+                              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <Icon name="TriangleAlert" className="size-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1">
+                                    <h4 className="text-sm font-medium text-yellow-800">
+                                      No models enabled
+                                    </h4>
+                                    <p className="text-sm text-yellow-700 mt-1">
+                                      Your organization needs to enable at least one model to use Discord bots.
+                                      <Link
+                                        to="/dashboard/settings"
+                                        className="text-yellow-800 underline hover:text-yellow-900 ml-1"
+                                      >
+                                        Go to settings
+                                      </Link>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Warning when balance is insufficient */}
+                            {hasEnabledModels && !hasSufficientBalance && balanceData !== undefined && (
+                              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                  <Icon name="TriangleAlert" className="size-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                  <div className="flex items-center justify-between w-full gap-10">
+                                    <div>
+                                      <h4 className="text-sm font-medium text-red-800">
+                                        Insufficient balance
+                                      </h4>
+                                      <p className="text-sm text-red-700 mt-1">
+                                        Your organization balance (${formatEther(BigInt(organizationBalance))}) is insufficient for the total cost per call.
+                                      </p>
+                                    </div>
+                                    {organization && <FundOrgDialog organization={organization} refetchBalance={refetchBalance} />}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Discord Developer Guide */}
+                            <div className="space-y-3">
+                              <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 dark:bg-blue-950/20 dark:border-blue-800">
+                                <div className="space-y-3">
+                                  <div className="flex items-start space-x-3">
+                                    <div className="text-sm">
+                                      <p className="font-medium text-blue-800 dark:text-blue-200 mb-2">How to create a Discord bot:</p>
+                                      <ol className="space-y-1 text-blue-700 dark:text-blue-300">
+                                        <li><strong>1.</strong> Go to <a href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer" className="text-blue-100 underline underline-offset-2 hover:text-blue-300 transition-colors">Discord Developer Portal</a></li>
+                                        <li><strong>2.</strong> Click "New Application" and give it a name</li>
+                                        <li><strong>3.</strong> Go to the "Bot" section and click "Add Bot"</li>
+                                        <li><strong>4.</strong> Under "Token", click "Copy" to get your bot token</li>
+                                        <li><strong>5.</strong> Paste the token below to connect your agent</li>
+                                      </ol>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Token Input */}
+                            <div className="space-y-2">
+                              <Label htmlFor="discord-token-input" className="text-sm">Bot Token</Label>
+                              <Input
+                                id="discord-token-input"
+                                placeholder="e.g. NTkzNjI4NTI4NjUyMjk4MjU2.Gq5-6g.example"
+                                value={discordToken}
+                                onChange={(e) => setDiscordToken(e.target.value)}
+                                className="font-mono text-sm mt-1"
+                              />
+                            </div>
+
+                            {/* Security Notice */}
+                            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 dark:bg-amber-950/20 dark:border-amber-800">
+                              <div className="flex items-start space-x-3">
+                                <div className="text-sm">
+                                  <p className="text-amber-700 dark:text-amber-300">
+                                    Your bot token will be encrypted and stored securely. You won't be able to view it after saving.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 mt-2">
+                            <Button variant="outline" onClick={() => {
+                              setIsDiscordDialogOpen(false);
+                              setDiscordToken("");
+                            }} className="flex-1">
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleSetDiscordToken}
+                              disabled={api.setDiscordToken.isPending || !discordToken.trim() || !telegramPrerequisitesMet}
+                              className="flex-1"
+                            >
+                              {api.setDiscordToken.isPending ? (
                                 <>
                                   <Icon name="LoaderCircle" className="h-4 w-4 animate-spin mr-2" />
                                   Saving...
