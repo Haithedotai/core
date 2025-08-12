@@ -1,5 +1,6 @@
 use actix_web::web;
 
+pub mod analytics;
 pub mod auth;
 pub mod creator;
 pub mod me;
@@ -10,7 +11,8 @@ pub mod projects;
 pub mod tee;
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/auth").configure(auth::routes))
+    cfg.service(web::scope("/analytics").configure(analytics::routes))
+        .service(web::scope("/auth").configure(auth::routes))
         .service(web::scope("/me").configure(me::routes))
         .service(web::scope("/models").configure(models::routes))
         .service(web::scope("/orgs").configure(orgs::routes))
