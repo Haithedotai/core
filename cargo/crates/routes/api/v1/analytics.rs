@@ -57,18 +57,13 @@ struct ModelUsageRecord {
     call_count: i64,
 }
 
-// ============================================================================
-// API ENDPOINTS (Now using the `api_calls` table for accuracy)
-// ============================================================================
-
 #[get("/org/{id}/overview")]
 async fn get_organization_analytics(
-    user: AuthUser,
+    _user: AuthUser, // TODO: Add permission check to verify user has access to this organization
     path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let org_id = path.into_inner();
-    // TODO: Add permission check to verify user has access to this organization
 
     let (total_api_calls,): (i64,) =
         sqlx::query_as("SELECT COUNT(id) FROM api_calls WHERE org_id = ?")
@@ -126,12 +121,11 @@ async fn get_organization_analytics(
 
 #[get("/project/{id}/summary")]
 async fn get_project_analytics(
-    user: AuthUser,
+    _user: AuthUser, // TODO: Add permission check to verify user has access to this project
     path: web::Path<i64>,
     state: web::Data<AppState>,
 ) -> Result<impl Responder, ApiError> {
     let project_id = path.into_inner();
-    // TODO: Add permission check to verify user has access to this project
 
     let (total_api_calls,): (i64,) =
         sqlx::query_as("SELECT COUNT(id) FROM api_calls WHERE project_id = ?")
@@ -150,22 +144,59 @@ async fn get_project_analytics(
     .bind(project_id)
     .fetch_all(&state.db)
     .await?;
-    
-    // You can get other project details with another query if needed.
-    // For brevity, this example focuses on using the new accurate data.
 
-    // Placeholder for other project details
+    // Fetch actual project details from database
+    let project_info: Option<(String, Option<String>, bool, bool)> = sqlx::query_as(
+        "SELECT name, last_activity, search_enabled, memory_enabled FROM projects WHERE id = ?"
+    )
+    .bind(project_id)
+    .fetch_optional(&state.db)
+    .await?;
+
+    let (project_name, last_activity_str, search_enabled, memory_enabled) = project_info
+        .unwrap_or_else(|| ("Unknown Project".to_string(), None, false, false));
+
+    // Convert last_activity string to DateTime<Utc> if it exists
+    let last_activity = last_activity_str
+        .and_then(|s| s.parse::<DateTime<Utc>>().ok());
+
+    // Calculate if project is active (has activity in last 7 days)
+    let is_active = last_activity
+        .map(|activity| {
+            let seven_days_ago = Utc::now() - chrono::Duration::days(7);
+            activity > seven_days_ago
+        })
+        .unwrap_or(false);
+
+    // Get team size (count of project members)
+    let (team_size,): (i64,) = sqlx::query_as(
+        "SELECT COUNT(*) FROM project_members WHERE project_id = ?"
+    )
+    .bind(project_id)
+    .fetch_one(&state.db)
+    .await
+    .unwrap_or((0,));
+
+    // Get enabled products count
+    let (enabled_products_count,): (i64,) = sqlx::query_as(
+        "SELECT COUNT(*) FROM project_products WHERE project_id = ? AND enabled = 1"
+    )
+    .bind(project_id)
+    .fetch_one(&state.db)
+    .await
+    .unwrap_or((0,));
+
     let analytics = ProjectAnalytics {
         project_id,
-        project_name: "Project Name".to_string(), // Fetch this from the DB
+        project_name,
         total_api_calls: total_api_calls as u64,
-        total_conversations: 0, // This can be calculated or deprecated
-        is_active: true, // Calculate based on last_activity
-        search_enabled: false, // Fetch this
-        memory_enabled: false, // Fetch this
-        team_size: 0, // Fetch this
-        enabled_products_count: 0, // Fetch this
-        last_activity: None, // Fetch this
+        total_conversations: 0, // Conversations are tracked at user level, not project level
+        is_active,
+        search_enabled,
+        memory_enabled,
+        team_size: team_size as u64,
+        enabled_products_count: enabled_products_count as u64,
+        last_activity,
         api_calls_trends,
     };
 
@@ -193,7 +224,7 @@ async fn get_user_analytics(
     .fetch_optional(&state.db)
     .await?;
 
-    // Other metrics like projects_count and organizations_count remain the same
+    // Other metrics like projects_count and organizations_count 
     let (organizations_count,): (i64,) = sqlx::query_as(
         "SELECT COUNT(*) FROM (SELECT id FROM organizations WHERE owner = ? UNION SELECT org_id FROM org_members WHERE wallet_address = ?)",
     )
@@ -220,10 +251,18 @@ async fn get_user_analytics(
     .fetch_all(&state.db)
     .await?;
 
+    // Get total conversations for this user
+    let (total_conversations,): (i64,) = sqlx::query_as(
+        "SELECT COUNT(id) FROM conversations WHERE wallet_address = ?"
+    )
+    .bind(wallet)
+    .fetch_one(&state.db)
+    .await
+    .unwrap_or((0,));
 
     let analytics = UserAnalytics {
         total_api_calls: total_api_calls as u64,
-        total_conversations: 0, // This metric is now less relevant than total_api_calls
+        total_conversations: total_conversations as u64,
         most_used_model,
         projects_count: projects_count as u64,
         organizations_count: organizations_count as u64,
@@ -233,9 +272,6 @@ async fn get_user_analytics(
     Ok(respond::ok("User dashboard analytics retrieved", analytics))
 }
 
-// ============================================================================
-// ROUTES CONFIGURATION
-// ============================================================================
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_organization_analytics)
