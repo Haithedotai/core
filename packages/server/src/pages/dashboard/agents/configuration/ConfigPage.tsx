@@ -881,7 +881,7 @@ export default function AgentsConfigurationPage() {
                           <DialogTrigger asChild>
                             <Button variant="outline">
                               <Icon name="Settings" className="h-4 w-4" />
-                              Reconfigure Token
+                              <p className="hidden md:block">Reconfigure Token</p>
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
@@ -1005,7 +1005,7 @@ export default function AgentsConfigurationPage() {
                           ) : (
                             <>
                               <Icon name="Trash" className="h-4 w-4 text-red-500" />
-                              Clear Bot Token
+                              <p className="hidden md:block">Clear Bot Token</p>
                             </>
                           )}
                         </Button>
@@ -1230,7 +1230,7 @@ export default function AgentsConfigurationPage() {
                           <DialogTrigger asChild>
                             <Button variant="outline">
                               <Icon name="Settings" className="h-4 w-4" />
-                              Reconfigure Token
+                              <p className="hidden md:block">Reconfigure Token</p>
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
@@ -1354,7 +1354,7 @@ export default function AgentsConfigurationPage() {
                           ) : (
                             <>
                               <Icon name="Trash" className="h-4 w-4 text-red-500" />
-                              Clear Bot Token
+                              <p className="hidden md:block">Clear Bot Token</p>
                             </>
                           )}
                         </Button>
