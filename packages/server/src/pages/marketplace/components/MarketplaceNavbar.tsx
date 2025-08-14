@@ -16,20 +16,17 @@ export default function MarketplaceNavbar() {
             alt="Logo"
             className="h-9 w-9 overflow-hidden rounded-full object-cover"
           />
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <span className="text-2xl">Haithe</span>
             <span className="text-sm text-muted-foreground ml-2">Marketplace</span>
-          </div>
-          <div className="@md:hidden">
-            <span className="text-lg font-bold">Marketplace</span>
           </div>
         </Link>
       </div>
 
       {/* Right side - Actions and user */}
       <div className="flex items-center gap-3">
-        <OrganizationSelector />
         <CreatorSheet />
+        <OrganizationSelector />
         <Connect />
       </div>
     </nav>

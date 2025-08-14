@@ -67,7 +67,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-16">
           <div className="mx-auto max-w-6xl text-center">
             <div className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm mb-8 lg:mb-12 backdrop-blur-sm hover:bg-white/8 transition-all duration-200">
-              <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse" />
+              <div className="w-2 h-2 bg-white rounded-full mr-3 animate-pulse hidden md:block" />
               <span className="text-white/80 font-medium">
                 Powered by Hyperion Testnet & Alith AI Framework
               </span>
@@ -90,9 +90,9 @@ export default function Landing() {
                 size="lg"
                 className="text-base lg:text-lg bg-white/90 text-black hover:bg-white border-0 px-8 lg:px-10 py-4 h-auto font-semibold transition-all duration-100 w-full sm:w-auto"
               >
-                <Link to="/marketplace" className="flex items-center">
-                  Explore Marketplace
-                  <Icon name="ArrowRight" className="ml-1 h-5 w-5" />
+                <Link to="/docs" className="flex items-center">
+                  <Icon name="Book" className="ml-1 h-5 w-5" />
+                  <span>See Documentation</span>
                 </Link>
               </Button>
               <Button

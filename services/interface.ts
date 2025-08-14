@@ -42,6 +42,10 @@ export class HaitheClient {
     });
   }
 
+  setProjectTelegramToken(projectId: number, token: string | null): Promise<{}> {
+    return this.projects.setTelegramToken(projectId, token);
+  }
+
   get fetch() {
     return this.auth.fetch.bind(this.auth);
   }
@@ -206,6 +210,7 @@ export class HaitheClient {
     name?: string;
     search_enabled?: boolean;
     memory_enabled?: boolean;
+    default_model_id?: number;
   }): Promise<Project> {
     return this.projects.updateProject(id, updates);
   }
@@ -313,6 +318,13 @@ export class HaitheClient {
     return this.products.disableProjectProduct(projectId, productId);
   }
 
+  updateProduct(
+    id: number, 
+    updates: { description?: string; photo_url?: string }
+  ): Promise<Product> {
+    return this.products.updateProduct(id, updates);
+  }
+
   getProjectProducts(projectId: number): Promise<number[]> {
     return this.projects.getProjectProducts(projectId);
   }
@@ -393,6 +405,59 @@ export class HaitheClient {
 
   createMessage(conversationId: number, message: string, sender: string, orgUid: string, projectUid: string): Promise<Message> {
     return this.projects.createMessage(conversationId, message, sender, orgUid, projectUid);
+  }
+
+  setTelegramToken(projectId: number, token: string | null): Promise<{}> {
+    return this.projects.setTelegramToken(projectId, token);
+  }
+
+  getTelegramInfo(projectId: number): Promise<{
+    configured: boolean;
+    running: boolean;
+    org_uid: string;
+    project_uid: string;
+    me: null | {
+      id: number;
+      is_bot: boolean;
+      first_name: string;
+      username?: string;
+      can_join_groups?: boolean;
+      can_read_all_group_messages?: boolean;
+      supports_inline_queries?: boolean;
+      link?: string | null;
+    };
+  }> {
+    return this.projects.getTelegramInfo(projectId);
+  }
+
+  setDiscordToken(projectId: number, token: string | null): Promise<{}> {
+    return this.projects.setDiscordToken(projectId, token);
+  }
+
+  getDiscordInfo(projectId: number): Promise<{
+    configured: boolean;
+    running: boolean;
+    org_uid: string;
+    project_uid: string;
+    me: null | {
+      id: string;
+      username: string;
+      discriminator: string;
+      avatar: string | null;
+      bot: boolean;
+      system: boolean;
+      mfa_enabled: boolean;
+      banner: string | null;
+      accent_colour: number | null;
+      locale: string | null;
+      verified: boolean | null;
+      email: string | null;
+      flags: number | null;
+      premium_type: number | null;
+      public_flags: number | null;
+    };
+  }> {
+    return this.projects.getDiscordInfo(projectId);
   }
 
   getCompletions(

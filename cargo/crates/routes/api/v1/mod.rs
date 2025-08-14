@@ -8,6 +8,7 @@ pub mod models;
 pub mod orgs;
 pub mod products;
 pub mod projects;
+pub mod stats;
 pub mod tee;
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
@@ -19,5 +20,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .service(web::scope("/projects").configure(projects::routes))
         .service(web::scope("/creator").configure(creator::routes))
         .service(web::scope("/products").configure(products::routes))
+        .service(web::scope("/stats").configure(stats::routes))
         .service(web::scope("/tee").configure(tee::routes));
 }

@@ -11,6 +11,10 @@ pub struct Model {
     pub price_per_call: u64,
 }
 
+pub fn get_model_by_id(id: u64) -> Option<Model> {
+    get_models().into_iter().find(|m| m.id == id)
+}
+
 pub fn get_models() -> Vec<Model> {
     let models = vec![
         Model {
@@ -27,7 +31,7 @@ pub fn get_models() -> Vec<Model> {
             display_name: "Gemini 2.0 Flash Lite".to_string(),
             provider: "Google".to_string(),
             is_active: true,
-            price_per_call: 0,
+            price_per_call: (0.0001_f64 * 1e18) as u64,
         },
         Model {
             id: 3,
@@ -42,7 +46,7 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-flash".to_string(),
             display_name: "Gemini 2.5 Flash".to_string(),
             provider: "Google".to_string(),
-            is_active: false,
+            is_active: true,
             price_per_call: (0.001_f64 * 1e18) as u64,
         },
         Model {
@@ -50,11 +54,27 @@ pub fn get_models() -> Vec<Model> {
             name: "gemini-2.5-flash-lite".to_string(),
             display_name: "Gemini 2.5 Flash Lite".to_string(),
             provider: "Google".to_string(),
-            is_active: false,
+            is_active: true,
             price_per_call: (0.0008_f64 * 1e18) as u64,
         },
         Model {
             id: 6,
+            name: "openai/gpt-oss-20b".to_string(),
+            display_name: "GPT-OSS 20B".to_string(),
+            provider: "Haithe".to_string(),
+            is_active: true,
+            price_per_call: (0.0001_f64 * 1e18) as u64,
+        },
+        Model {
+            id: 7,
+            name: "openai/gpt-oss-120b".to_string(),
+            display_name: "GPT-OSS 120B".to_string(),
+            provider: "Haithe".to_string(),
+            is_active: false,
+            price_per_call: (0.00035_f64 * 1e18) as u64,
+        },
+        Model {
+            id: 8,
             name: "gpt-o3".to_string(),
             display_name: "GPT-o3".to_string(),
             provider: "OpenAI".to_string(),
@@ -63,7 +83,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 7,
+            id: 9,
             name: "gpt-o3-mini".to_string(),
             display_name: "GPT-o3 Mini".to_string(),
             provider: "OpenAI".to_string(),
@@ -71,7 +91,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 8,
+            id: 10,
             name: "gpt-o4-mini".to_string(),
             display_name: "GPT-o4 Mini".to_string(),
             provider: "OpenAI".to_string(),
@@ -79,7 +99,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 9,
+            id: 11,
             name: "gpt-4.1-nano".to_string(),
             display_name: "GPT-4.1 Nano".to_string(),
             provider: "OpenAI".to_string(),
@@ -87,7 +107,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 10,
+            id: 12,
             name: "gpt-4.1-mini".to_string(),
             display_name: "GPT-4.1 Mini".to_string(),
             provider: "OpenAI".to_string(),
@@ -95,7 +115,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 11,
+            id: 13,
             name: "deepseek-chat".to_string(),
             display_name: "DeepSeek Chat".to_string(),
             provider: "DeepSeek".to_string(),
@@ -103,7 +123,7 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 12,
+            id: 14,
             name: "deepseek-reasoner".to_string(),
             display_name: "DeepSeek Reasoner".to_string(),
             provider: "DeepSeek".to_string(),
@@ -111,12 +131,12 @@ pub fn get_models() -> Vec<Model> {
             price_per_call: 0,
         },
         Model {
-            id: 13,
-            name: "kimi-k2-0711-preview".to_string(),
+            id: 15,
+            name: "moonshotai/kimi-k2-instruct".to_string(),
             display_name: "Kimi K2".to_string(),
             provider: "Haithe".to_string(),
-            is_active: false,
-            price_per_call: 0,
+            is_active: true,
+            price_per_call: (0.005_f64 * 1e18) as u64,
         },
     ];
 
@@ -137,6 +157,7 @@ pub fn resolve_model(name: &str) -> LLM {
         ),
         "DeepSeek" => ("https://api.deepseek.com/v1", "DEEPSEEK_API_KEY"),
         "Moonshot" => ("https://api.moonshot.com/v1", "MOONSHOT_API_KEY"),
+        "Haithe" => ("https://api.groq.com/openai/v1", "GROQ_API_KEY"),
         _ => panic!("Unsupported provider: {}", model.provider),
     };
 

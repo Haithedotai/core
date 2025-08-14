@@ -117,7 +117,7 @@ export default function MarketplaceItemCard({
               {categoryEmoji}
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold truncate leading-tight">{truncateText(item.name, 20)}</CardTitle>
+              <CardTitle title={item.name} className="text-lg font-semibold truncate leading-tight">{truncateText(item.name, 20)}</CardTitle>
               <CardDescription className="text-sm mt-1">
                 {categoryLabel} • #{item.id}
               </CardDescription>

@@ -1,25 +1,161 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, ExternalLink, Copy, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Copy, CheckCircle, Edit } from 'lucide-react';
 import { Button } from '../../../lib/components/ui/button';
 import { Badge } from '../../../lib/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../lib/components/ui/card';
 import { Skeleton } from '../../../lib/components/ui/skeleton';
+import { Input } from '../../../lib/components/ui/input';
+import { Textarea } from '../../../lib/components/ui/textarea';
+import { Label } from '../../../lib/components/ui/label';
+import { Avatar, AvatarImage, AvatarFallback } from '../../../lib/components/ui/avatar';
 import MarketplaceLayout from '../components/MarketplaceLayout';
 import { useHaitheApi } from '@/src/lib/hooks/use-haithe-api';
+import { useApi } from '@/src/lib/hooks/use-api';
 import { useStore } from '@/src/lib/hooks/use-store';
 import { truncateAddress } from '@/src/lib/utils';
 import { copyToClipboard } from '@/utils';
 import AddProductButton from '@/src/pages/marketplace/components/AddProductButton';
+import Upload from '@/src/lib/components/custom/Upload';
+import Icon from '@/src/lib/components/custom/Icon';
+import { usePrivy } from '@privy-io/react-auth';
+import React from 'react';
+
+// Edit Form Modal
+function EditFormModal({ 
+  description, 
+  setDescription, 
+  photo, 
+  setPhoto, 
+  onSubmit, 
+  onCancel,
+  isSubmitting 
+}: {
+  description: string;
+  setDescription: (v: string) => void;
+  photo: File | null;
+  setPhoto: (f: File | null) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+  isSubmitting: boolean;
+}) {
+  const [preview, setPreview] = useState<string | null>(null);
+  
+  // Show preview if photo is present
+  React.useEffect(() => {
+    if (photo) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result as string);
+      reader.readAsDataURL(photo);
+    } else {
+      setPreview(null);
+    }
+  }, [photo]);
+
+  const isValid = description.trim();
+
+  return (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Edit Product</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div>
+            <Label htmlFor="product-description">Description</Label>
+            <Textarea
+              id="product-description"
+              placeholder="Enter product description"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="mt-2 min-h-24"
+            />
+          </div>
+          <div>
+            <Label>Product Photo</Label>
+            <Upload setImage={setPhoto} />
+          </div>
+        </CardContent>
+        <div className="flex justify-between p-6 pt-0">
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button onClick={onSubmit} disabled={!isValid || isSubmitting}>
+            {isSubmitting ? <Icon name="LoaderCircle" className="animate-spin" /> : "Save Changes"}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 export default function ItemDetailPage() {
   const { id } = useParams({ from: '/marketplace/item/$id' });
   const haithe = useHaitheApi();
+  const { uploadFile } = useApi();
   const navigate = useNavigate();
   const { selectedOrganizationId } = useStore();
   const { data: organization } = haithe.getOrganization(selectedOrganizationId);
   const { data: item, isLoading: isLoadingItem } = haithe.getProductById(Number(id));
+  const { data: profile } = haithe.profile();
+  const { user } = usePrivy();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false);
+  const [description, setDescription] = useState('');
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if current user is the creator
+  const isCreator = user?.wallet?.address?.toLowerCase() === item?.creator?.toLowerCase();
+
+  // Initialize form with current values
+  React.useEffect(() => {
+    if (item && !description) {
+      setDescription(item.description || '');
+    }
+  }, [item, description]);
+
+  const uploadToIPFS = async (data: File): Promise<string> => {
+    const { cid } = await uploadFile.mutateAsync(data);
+    return `https://${process.env.BUN_PUBLIC_PINATA_GATEWAY_URL}/ipfs/${cid}`;
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      let photoURL: string | undefined;
+      if (photo) {
+        photoURL = await uploadToIPFS(photo);
+      }
+
+      const updates: { description?: string; photo_url?: string } = {};
+      if (description.trim()) {
+        updates.description = description.trim();
+      }
+      if (photoURL) {
+        updates.photo_url = photoURL;
+      }
+
+      await haithe.updateProduct.mutateAsync({
+        id: Number(id),
+        updates
+      });
+
+      setIsEditing(false);
+      setPhoto(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setPhoto(null);
+    setDescription(item?.description || '');
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -136,18 +272,24 @@ export default function ItemDetailPage() {
             <div className="space-y-8">
               {/* Header */}
               <div className="space-y-4">
-                <div className="flex items-start gap-4">
+                <div className="flex items-center gap-4">
                   <div className="size-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-primary/20 text-3xl">
                     {categoryIcon}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-4xl font-bold text-foreground mb-2">{item.name}</h1>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="text-sm px-3 py-1">
-                        {categoryLabel}
-                      </Badge>
+                  <div className="flex items-center gap-4 w-full">
+                      <h1 className="text-4xl font-bold text-foreground">{item.name}</h1>
+                      {/* {isCreator && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditing(true)}
+                          className="mt-1"
+                        >
+                          <Edit className="size-4" />
+                          Edit Product
+                        </Button>
+                      )} */}
                     </div>
-                  </div>
                 </div>
               </div>
 
@@ -155,7 +297,7 @@ export default function ItemDetailPage() {
               <Card className="overflow-hidden">
                 <div className="h-64 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5 flex items-center justify-center relative">
                   <div className="absolute inset-0 bg-grid-white/10" />
-                  <div className="relative text-center space-y-4">
+                  <div className="relative text-center space-y-4 p-4">
                     <div className="text-8xl mb-4">{categoryIcon}</div>
                     <h2 className="text-2xl font-semibold">{item.name}</h2>
                     <p className="text-muted-foreground max-w-md">
@@ -172,11 +314,17 @@ export default function ItemDetailPage() {
                     <h3 className="text-xl font-semibold mb-4">Description</h3>
                     <div className="prose prose-sm max-w-none text-muted-foreground">
                       <p>
-                        This is a <span className='font-bold text-primary'>{categoryLabel}</span> product created by{' '}
-                        <code className="text-xs bg-muted-foreground px-1 py-0.5 rounded">
-                          {item.creator.slice(0, 6)}...{item.creator.slice(-4)}
-                        </code>
-                        . It's available for purchase and can be used in your AI applications.
+                        {item.description ? (
+                          item.description
+                        ) : (
+                          <>
+                            This is a <span className='font-bold text-primary'>{categoryLabel}</span> product created by{' '}
+                            <code className="text-xs bg-muted-foreground px-1 py-0.5 rounded">
+                              {item.creator.slice(0, 6)}...{item.creator.slice(-4)}
+                            </code>
+                            . It's available for purchase and can be used in your AI applications.
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -305,6 +453,19 @@ export default function ItemDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {isEditing && (
+        <EditFormModal
+          description={description}
+          setDescription={setDescription}
+          photo={photo}
+          setPhoto={setPhoto}
+          onSubmit={handleEditSubmit}
+          onCancel={handleCancelEdit}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </MarketplaceLayout>
   );
 } 

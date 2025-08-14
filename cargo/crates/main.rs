@@ -1,4 +1,6 @@
+use crate::lib::discord::sync_discord_bots;
 use crate::lib::state;
+use crate::lib::telegram::sync_bots;
 use crate::routes::routes;
 use actix_cors::Cors;
 use actix_web::middleware;
@@ -47,7 +49,27 @@ async fn main() -> std::io::Result<()> {
         nonce_registry: Mutex::new(HashMap::new()),
         db: db_pool,
         window_buffer_memory: Mutex::new(HashMap::new()),
+        discord_bots: Mutex::new(HashMap::new()),
+        telegram_bots: Mutex::new(HashMap::new()),
     });
+
+    {
+        let state_clone = global_app_state.clone();
+        tokio::spawn(async move {
+            if let Err(e) = sync_bots(state_clone.clone()).await {
+                eprintln!("Failed to sync Telegram bots at startup: {}", e);
+            }
+        });
+    }
+
+    {
+        let state_clone = global_app_state.clone();
+        tokio::spawn(async move {
+            if let Err(e) = sync_discord_bots(state_clone.clone()).await {
+                eprintln!("Failed to sync Discord bots at startup: {}", e);
+            }
+        });
+    }
 
     let port = std::env::var("PORT")
         .unwrap_or_else(|_| "8080".to_string())
@@ -61,7 +83,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(
                 Cors::default()
                     .allow_any_origin()
-                    .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "OPTIONS"])
+                    .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"])
                     .allowed_headers(vec![
                         actix_web::http::header::AUTHORIZATION,
                         actix_web::http::header::CONTENT_TYPE,

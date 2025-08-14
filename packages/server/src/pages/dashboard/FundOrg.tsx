@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/src/lib/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/lib/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/lib/components/ui/dialog";
 import { Input } from "@/src/lib/components/ui/input";
 import Icon from "@/src/lib/components/custom/Icon";
 import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
@@ -9,7 +9,7 @@ import QRCode from "qrcode";
 import type { Organization } from "services";
 import { Image } from "@/src/lib/components/custom/Image";
 
-export default function FundOrgDialog({ organization }: { organization: Organization }) {
+export default function FundOrgDialog({ organization, refetchBalance }: { organization: Organization, refetchBalance: () => void }) {
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [amount, setAmount] = useState<string>("1");
@@ -24,6 +24,7 @@ export default function FundOrgDialog({ organization }: { organization: Organiza
                 recipient: organization.address,
                 amount: amountInWei,
             });
+            refetchBalance();
         } catch (error) {
             console.error(error);
         }
@@ -62,13 +63,20 @@ export default function FundOrgDialog({ organization }: { organization: Organiza
                     <p className="hidden md:block">Fund Organization</p>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Image src="/static/tether.svg" alt="USDT" className="size-5" />
-                        Fund Organization
+                    <DialogTitle className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Image src="/static/tether.svg" alt="USDT" className="size-5" />
+                            Fund Organization
+                        </div>
+                        <DialogClose asChild>
+                            <Button variant="ghost" size="icon">
+                                <Icon name="X" className="size-4" />
+                            </Button>
+                        </DialogClose>
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="hidden">
                         Send USDT to the organization wallet to fund it.
                     </DialogDescription>
                 </DialogHeader>

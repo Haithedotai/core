@@ -29,6 +29,7 @@ export class HaitheProjectsClient extends BaseClient {
       name?: string;
       search_enabled?: boolean;
       memory_enabled?: boolean;
+      default_model_id?: number;
     }
   ): Promise<Project> {
     const queryParams = new URLSearchParams();
@@ -41,6 +42,12 @@ export class HaitheProjectsClient extends BaseClient {
     }
     if (updates.memory_enabled !== undefined) {
       queryParams.append("memory_enabled", updates.memory_enabled.toString());
+    }
+    if (updates.default_model_id !== undefined) {
+      queryParams.append(
+        "default_model_id",
+        updates.default_model_id.toString()
+      );
     }
 
     return this.fetch(
@@ -101,6 +108,75 @@ export class HaitheProjectsClient extends BaseClient {
       )}`,
       this.authClient.getAuthToken(),
       { method: "DELETE" }
+    );
+  }
+
+  getTelegramInfo(projectId: number): Promise<{
+    configured: boolean;
+    running: boolean;
+    org_uid: string;
+    project_uid: string;
+    me: null | {
+      id: number;
+      is_bot: boolean;
+      first_name: string;
+      username?: string;
+      can_join_groups?: boolean;
+      can_read_all_group_messages?: boolean;
+      supports_inline_queries?: boolean;
+      link?: string | null;
+    };
+  }> {
+    return this.fetch(
+      `/v1/projects/${projectId}/telegram`,
+      this.authClient.getAuthToken()
+    );
+  }
+
+  setTelegramToken(projectId: number, token: string | null): Promise<{}> {
+    const body = { teloxide_token: token };
+    return this.fetch(
+      `/v1/projects/${projectId}/telegram`,
+      this.authClient.getAuthToken(),
+      { method: "PUT", body: JSON.stringify(body) }
+    );
+  }
+
+  getDiscordInfo(projectId: number): Promise<{
+    configured: boolean;
+    running: boolean;
+    org_uid: string;
+    project_uid: string;
+    me: null | {
+      id: string;
+      username: string;
+      discriminator: string;
+      avatar: string | null;
+      bot: boolean;
+      system: boolean;
+      mfa_enabled: boolean;
+      banner: string | null;
+      accent_colour: number | null;
+      locale: string | null;
+      verified: boolean | null;
+      email: string | null;
+      flags: number | null;
+      premium_type: number | null;
+      public_flags: number | null;
+    };
+  }> {
+    return this.fetch(
+      `/v1/projects/${projectId}/discord`,
+      this.authClient.getAuthToken()
+    );
+  }
+
+  setDiscordToken(projectId: number, token: string | null): Promise<{}> {
+    const body = { discord_token: token };
+    return this.fetch(
+      `/v1/projects/${projectId}/discord`,
+      this.authClient.getAuthToken(),
+      { method: "PUT", body: JSON.stringify(body) }
     );
   }
 

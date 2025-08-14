@@ -29,6 +29,9 @@ export interface Project {
   created_at: string;
   search_enabled: boolean;
   memory_enabled: boolean;
+  default_model_id?: number | null;
+  teloxide_token?: string | null;
+  discord_token?: string | null;
 }
 
 export interface ProjectMember {
@@ -70,6 +73,8 @@ export interface Product {
   price_per_call: number;
   category: string;
   created_at: string;
+  description?: string;
+  photo_url?: string;
 }
 
 export interface Conversation {

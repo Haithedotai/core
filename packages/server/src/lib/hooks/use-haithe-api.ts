@@ -206,7 +206,7 @@ export function useHaitheApi() {
             },
             onError: (error) => {
                 console.error(error?.toString?.() || error);
-                toast.error('Could not create organization. Please try again.');
+                toast.error('Could not create organization. Try with a different name.');
             }
         }),
 
@@ -432,6 +432,7 @@ export function useHaitheApi() {
                 name?: string;
                 search_enabled?: boolean;
                 memory_enabled?: boolean;
+                default_model_id?: number;
             } }) => {
                 if (!client) throw new Error("Wallet not connected");
                 return client.updateProject(id, updates);
@@ -623,6 +624,26 @@ export function useHaitheApi() {
                 return client.getProductById(id);
             },
             enabled: !!client && !!id,
+        }),
+
+        updateProduct: useMutation({
+            mutationKey: ['updateProduct'],
+            mutationFn: ({ id, updates }: { 
+                id: number; 
+                updates: { description?: string; photo_url?: string } 
+            }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.updateProduct(id, updates);
+            },
+            onSuccess: (_, { id }) => {
+                toast.success('Product updated successfully');
+                queryClient.invalidateQueries({ queryKey: ['product', id] });
+                queryClient.invalidateQueries({ queryKey: ['allProducts'] });
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not update product. Please try again.');
+            }
         }),
 
         // Project product management
@@ -824,6 +845,54 @@ export function useHaitheApi() {
                 console.error(error?.toString?.() || error);
                 toast.error('Could not get AI completion. Please try again.');
             }
+        }),
+
+        setTelegramToken: useMutation({
+            mutationKey: ['setTelegramToken'],
+            mutationFn: ({ projectId, token }: { projectId: number; token: string | null }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.setTelegramToken(projectId, token);
+            },
+            onSuccess: () => {
+                toast.success('Telegram token set successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not set Telegram token. Please try again.');
+            }
+        }),
+
+        getTelegramInfo: (projectId: number) => useQuery({
+            queryKey: ['telegramInfo', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getTelegramInfo(projectId);
+            },
+            enabled: !!client && !!projectId,
+        }),
+
+        setDiscordToken: useMutation({
+            mutationKey: ['setDiscordToken'],
+            mutationFn: ({ projectId, token }: { projectId: number; token: string | null }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.setDiscordToken(projectId, token);
+            },
+            onSuccess: () => {
+                toast.success('Discord token set successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not set Discord token. Please try again.');
+            }
+        }),
+
+        getDiscordInfo: (projectId: number) => useQuery({
+            queryKey: ['discordInfo', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getDiscordInfo(projectId);
+            },
+            enabled: !!client && !!projectId,
         }),
     };
 } 

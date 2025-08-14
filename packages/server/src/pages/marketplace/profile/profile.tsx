@@ -9,6 +9,7 @@ import { useHaitheApi } from "@/src/lib/hooks/use-haithe-api";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import { useWalletClient } from "wagmi";
 import MarkdownRenderer from "@/src/lib/components/custom/MarkdownRenderer";
+import definitions from "services/definitions";
 
 export default function ProfilePage() {
 
@@ -17,6 +18,9 @@ export default function ProfilePage() {
     const { data: creatorProducts, isFetching: isProductsFetching } = useHaitheApi().getCreatorProducts(id);
     const { data: walletClient } = useWalletClient();
     const AmITheCreator = walletClient?.account.address?.toLowerCase() === id?.toLowerCase();
+
+    const creatorIdentity = definitions.HaitheCreatorIdentity.address;
+    console.log(creatorIdentity);
 
     const navigate = useNavigate();
 
