@@ -58,7 +58,7 @@ async fn post_login_handler(
         return Err(ApiError::Unauthorized);
     }
 
-    let conn_info = req.connection_info(); // Keep the temporary alive
+    let conn_info = req.connection_info(); 
     let ip = conn_info
         .realip_remote_addr()
         .unwrap_or("unknown")
@@ -92,6 +92,13 @@ async fn post_login_handler(
     .execute(&state.db)
     .await?;
 
+    // Log the successful login event for analytics
+    let log_details = utils::LogDetails {
+        user_wallet: Some(address.clone()),
+        ..Default::default()
+    };
+    utils::log_event(&state.db, "user.login.success", log_details).await;
+
     Ok(respond::ok(
         "Login successful",
         serde_json::json!({
@@ -110,6 +117,13 @@ async fn post_logout_handler(
         .bind(&user.wallet_address)
         .execute(&state.db)
         .await?;
+
+    // Log the logout event for analytics
+    let log_details = utils::LogDetails {
+        user_wallet: Some(user.wallet_address.clone()),
+        ..Default::default()
+    };
+    utils::log_event(&state.db, "user.logout", log_details).await;
 
     Ok(respond::ok("Logged out", ()))
 }

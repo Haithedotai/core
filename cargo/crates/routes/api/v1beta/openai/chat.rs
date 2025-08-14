@@ -442,6 +442,20 @@ async fn get_completions_handler(
         .execute(&state.db)
         .await?;
 
+    
+    let log_type = format!("api.call.{}", model);
+    let log_details = crate::utils::LogDetails {
+        org_id: Some(org_id),
+        project_id: Some(project_id),
+        user_wallet: Some(api_caller.wallet_address.clone()),
+        metadata: Some(serde_json::json!({
+            "model": model,
+            "cost": total_cost,
+            "message_count": messages.len()
+        }).to_string()),
+    };
+    crate::utils::log_event(&state.db, &log_type, log_details).await;
+
     Ok(HttpResponse::Ok().json(json!({
         "id": format!("chatcmpl-{}", uuid::Uuid::new_v4().to_string()),
         "object": "chat.completion",
