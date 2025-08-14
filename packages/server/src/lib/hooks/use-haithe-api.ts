@@ -870,5 +870,29 @@ export function useHaitheApi() {
             },
             enabled: !!client && !!projectId,
         }),
+
+        setDiscordToken: useMutation({
+            mutationKey: ['setDiscordToken'],
+            mutationFn: ({ projectId, token }: { projectId: number; token: string | null }) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.setDiscordToken(projectId, token);
+            },
+            onSuccess: () => {
+                toast.success('Discord token set successfully');
+            },
+            onError: (error) => {
+                console.error(error?.toString?.() || error);
+                toast.error('Could not set Discord token. Please try again.');
+            }
+        }),
+
+        getDiscordInfo: (projectId: number) => useQuery({
+            queryKey: ['discordInfo', projectId],
+            queryFn: () => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.getDiscordInfo(projectId);
+            },
+            enabled: !!client && !!projectId,
+        }),
     };
 } 
