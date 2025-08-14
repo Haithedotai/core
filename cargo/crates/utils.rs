@@ -5,6 +5,7 @@ use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
 use secp256k1::{Secp256k1, SecretKey, Message, PublicKey};
 use sha3::{Digest, Keccak256};
+use sqlx::SqlitePool;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -145,4 +146,41 @@ pub fn derive_public_key_from_private(private_key: &str) -> Result<String, Box<d
     let secret_key = SecretKey::from_slice(&hex::decode(key_hex)?)?;
     let public_key = PublicKey::from_secret_key(&secp, &secret_key);
     Ok(format!("0x{}", hex::encode(public_key.serialize())))
+}
+
+
+#[derive(Default)]
+pub struct LogDetails {
+    pub org_id: Option<i64>,
+    pub project_id: Option<i64>,
+    pub user_wallet: Option<String>,
+    pub metadata: Option<String>, // Optional JSON metadata
+}
+
+
+pub async fn log_event(
+    db: &SqlitePool,
+    log_type: &str,
+    details: LogDetails
+) {
+    let db_clone = db.clone();
+    let log_type_clone = log_type.to_string();
+
+    
+    tokio::spawn(async move {
+        let result = sqlx::query(
+            "INSERT INTO analytics_logs (log_type, org_id, project_id, user_wallet_address, metadata) VALUES (?, ?, ?, ?, ?)"
+        )
+        .bind(log_type_clone)
+        .bind(details.org_id)
+        .bind(details.project_id)
+        .bind(details.user_wallet)
+        .bind(details.metadata)
+        .execute(&db_clone)
+        .await;
+
+        if let Err(e) = result {
+            eprintln!("Failed to write analytics log: {}", e);
+        }
+    });
 }
