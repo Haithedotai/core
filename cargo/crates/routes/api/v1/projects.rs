@@ -2,6 +2,7 @@ use crate::lib::discord::sync_discord_bots;
 use crate::lib::extractors::AuthUser;
 use crate::lib::telegram::sync_bots;
 use crate::lib::{error::ApiError, respond, state::AppState};
+use crate::utils;
 use actix_web::{Responder, delete, get, patch, post, put, web};
 use serde::{Deserialize, Serialize};
 use serenity::http::Http;
@@ -164,6 +165,23 @@ async fn create_project_handler(
     .bind(default_model_id)
     .fetch_one(&state.db)
     .await?;
+
+    // Log project creation event
+    if let Err(e) = utils::log_event(
+        &state.db,
+        "project.create",
+        utils::LogDetails {
+            org_id: Some(query.org_id),
+            project_id: Some(project.id),
+            user_wallet: Some(user.wallet_address.clone()),
+            metadata: Some(serde_json::json!({
+                "project_name": query.name,
+                "project_uid": project_uid
+            }).to_string()),
+        }
+    ).await {
+        eprintln!("Failed to log project creation event: {}", e);
+    }
 
     Ok(respond::ok("Project created", project))
 }

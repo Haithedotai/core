@@ -61,9 +61,50 @@ impl FromRequest for AuthUser {
                     .await
                     .map_err(|_| ApiError::Internal("DB error".into()))?;
 
-                    user.ok_or(ApiError::Unauthorized)
+                    if let Some(user) = user {
+                        // Log successful JWT authentication
+                        if let Err(e) = crate::utils::log_event(
+                            &db,
+                            "user.auth.jwt.success",
+                            crate::utils::LogDetails {
+                                user_wallet: Some(user.wallet_address.clone()),
+                                ..Default::default()
+                            }
+                        ).await {
+                            eprintln!("Failed to log JWT auth event: {}", e);
+                        }
+                        Ok(user)
+                    } else {
+                        // Log failed JWT authentication - user not found
+                        if let Err(e) = crate::utils::log_event(
+                            &db,
+                            "user.auth.jwt.failed",
+                            crate::utils::LogDetails {
+                                user_wallet: Some(wallet_address.clone()),
+                                metadata: Some("user_not_found".to_string()),
+                                ..Default::default()
+                            }
+                        ).await {
+                            eprintln!("Failed to log JWT auth failure: {}", e);
+                        }
+                        Err(ApiError::Unauthorized)
+                    }
                 }
-                _ => Err(ApiError::Unauthorized),
+                _ => {
+                    // Log failed JWT authentication - invalid token
+                    if let Err(e) = crate::utils::log_event(
+                        &db,
+                        "user.auth.jwt.failed",
+                        crate::utils::LogDetails {
+                            user_wallet: Some(wallet_address.clone()),
+                            metadata: Some("invalid_token".to_string()),
+                            ..Default::default()
+                        }
+                    ).await {
+                        eprintln!("Failed to log JWT auth failure: {}", e);
+                    }
+                    Err(ApiError::Unauthorized)
+                },
             }
         });
 
@@ -114,9 +155,51 @@ impl FromRequest for ApiCaller {
                         .await
                         .map_err(|_| ApiError::Internal("DB error".into()))?;
 
-                        user.ok_or(ApiError::Unauthorized)
+                        if let Some(user) = user {
+                            // Log successful JWT authentication in ApiCaller context
+                            if let Err(e) = crate::utils::log_event(
+                                &db,
+                                "user.auth.jwt.success",
+                                crate::utils::LogDetails {
+                                    user_wallet: Some(user.wallet_address.clone()),
+                                    metadata: Some("api_caller_context".to_string()),
+                                    ..Default::default()
+                                }
+                            ).await {
+                                eprintln!("Failed to log JWT auth event: {}", e);
+                            }
+                            Ok(user)
+                        } else {
+                            // Log failed JWT authentication - user not found
+                            if let Err(e) = crate::utils::log_event(
+                                &db,
+                                "user.auth.jwt.failed",
+                                crate::utils::LogDetails {
+                                    user_wallet: Some(wallet_address.clone()),
+                                    metadata: Some("user_not_found_api_caller".to_string()),
+                                    ..Default::default()
+                                }
+                            ).await {
+                                eprintln!("Failed to log JWT auth failure: {}", e);
+                            }
+                            Err(ApiError::Unauthorized)
+                        }
                     }
-                    _ => Err(ApiError::Unauthorized),
+                    _ => {
+                        // Log failed JWT authentication - invalid token
+                        if let Err(e) = crate::utils::log_event(
+                            &db,
+                            "user.auth.jwt.failed",
+                            crate::utils::LogDetails {
+                                user_wallet: Some(wallet_address.clone()),
+                                metadata: Some("invalid_token_api_caller".to_string()),
+                                ..Default::default()
+                            }
+                        ).await {
+                            eprintln!("Failed to log JWT auth failure: {}", e);
+                        }
+                        Err(ApiError::Unauthorized)
+                    },
                 }
             });
 
@@ -216,6 +299,23 @@ impl FromRequest for ApiCaller {
                     );
 
                     if !has_org_permission && !has_project_permission {
+                        // Log permission denied for JWT authentication
+                        if let Err(e) = crate::utils::log_event(
+                            &db,
+                            "user.auth.jwt.permission_denied",
+                            crate::utils::LogDetails {
+                                user_wallet: Some(wallet_address.clone()),
+                                metadata: Some(serde_json::json!({
+                                    "org_uid": org_uid_header,
+                                    "project_uid": proj_uid_header,
+                                    "org_role": org_role,
+                                    "project_role": project_role
+                                }).to_string()),
+                                ..Default::default()
+                            }
+                        ).await {
+                            eprintln!("Failed to log JWT permission denial: {}", e);
+                        }
                         return Err(ApiError::Forbidden);
                     }
 
@@ -235,12 +335,43 @@ impl FromRequest for ApiCaller {
                     })?;
 
                     if project_exists.is_none() {
+                        // Log project not found error for JWT auth
+                        if let Err(e) = crate::utils::log_event(
+                            &db,
+                            "user.auth.jwt.project_not_found",
+                            crate::utils::LogDetails {
+                                user_wallet: Some(wallet_address.clone()),
+                                metadata: Some(serde_json::json!({
+                                    "org_uid": org_uid_header,
+                                    "project_uid": proj_uid_header
+                                }).to_string()),
+                                ..Default::default()
+                            }
+                        ).await {
+                            eprintln!("Failed to log JWT project not found: {}", e);
+                        }
                         return Err(ApiError::BadRequest(
                             "Project not found or does not belong to organization".into(),
                         ));
                     }
 
                     println!("Debug: JWT authentication successful!");
+
+                    // Log successful JWT authentication with permissions
+                    if let Err(e) = crate::utils::log_event(
+                        &db,
+                        "user.auth.jwt.api_caller_success",
+                        crate::utils::LogDetails {
+                            user_wallet: Some(wallet_address.clone()),
+                            metadata: Some(serde_json::json!({
+                                "org_uid": org_uid_header,
+                                "project_uid": proj_uid_header
+                            }).to_string()),
+                            ..Default::default()
+                        }
+                    ).await {
+                        eprintln!("Failed to log JWT API caller success: {}", e);
+                    }
 
                     Ok(ApiCaller {
                         wallet_address,
@@ -343,6 +474,18 @@ impl FromRequest for ApiCaller {
                         "Debug: No API key timestamp found for address: {}",
                         wallet_address
                     );
+                    // Log failed API key authentication - no timestamp
+                    if let Err(e) = crate::utils::log_event(
+                        &db,
+                        "user.auth.apikey.failed",
+                        crate::utils::LogDetails {
+                            user_wallet: Some(wallet_address.clone()),
+                            metadata: Some("no_api_key_timestamp".to_string()),
+                            ..Default::default()
+                        }
+                    ).await {
+                        eprintln!("Failed to log API key auth failure: {}", e);
+                    }
                     return Err(ApiError::Unauthorized);
                 }
             };
@@ -358,6 +501,18 @@ impl FromRequest for ApiCaller {
 
             if !is_valid {
                 println!("Debug: API key signature invalid");
+                // Log failed API key authentication
+                if let Err(e) = crate::utils::log_event(
+                    &db,
+                    "user.auth.apikey.failed",
+                    crate::utils::LogDetails {
+                        user_wallet: Some(wallet_address.clone()),
+                        metadata: Some("invalid_signature".to_string()),
+                        ..Default::default()
+                    }
+                ).await {
+                    eprintln!("Failed to log API key auth failure: {}", e);
+                }
                 return Err(ApiError::Unauthorized);
             }
 
@@ -418,6 +573,23 @@ impl FromRequest for ApiCaller {
             );
 
             if !has_org_permission && !has_project_permission {
+                // Log permission denied for API key authentication
+                if let Err(e) = crate::utils::log_event(
+                    &db,
+                    "user.auth.apikey.permission_denied",
+                    crate::utils::LogDetails {
+                        user_wallet: Some(wallet_address.clone()),
+                        metadata: Some(serde_json::json!({
+                            "org_uid": org_uid_header,
+                            "project_uid": proj_uid_header,
+                            "org_role": org_role,
+                            "project_role": project_role
+                        }).to_string()),
+                        ..Default::default()
+                    }
+                ).await {
+                    eprintln!("Failed to log API key permission denial: {}", e);
+                }
                 return Err(ApiError::Forbidden);
             }
 
@@ -441,12 +613,43 @@ impl FromRequest for ApiCaller {
                     "Debug: Project {} not found in org {}",
                     proj_uid_header, org_uid_header
                 );
+                // Log project not found error
+                if let Err(e) = crate::utils::log_event(
+                    &db,
+                    "user.auth.apikey.project_not_found",
+                    crate::utils::LogDetails {
+                        user_wallet: Some(wallet_address.clone()),
+                        metadata: Some(serde_json::json!({
+                            "org_uid": org_uid_header,
+                            "project_uid": proj_uid_header
+                        }).to_string()),
+                        ..Default::default()
+                    }
+                ).await {
+                    eprintln!("Failed to log project not found: {}", e);
+                }
                 return Err(ApiError::BadRequest(
                     "Project not found or does not belong to organization".into(),
                 ));
             }
 
             println!("Debug: API key authentication successful!");
+
+            // Log successful API key authentication
+            if let Err(e) = crate::utils::log_event(
+                &db,
+                "user.auth.apikey.success",
+                crate::utils::LogDetails {
+                    user_wallet: Some(wallet_address.clone()),
+                    metadata: Some(serde_json::json!({
+                        "org_uid": org_uid_header,
+                        "project_uid": proj_uid_header
+                    }).to_string()),
+                    ..Default::default()
+                }
+            ).await {
+                eprintln!("Failed to log API key auth success: {}", e);
+            }
 
             Ok(ApiCaller {
                 wallet_address,

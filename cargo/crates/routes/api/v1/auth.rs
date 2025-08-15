@@ -92,6 +92,22 @@ async fn post_login_handler(
     .execute(&state.db)
     .await?;
 
+    // Log successful login event
+    if let Err(e) = utils::log_event(
+        &state.db,
+        "user.login.success",
+        utils::LogDetails {
+            user_wallet: Some(address.clone()),
+            metadata: Some(serde_json::json!({
+                "ip": ip,
+                "user_agent": user_agent
+            }).to_string()),
+            ..Default::default()
+        }
+    ).await {
+        eprintln!("Failed to log login event: {}", e);
+    }
+
     Ok(respond::ok(
         "Login successful",
         serde_json::json!({
@@ -110,6 +126,18 @@ async fn post_logout_handler(
         .bind(&user.wallet_address)
         .execute(&state.db)
         .await?;
+
+    // Log logout event
+    if let Err(e) = utils::log_event(
+        &state.db,
+        "user.logout",
+        utils::LogDetails {
+            user_wallet: Some(user.wallet_address.clone()),
+            ..Default::default()
+        }
+    ).await {
+        eprintln!("Failed to log logout event: {}", e);
+    }
 
     Ok(respond::ok("Logged out", ()))
 }
