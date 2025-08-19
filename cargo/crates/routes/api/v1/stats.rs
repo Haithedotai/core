@@ -65,8 +65,6 @@ struct StatsResponse {
     server: ServerStats,
     #[serde(rename = "transactionCount")]
     transaction_count_contracts: u64,
-    #[serde(rename = "transactionCountWithServer")]
-    transaction_count_with_server: u64,
 }
 
 #[derive(Debug, Serialize)]
@@ -109,7 +107,6 @@ async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder,
             transactions_count: 0,
         },
         transaction_count_contracts: 0,
-        transaction_count_with_server: 0,
     };
 
     // Get server transaction count
@@ -219,6 +216,18 @@ async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder,
         Err(e) => println!("Warning: Failed to get orchestrator contract: {}", e),
     }
 
+    // Add tUSDT contract
+    let tusdt_address = "0x62500ed734585c9f1f63f45a18fd81618ef5abe5";
+    println!("Processing tUSDT contract at address: {}", tusdt_address);
+
+    let transactions_count = txn_count(tusdt_address).await.unwrap_or(0);
+
+    response.contracts.push(ContractStats {
+        address: tusdt_address.to_string(),
+        contract_type: "haithe.core.tusdt".to_string(),
+        transactions_count,
+    });
+
     // Calculate transaction counts
     response.transaction_count_contracts = response
         .contracts
@@ -226,14 +235,10 @@ async fn get_index_handler(state: web::Data<AppState>) -> Result<impl Responder,
         .map(|c| c.transactions_count)
         .sum::<u64>();
 
-    response.transaction_count_with_server =
-        response.server.transactions_count + response.transaction_count_contracts;
-
     println!(
-        "Final response: {} contracts, contracts transactions: {}, total with server: {}",
+        "Final response: {} contracts, contracts transactions: {}",
         response.contracts.len(),
         response.transaction_count_contracts,
-        response.transaction_count_with_server
     );
 
     Ok(respond::ok("Statistics retrieved successfully", response))
