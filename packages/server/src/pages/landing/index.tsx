@@ -80,10 +80,6 @@ export default function Landing() {
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl lg:text-2xl text-white/60 mb-12 lg:mb-16 max-w-4xl mx-auto leading-relaxed font-light px-4">
-              Haithe combines Web3 blockchain technology with advanced AI capabilities to create a decentralized ecosystem for AI development, deployment, and marketplace commerce.
-            </p>
-
             <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center px-4">
               <Button
                 asChild
@@ -121,18 +117,18 @@ export default function Landing() {
             {[
               {
                 src: "/static/aiAbstract.webp",
-                title: "AI Agent Management",
-                description: "Create, configure, and deploy AI agents with custom capabilities"
+                title: "Build custom agents",
+                description: "Create, configure, and deploy AI agents with custom context, tools, and knowledge bases"
               },
               {
                 src: "/static/transparentAbstract.webp",
-                title: "Web3 Integration",
-                description: "Blockchain-based authentication, payments, and decentralized marketplace"
+                title: "Powered by Blockchain",
+                description: "Haithe is built on Hyperion, one of the fastest growing and secure Ethereum Layer-2 networks, built for AI"
               },
               {
                 src: "/static/verificationAbstract.webp",
-                title: "Marketplace Ecosystem",
-                description: "Buy, sell, and share AI products, knowledge bases, and tools"
+                title: "Sell on the marketplace",
+                description: "Buy & sell context, knowledge bases, tools and RPCs"
               }
             ].map((item, index) => (
               <div key={index} className="relative rounded-2xl border border-white/10 overflow-hidden ">
@@ -236,13 +232,10 @@ export default function Landing() {
                     <ul className="space-y-3 lg:space-y-4 text-white/70 text-sm lg:text-base">
                       {[
                         "AI Agent Management & Deployment",
-                        "Web3 Wallet Authentication",
                         "Decentralized Marketplace",
                         "Multi-tenant Organizations",
-                        "USDT-based Financial System",
-                        "Real-time AI Chat Interface",
+                        "Telegram & Discord Bot Integration",
                         "API Access & Integration",
-                        "Role-based Access Control",
                       ].map((feature, index) => (
                         <li key={index} className="flex items-start">
                           <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 lg:mr-4 mt-2 flex-shrink-0" />
@@ -456,12 +449,6 @@ export default function Landing() {
                 <p className="relative text-white/60 mb-4 lg:mb-6 text-sm lg:text-base leading-relaxed">
                   {community.description}
                 </p>
-                <Button
-                  variant="outline"
-                  className="relative border-white/20 text-white/80 hover:bg-white/5 hover:text-white rounded-full text-sm lg:text-base group-hover:border-white/40 transition-all duration-200"
-                >
-                  {community.buttonText}
-                </Button>
               </Card>
             ))}
           </div>
