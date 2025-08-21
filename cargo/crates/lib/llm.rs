@@ -1,4 +1,5 @@
 use crate::lib::{contracts, error::ApiError, models, state::AppState};
+use crate::utils;
 use alith::data::crypto::decrypt;
 use alith::{
     Agent, Chat, HtmlKnowledge, Knowledge, PdfFileKnowledge, SearchTool, StringKnowledge,
@@ -384,6 +385,26 @@ pub async fn generate_llm_response(
         .bind(org_id)
         .execute(&state.db)
         .await?;
+
+    // Log the API call event
+    if let Err(e) = utils::log_event(
+        &state.db,
+        &format!("api.call.{}", params.model),
+        utils::LogDetails {
+            org_id: Some(org_id),
+            project_id: Some(project_id),
+            user_wallet: None, // Will be set if available in future
+            metadata: Some(serde_json::json!({
+                "model": params.model,
+                "total_cost": total_cost,
+                "prompt_tokens": prompt.len(),
+                "temperature": params.temperature,
+                "choices_count": params.n
+            }).to_string()),
+        }
+    ).await {
+        eprintln!("Failed to log API call event: {}", e);
+    }
 
     Ok(LlmResponse {
         choices,
