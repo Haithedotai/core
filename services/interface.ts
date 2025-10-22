@@ -293,6 +293,10 @@ export class HaitheClient {
     return this.creator.isCreator();
   }
 
+  getAllCreators(): Promise<CreatorDetails[]> {
+    return this.creator.getAllCreators();
+  }
+
   getCreatorByAddress(walletAddress: string): Promise<CreatorDetails> {
     return this.creator.getCreatorByAddress(walletAddress);
   }

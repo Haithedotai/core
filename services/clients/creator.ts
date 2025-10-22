@@ -71,6 +71,15 @@ export class HaitheCreatorClient extends BaseClient {
   //   };
   // }
 
+  async getAllCreators(): Promise<CreatorDetails[]> {
+    const response = await this.fetch<{ creators: CreatorDetails[] }>(
+      "/v1/creator",
+      null
+    );
+
+    return response.creators;
+  }
+
   async getCreatorByAddress(walletAddress: string): Promise<CreatorDetails> {
     const response = await this.fetch<{ creator: CreatorDetails }>(
       `/v1/creator/${walletAddress}`,

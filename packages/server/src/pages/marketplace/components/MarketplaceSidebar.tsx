@@ -1,13 +1,8 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "../../../lib/components/ui/button";
 import { Separator } from "../../../lib/components/ui/separator";
-import { Badge } from "../../../lib/components/ui/badge";
 import { Checkbox } from "../../../lib/components/ui/checkbox";
 import {
-  Sparkles,
-  Clock,
-  Heart,
-  ShoppingCart,
   FileText,
   Code,
   Database,
@@ -49,9 +44,9 @@ export default function MarketplaceSidebar() {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1">
             Discover
           </p>
-          <Button 
-            variant={isActive("/marketplace") && pathname === "/marketplace" ? "default" : "ghost"} 
-            className="w-full justify-start h-10" 
+          <Button
+            variant={isActive("/marketplace") && pathname === "/marketplace" ? "default" : "ghost"}
+            className="w-full justify-start h-10"
             asChild
           >
             <Link to="/marketplace">
@@ -59,9 +54,15 @@ export default function MarketplaceSidebar() {
               Explore All
             </Link>
           </Button>
-          <Button variant="ghost" className="w-full justify-start h-10">
-            <Icon name="TrendingUp" className="size-4" />
-            Trending Now
+          <Button
+            variant={isActive("/marketplace/creators") ? "default" : "ghost"}
+            className="w-full justify-start h-10"
+            asChild
+          >
+            <Link to="/marketplace/creators">
+              <Icon name="Users" className="size-4" />
+              Creators
+            </Link>
           </Button>
         </div>
 

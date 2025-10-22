@@ -84,6 +84,24 @@ async fn get_creator_products(
     ))
 }
 
+#[get("")]
+async fn get_all_creators(state: web::Data<AppState>) -> Result<impl Responder, ApiError> {
+    let creators = sqlx::query_as::<_, CreatorDetails>(
+        "SELECT wallet_address, uri, created_at FROM creators ORDER BY created_at DESC"
+    )
+    .fetch_all(&state.db)
+    .await
+    .map_err(|e| {
+        println!("DB Error fetching creators: {:?}", e);
+        ApiError::Internal("Failed to fetch creators".into())
+    })?;
+
+    Ok(respond::ok(
+        "Creators fetched successfully",
+        serde_json::json!({ "creators": creators }),
+    ))
+}
+
 #[post("")]
 async fn become_creator(
     user: AuthUser,
@@ -283,7 +301,8 @@ async fn become_creator(
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(get_creator_by_address)
+    cfg.service(get_all_creators)
+        .service(get_creator_by_address)
         .service(get_creator_products)
         .service(become_creator);
 }

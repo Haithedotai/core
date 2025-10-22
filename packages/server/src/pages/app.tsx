@@ -23,6 +23,7 @@ import BecomeCreator from './marketplace/become-creator';
 import Create from './marketplace/create';
 import ItemDetailPage from './marketplace/item/itemDetailPage';
 import MarketplaceProfilePage from './marketplace/profile';
+import CreatorShowcase from './marketplace/creators';
 import { useHaitheApi } from '../lib/hooks/use-haithe-api';
 import Loader from '../lib/components/app/Loader';
 import AgentsConfiguration from './dashboard/agents/configuration';
@@ -260,6 +261,14 @@ const marketplaceProfileRoute = createRoute({
   },
 })
 
+const creatorsShowcaseRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/marketplace/creators',
+  component: function CreatorsShowcaseRoute() {
+    return withPageErrorBoundary(CreatorShowcase)({});
+  },
+})
+
 const generateAPIKeyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard/generate-api-key',
@@ -342,6 +351,7 @@ const routeTree = rootRoute.addChildren([
   createItemsRoute,
   itemDetailRoute,
   marketplaceProfileRoute,
+  creatorsShowcaseRoute,
   generateAPIKeyRoute,
   chatListRoute,
   chatWithAgentRoute,

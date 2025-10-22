@@ -60,9 +60,16 @@ export default function MarketplaceMobileSidebar() {
             Explore All
           </Link>
         </Button>
-        <Button variant="ghost" className="w-full justify-start h-10" onClick={handleLinkClick}>
-          <Icon name="TrendingUp" className="size-4" />
-          Trending Now
+        <Button
+          variant={isActive("/marketplace/creators") ? "default" : "ghost"}
+          className="w-full justify-start h-10"
+          asChild
+          onClick={handleLinkClick}
+        >
+          <Link to="/marketplace/creators">
+            <Icon name="Users" className="size-4" />
+            Creators
+          </Link>
         </Button>
       </div>
 

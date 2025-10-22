@@ -582,6 +582,34 @@ export function useHaitheApi() {
             enabled: isLoggedIn() && !!client,
         }),
 
+        getAllCreators: () => useQuery({
+            queryKey: ['creators'],
+            queryFn: async () => {
+                if (!client) throw new Error("Wallet not connected");
+                const creators = await client.getAllCreators();
+
+                // Fetch IPFS metadata for each creator
+                const creatorsWithMetadata = await Promise.all(
+                    creators.map(async (creator) => {
+                        try {
+                            const ipfsData = await fetch(creator.uri);
+                            const data = await ipfsData.json();
+                            return {
+                                ...creator,
+                                ...data,
+                            };
+                        } catch (error) {
+                            console.error(`Failed to fetch metadata for creator ${creator.wallet_address}:`, error);
+                            return creator; // Return basic data if IPFS fetch fails
+                        }
+                    })
+                );
+
+                return creatorsWithMetadata;
+            },
+            enabled: !!client,
+        }),
+
         getCreatorByAddress: (id: string) => useQuery({
             queryKey: ['creator', id],
             queryFn: async () => {
