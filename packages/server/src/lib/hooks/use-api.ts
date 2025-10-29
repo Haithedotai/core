@@ -114,5 +114,64 @@ export function useApi() {
                 console.error(err);
             }
         }),
+
+        // Docs API methods
+        getDocsMetadata: useMutation({
+            mutationFn: async () => {
+                const result = await client.docs.metadata.$get();
+
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+            onError: (err) => {
+                console.error("Failed to fetch docs metadata:", err);
+                toast.error("Failed to load documentation");
+            }
+        }),
+
+        getDocSections: useMutation({
+            mutationFn: async (docId: string) => {
+                const result = await client.docs.sections[":docId"].$get({
+                    param: { docId }
+                });
+
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+            onError: (err) => {
+                console.error("Failed to fetch doc sections:", err);
+                toast.error("Failed to load sections");
+            }
+        }),
+
+        getSectionContent: useMutation({
+            mutationFn: async ({ docId, sectionId }: { docId: string; sectionId: string }) => {
+                const result = await client.docs.content[":docId"][":sectionId"].$get({
+                    param: { docId, sectionId }
+                });
+
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+            onError: (err) => {
+                console.error("Failed to fetch section content:", err);
+                toast.error("Failed to load content");
+            }
+        }),
     }
 }

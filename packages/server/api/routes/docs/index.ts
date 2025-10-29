@@ -1,0 +1,1 @@
+export { default, type DocsType } from "./docs.route";
