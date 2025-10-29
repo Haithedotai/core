@@ -328,6 +328,10 @@ const chatSettingsRoute = createRoute({
 const docsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/docs',
+  validateSearch: (search: Record<string, unknown>) => ({
+    doc: (search.doc as string) || undefined,
+    section: (search.section as string) || undefined,
+  }),
   component: function DocsRoute() {
     return withPageErrorBoundary(Docs)({});
   },

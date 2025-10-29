@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import client from "../utils/api-client";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -28,7 +28,6 @@ export function useApi() {
             },
             onError: (err) => {
                 console.error(err);
-                toast.error("Failed to fetch data");
             }
         }),
         generateText: useMutation({
@@ -50,7 +49,6 @@ export function useApi() {
             },
             onError: (err) => {
                 console.error(err);
-                toast.error("Failed to generate text");
             }
         }),
         generateStream: useMutation({
@@ -89,7 +87,6 @@ export function useApi() {
             },
             onError: (err) => {
                 console.error('Stream error:', err);
-                toast.error("Failed to generate stream");
             }
         }),
 
@@ -116,8 +113,9 @@ export function useApi() {
         }),
 
         // Docs API methods
-        getDocsMetadata: useMutation({
-            mutationFn: async () => {
+        getDocsMetadata: useQuery({
+            queryKey: ["docs", "metadata"],
+            queryFn: async () => {
                 const result = await client.docs.metadata.$get();
 
                 const parsed = await result.json();
@@ -127,15 +125,12 @@ export function useApi() {
                 }
 
                 return parsed.data;
-            },
-            onError: (err) => {
-                console.error("Failed to fetch docs metadata:", err);
-                toast.error("Failed to load documentation");
             }
         }),
 
-        getDocSections: useMutation({
-            mutationFn: async (docId: string) => {
+        getDocSections: (docId: string, options?: any) => useQuery({
+            queryKey: ["docs", "sections", docId],
+            queryFn: async () => {
                 const result = await client.docs.sections[":docId"].$get({
                     param: { docId }
                 });
@@ -148,14 +143,12 @@ export function useApi() {
 
                 return parsed.data;
             },
-            onError: (err) => {
-                console.error("Failed to fetch doc sections:", err);
-                toast.error("Failed to load sections");
-            }
+            ...options
         }),
 
-        getSectionContent: useMutation({
-            mutationFn: async ({ docId, sectionId }: { docId: string; sectionId: string }) => {
+        getSectionContent: ({ docId, sectionId }: { docId: string; sectionId: string }, options?: any) => useQuery({
+            queryKey: ["docs", "content", docId, sectionId],
+            queryFn: async () => {
                 const result = await client.docs.content[":docId"][":sectionId"].$get({
                     param: { docId, sectionId }
                 });
@@ -168,10 +161,7 @@ export function useApi() {
 
                 return parsed.data;
             },
-            onError: (err) => {
-                console.error("Failed to fetch section content:", err);
-                toast.error("Failed to load content");
-            }
+            ...options
         }),
     }
 }
