@@ -1,1 +1,0 @@
-export { default, type UserType } from "./user.route";

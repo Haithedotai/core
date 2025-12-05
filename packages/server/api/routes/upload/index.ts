@@ -1,1 +1,0 @@
-export { default, type UploadType } from "./upload.route";    

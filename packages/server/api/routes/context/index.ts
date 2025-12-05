@@ -1,1 +1,0 @@
-export { default, type ContextType } from "./context.route";
