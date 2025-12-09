@@ -1,16 +1,8 @@
 const envKeys = [
-    "TG_ANALYTICS_BOT_GROUP_ID",
-    "TG_ANALYTICS_BOT_TOKEN",
-    "S3_SECRET_ACCESS_KEY",
-    "S3_ACCESS_KEY_ID",
-    "S3_BUCKET",
-    "S3_ENDPOINT",
-    "EVM_PRIVATE_KEY_SYNAPSE",
-    "EVM_PRIVATE_KEY_SERVER",
-    "PG_URI",
-    "DB_NAME",
-    "FRONTEND_URL",
-    "RUNTIME_CHAIN_ID",
+	"PG_URI",
+	"DB_NAME",
+	"FRONTEND_URL",
+	"RUNTIME_CHAIN_ID",
 ] as const;
 
 type ENV = Record<(typeof envKeys)[number], string>;
@@ -18,16 +10,16 @@ type ENV = Record<(typeof envKeys)[number], string>;
 let env: ENV = {} as ENV;
 
 export function ensureEnv() {
-    for (const key of envKeys) {
-        if (!Bun.env[key]) {
-            throw new Error(`Environment variable ${key} is not set`);
-        }
-    }
+	for (const key of envKeys) {
+		if (!Bun.env[key]) {
+			throw new Error(`Environment variable ${key} is not set`);
+		}
+	}
 
-    env = Object.fromEntries(envKeys.map((key) => [key, Bun.env[key]])) as ENV;
+	env = Object.fromEntries(envKeys.map((key) => [key, Bun.env[key]])) as ENV;
 }
 const isProd =
-    process.env.NODE_ENV === "production" || process.env.NODE_ENV === "prod";
+	process.env.NODE_ENV === "production" || process.env.NODE_ENV === "prod";
 if (!isProd) ensureEnv();
 
 export default env;
