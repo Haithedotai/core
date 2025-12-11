@@ -5,7 +5,7 @@ export class TelegramBot {
 
 	constructor(
 		public botToken: string,
-		public chatId: string,
+		public chatId: number,
 	) {
 		this.rpc = new Axios({
 			baseURL: `https://api.telegram.org/bot${botToken}/`,
