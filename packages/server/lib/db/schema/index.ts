@@ -1,7 +1,7 @@
 import * as user from "./user";
 
 const schema = {
-    ...user,
+	...user,
 };
 
 export default schema;
