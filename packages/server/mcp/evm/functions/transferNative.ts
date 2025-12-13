@@ -1,0 +1,22 @@
+// mcp/evm/functions/transferNative.ts
+import { z } from "zod";
+import { transferNativeSchema } from "../schemas/transferNative.schema";
+import { createViemWalletClient } from "../viemClient";
+
+export const transferNative = {
+  description: "Sends native token from configured wallet to recipient.",
+  schema: transferNativeSchema,
+  run: async (config: { rpcUrl: string; privateKey?: string }, input: z.infer<typeof transferNativeSchema>) => {
+    if (!config.privateKey) throw new Error("privateKey required in server config to send transactions.");
+    const { walletClient, address: from } = createViemWalletClient(config.rpcUrl, config.privateKey);
+
+    
+    const txHash = await walletClient.sendTransaction({
+      to: input.to as `0x${string}`,
+      value: BigInt(input.value),
+      
+    } as any);
+
+    return { txHash };
+  },
+};
