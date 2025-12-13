@@ -5,7 +5,7 @@ import { TelegramBot } from "./bot";
 export default function (config: {
 	name: string;
 	botToken: string;
-	chatId: string;
+	chatId: number;
 }) {
 	const { botToken, chatId, name } = config;
 
