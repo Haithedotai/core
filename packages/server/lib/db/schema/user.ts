@@ -14,6 +14,7 @@ export const usersAgents = t.pgTable("users_agents", {
 	userWalletAddress: tEvmAddress().references(() => users.walletAddress, {
 		onDelete: "cascade",
 	}),
+	apiKeyHash: t.text().notNull().unique(),
 
 	...timestamps,
 });
@@ -34,7 +35,6 @@ export const agentMcps = t.pgTable("user_mcps", {
 
 	mcpIdentifier: t.text().notNull(),
 	mcpConfigEncrypted: t.text().notNull(),
-	mcpConfigHash: t.text().notNull(),
 
 	...timestamps,
 });
