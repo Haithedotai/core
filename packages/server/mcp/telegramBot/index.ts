@@ -1,12 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
+import type { McpServerCreationConfig } from "../registry";
 import { TelegramBot } from "./bot";
 
-export default function (config: {
-	name: string;
-	botToken: string;
-	chatId: number;
-}) {
+export default function (
+	config: McpServerCreationConfig<{
+		botToken: string;
+		chatId: number;
+	}>,
+) {
 	const { name, botToken, chatId } = config;
 
 	const server = new McpServer({
