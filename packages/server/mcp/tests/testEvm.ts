@@ -1,5 +1,4 @@
 import { evmFunctions } from "../evm/functions/index.js";
-import { evmServer } from "../evm/server.js";
 
 async function main() {
 	const config = {

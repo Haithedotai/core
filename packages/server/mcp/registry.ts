@@ -25,7 +25,7 @@ export const McpServerRegistry: Record<
 	evm: {
 		name: "EVM MCP",
 		configSchema: z.object({
-			privateKey: z.string().optional().describe("Private key for signing."),
+			privateKey: z.string().describe("Private key for signing."),
 		}),
 		creationFn: evmMcp,
 	},
