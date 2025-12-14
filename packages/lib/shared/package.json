@@ -6,9 +6,10 @@
 		"@types/bun": "latest"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5",
+		"fast-json-stable-stringify": "^2.1.0",
+		"zod": "^4.1.13",
+		"viem": "^2.42.0"
 	},
-	"dependencies": {
-		"fast-json-stable-stringify": "^2.1.0"
-	}
+	"dependencies": {}
 }
