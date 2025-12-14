@@ -7,7 +7,7 @@ export default function (config: {
 	botToken: string;
 	chatId: number;
 }) {
-	const { botToken, chatId, name } = config;
+	const { name, botToken, chatId } = config;
 
 	const server = new McpServer({
 		name,

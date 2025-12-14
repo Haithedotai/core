@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 import z from "zod";
-import { evmServer } from "./evm/server";
-import telegramBot from "./telegramBot";
+import evmMcp from "./evm";
+import telegramBotMcp from "./telegramBot";
 
 export const McpServerRegistry: Record<
 	string,
@@ -19,20 +19,23 @@ export const McpServerRegistry: Record<
 			botToken: z.string().describe("The Telegram bot token."),
 			chatId: z.string().describe("The Telegram chat ID to post messages to."),
 		}),
-		creationFn: telegramBot,
+		creationFn: telegramBotMcp,
 	},
 
 	evm: {
 		name: "EVM MCP",
 		configSchema: z.object({
-			rpcUrl: z.string().describe("RPC URL for EVM client."),
 			privateKey: z.string().optional().describe("Private key for signing."),
 		}),
-		creationFn: evmServer,
+		creationFn: evmMcp,
 	},
 } as const;
 
 export type McpServerName = keyof typeof McpServerRegistry;
+export type McpServerCreationConfig<T extends object> = { name: string } & T;
+export type McpToolRegistrationConfig<T extends object> = {
+	server: McpServer;
+} & T;
 
 export function getMcpServer(
 	name: McpServerName,
