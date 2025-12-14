@@ -4,6 +4,7 @@ import type { EvmMcpConfig } from "..";
 import registerGetBalance from "./getBalance";
 import registerSignMessage from "./signMessage";
 import registerSignRawBytes from "./signRawBytes";
+import registerTransferErc20 from "./transferErc20";
 
 export default function registerEvmTools(
 	config: McpToolRegistrationConfig<EvmMcpConfig>,
@@ -11,4 +12,5 @@ export default function registerEvmTools(
 	registerGetBalance(config);
 	registerSignMessage(config);
 	registerSignRawBytes(config);
+	registerTransferErc20(config);
 }
