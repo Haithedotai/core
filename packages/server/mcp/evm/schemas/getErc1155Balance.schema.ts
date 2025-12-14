@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 export const getErc1155BalanceSchema = z.object({
-  contract: z.string(),
-  owner: z.string(),
-  tokenId: z.string(),
+	contract: z.string(),
+	owner: z.string(),
+	tokenId: z.string(),
 });

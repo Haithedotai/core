@@ -1,6 +1,7 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 import z from "zod";
-import telegramBot from "./telegramBot";
 import { evmServer } from "./evm/server";
+import telegramBot from "./telegramBot";
 
 export const McpServerRegistry: Record<
 	string,

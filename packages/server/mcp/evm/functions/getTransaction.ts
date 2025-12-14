@@ -1,14 +1,19 @@
 // mcp/evm/functions/getTransaction.ts
-import { z } from "zod";
+import type { z } from "zod";
 import { getTransactionSchema } from "../schemas/getTransaction.schema";
 import { createViemPublicClient } from "../viemClient";
 
 export const getTransaction = {
-  description: "Fetch transaction by hash",
-  schema: getTransactionSchema,
-  run: async (config: { rpcUrl: string }, input: z.infer<typeof getTransactionSchema>) => {
-    const publicClient = createViemPublicClient(config.rpcUrl);
-    const tx = await publicClient.getTransaction({ hash: input.txHash as `0x${string}` });
-    return tx;
-  },
+	description: "Fetch transaction by hash",
+	schema: getTransactionSchema,
+	run: async (
+		config: { rpcUrl: string },
+		input: z.infer<typeof getTransactionSchema>,
+	) => {
+		const publicClient = createViemPublicClient(config.rpcUrl);
+		const tx = await publicClient.getTransaction({
+			hash: input.txHash as `0x${string}`,
+		});
+		return tx;
+	},
 };

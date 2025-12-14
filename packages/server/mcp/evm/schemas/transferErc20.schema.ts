@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 export const transferErc20Schema = z.object({
-  token: z.string(),
-  to: z.string(),
-  amount: z.string().describe("Amount in wei"),
+	token: z.string(),
+	to: z.string(),
+	amount: z.string().describe("Amount in wei"),
 });

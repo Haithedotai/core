@@ -2,6 +2,6 @@
 import { z } from "zod";
 
 export const getContractAbiSchema = z.object({
-  contract: z.string(),
-  etherscanApiKey: z.string(),
+	contract: z.string(),
+	etherscanApiKey: z.string(),
 });

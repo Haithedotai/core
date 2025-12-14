@@ -2,5 +2,5 @@
 import { z } from "zod";
 
 export const signMessageSchema = z.object({
-  message: z.string(),
+	message: z.string(),
 });
