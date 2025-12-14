@@ -1,7 +1,7 @@
 // mcp/evm/functions/waitForTransaction.ts
 import { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getTransactionSchema } from "../schemas/getTransaction.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const waitTxSchema = getTransactionSchema.extend({
 	confirmations: z.number().optional(),

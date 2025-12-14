@@ -1,7 +1,7 @@
 // mcp/evm/functions/getTokenMetadata.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getTokenMetadataSchema } from "../schemas/getTokenMetadata.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC20_META_ABI = [
 	{

@@ -1,7 +1,7 @@
 // mcp/evm/functions/getErc1155Balance.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getErc1155BalanceSchema } from "../schemas/getErc1155Balance.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC1155_ABI = [
 	{

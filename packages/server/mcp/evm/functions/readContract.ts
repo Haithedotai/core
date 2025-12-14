@@ -1,7 +1,7 @@
 // mcp/evm/functions/readContract.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { readContractSchema } from "../schemas/readContract.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const readContract = {
 	description: "Calls a read-only smart contract function.",

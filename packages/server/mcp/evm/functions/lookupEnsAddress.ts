@@ -1,7 +1,7 @@
 // mcp/evm/functions/lookupEnsAddress.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { lookupEnsAddressSchema } from "../schemas/lookupEnsAddress.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const lookupEnsAddress = {
 	description: "Reverse lookup ENS name for an address.",

@@ -1,6 +1,6 @@
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getAllowanceSchema } from "../schemas/getAllowance.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC20_ABI = [
 	{

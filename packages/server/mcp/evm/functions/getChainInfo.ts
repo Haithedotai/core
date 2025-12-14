@@ -1,6 +1,6 @@
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getChainInfoSchema } from "../schemas/getChainInfo.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const getChainInfo = {
 	description:

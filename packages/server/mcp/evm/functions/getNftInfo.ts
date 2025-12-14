@@ -1,7 +1,7 @@
 // mcp/evm/functions/getNftInfo.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getNftInfoSchema } from "../schemas/getNftInfo.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC721_ABI = [
 	{

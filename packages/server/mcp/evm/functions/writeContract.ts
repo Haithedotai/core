@@ -1,7 +1,7 @@
 // mcp/evm/functions/writeContract.ts
 import type { z } from "zod";
+import { createViemWalletClient } from "../evmClient";
 import { writeContractSchema } from "../schemas/writeContract.schema";
-import { createViemWalletClient } from "../viemClient";
 
 export const writeContract = {
 	description: "Executes a state-changing contract function.",

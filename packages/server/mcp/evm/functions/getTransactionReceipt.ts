@@ -1,7 +1,7 @@
 // mcp/evm/functions/getTransactionReceipt.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getTransactionSchema } from "../schemas/getTransaction.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const getTransactionReceipt = {
 	description: "Get transaction receipt by hash",

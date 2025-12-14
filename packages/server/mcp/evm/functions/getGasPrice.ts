@@ -1,5 +1,5 @@
 // mcp/evm/functions/getGasPrice.ts
-import { createViemPublicClient } from "../viemClient";
+import { createViemPublicClient } from "../evmClient";
 
 export const getGasPrice = {
 	description: "Returns current baseFee & priorityFee.",

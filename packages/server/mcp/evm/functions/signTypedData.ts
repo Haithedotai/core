@@ -1,7 +1,7 @@
 // mcp/evm/functions/signTypedData.ts
 import type { z } from "zod";
+import { createViemWalletClient } from "../evmClient";
 import { signTypedDataSchema } from "../schemas/signTypedData.schema";
-import { createViemWalletClient } from "../viemClient";
 
 export const signTypedData = {
 	description: "Sign EIP-712 typed data.",

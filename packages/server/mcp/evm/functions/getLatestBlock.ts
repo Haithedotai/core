@@ -1,5 +1,5 @@
 // mcp/evm/functions/getLatestBlock.ts
-import { createViemPublicClient } from "../viemClient";
+import { createViemPublicClient } from "../evmClient";
 
 export const getLatestBlock = {
 	description: "Returns the latest block number and basic metadata.",

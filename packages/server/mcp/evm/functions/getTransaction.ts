@@ -1,7 +1,7 @@
 // mcp/evm/functions/getTransaction.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getTransactionSchema } from "../schemas/getTransaction.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const getTransaction = {
 	description: "Fetch transaction by hash",

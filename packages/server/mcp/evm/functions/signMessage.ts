@@ -1,7 +1,7 @@
 // mcp/evm/functions/signMessage.ts
 import type { z } from "zod";
+import { createViemWalletClient } from "../evmClient";
 import { signMessageSchema } from "../schemas/signMessage.schema";
-import { createViemWalletClient } from "../viemClient";
 
 export const signMessage = {
 	description: "Sign an arbitrary message.",

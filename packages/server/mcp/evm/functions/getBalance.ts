@@ -1,7 +1,7 @@
 // mcp/evm/functions/getBalance.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getBalanceSchema } from "../schemas/getBalance.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const getBalance = {
 	description:

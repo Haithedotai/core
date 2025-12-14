@@ -1,7 +1,7 @@
 // mcp/evm/functions/getContractInterfaces.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getContractInterfacesSchema } from "../schemas/getContractInterfaces.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC165_ABI = [
 	{

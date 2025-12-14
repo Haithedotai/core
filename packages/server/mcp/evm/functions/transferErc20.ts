@@ -1,7 +1,7 @@
 // mcp/evm/functions/transferErc20.ts
 import type { z } from "zod";
+import { createViemWalletClient } from "../evmClient";
 import { transferErc20Schema } from "../schemas/transferErc20.schema";
-import { createViemWalletClient } from "../viemClient";
 
 const ERC20_ABI = [
 	{

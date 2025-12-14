@@ -1,7 +1,7 @@
 // mcp/evm/functions/approveTokenSpending.ts
 import type { z } from "zod";
+import { createViemWalletClient } from "../evmClient";
 import { approveTokenSpendingSchema } from "../schemas/approveTokenSpending.schema";
-import { createViemWalletClient } from "../viemClient";
 
 const ERC20_APPROVE_ABI = [
 	{

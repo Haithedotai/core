@@ -1,7 +1,7 @@
 // mcp/evm/functions/transferNative.ts
 import type { z } from "zod";
+import { createViemWalletClient } from "../evmClient";
 import { transferNativeSchema } from "../schemas/transferNative.schema";
-import { createViemWalletClient } from "../viemClient";
 
 export const transferNative = {
 	description: "Sends native token from configured wallet to recipient.",

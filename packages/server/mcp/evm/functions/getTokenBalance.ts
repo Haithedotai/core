@@ -1,7 +1,7 @@
 // mcp/evm/functions/getTokenBalance.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getTokenBalanceSchema } from "../schemas/getTokenBalance.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC20_ABI = [
 	{

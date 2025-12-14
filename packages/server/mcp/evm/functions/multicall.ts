@@ -1,7 +1,7 @@
 // mcp/evm/functions/multicall.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { multicallSchema } from "../schemas/multicall.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const multicall = {
 	description: "Runs multiple read calls in a single RPC request.",

@@ -1,7 +1,7 @@
 // mcp/evm/functions/getNftOwner.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getNftOwnerSchema } from "../schemas/getNftOwner.schema";
-import { createViemPublicClient } from "../viemClient";
 
 const ERC721_OWNER_ABI = [
 	{

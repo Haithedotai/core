@@ -1,7 +1,7 @@
 // mcp/evm/functions/getBlock.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { getBlockSchema } from "../schemas/getBlock.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const getBlock = {
 	description: "Fetches a block by number, hash, or tag.",

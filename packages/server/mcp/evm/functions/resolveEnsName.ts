@@ -1,7 +1,7 @@
 // mcp/evm/functions/resolveEnsName.ts
 import type { z } from "zod";
+import { createViemPublicClient } from "../evmClient";
 import { resolveEnsNameSchema } from "../schemas/resolveEnsName.schema";
-import { createViemPublicClient } from "../viemClient";
 
 export const resolveEnsName = {
 	description: "Resolves an ENS name to an Ethereum address.",
