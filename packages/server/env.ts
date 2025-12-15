@@ -1,6 +1,7 @@
 const envKeys = [
 	"PG_URI",
 	"DB_NAME",
+	"EVM_PRIVATE_KEY_SERVER",
 	"FRONTEND_URL",
 	"RUNTIME_CHAIN_ID",
 ] as const;
