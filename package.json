@@ -4,6 +4,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
+		"server:start": "cd packages/server && bun start",
 		"fmt-lint": "bunx biome check --write",
 		"prepare": "husky"
 	},
