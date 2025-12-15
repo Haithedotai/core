@@ -1,5 +1,5 @@
 import type { Chain } from "viem";
-import viemChains from "viem/chains";
+import * as viemChains from "viem/chains";
 
 export const supportedChains: ChainDefinition[] = [
 	{
