@@ -3,6 +3,9 @@
 	"module": "index.ts",
 	"type": "module",
 	"private": true,
+	"scripts": {
+		"start": "bun run index"
+	},
 	"dependencies": {
 		"@haithe/shared": "workspace:*",
 		"@hono/mcp": "^0.2.2",
