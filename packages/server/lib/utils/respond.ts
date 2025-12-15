@@ -1,5 +1,5 @@
 import { jsonStringify } from "@haithe/shared";
-import type { Response } from "express";
+import type { Context } from "hono";
 import type { ResponseHeader } from "hono/utils/headers";
 import type {
 	ClientErrorStatusCode,
@@ -10,37 +10,37 @@ import type { JSONObject } from "hono/utils/types";
 
 export const respond = {
 	ok: <
-		R extends Response,
+		C extends Context,
 		T extends JSONObject | Record<string, unknown>,
 		U extends 200 | 201 | 202 | 303,
 	>(
-		res: R,
+		ctx: C,
 		data: T,
 		message: string,
 		status: U,
 		headers?: HeaderRecord,
 	) => {
-		res.status(status);
+		ctx.status(status);
 		for (const [name, value] of Object.entries(headers || {})) {
-			res.header(name, value);
+			ctx.header(name, value);
 		}
-		return res.json({ success: true, data, message }); //status,headers);
+		return ctx.json({ success: true, data, message }); //status,headers);
 	},
 
 	err: <
-		R extends Response,
+		C extends Context,
 		U extends ClientErrorStatusCode | ServerErrorStatusCode,
 	>(
-		res: R,
+		ctx: C,
 		message: string,
 		status: U,
 		headers?: HeaderRecord,
 	) => {
-		res.status(status);
+		ctx.status(status);
 		for (const [name, value] of Object.entries(headers || {})) {
-			res.header(name, value);
+			ctx.header(name, value);
 		}
-		return res.json({ success: false, error: jsonStringify(message) }); //, status, headers);
+		return ctx.json({ success: false, error: jsonStringify(message) }); //, status, headers);
 	},
 };
 
