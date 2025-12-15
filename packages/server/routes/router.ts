@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
+import authRoutes from "./auth";
 import mcpRoutes from "./mcp";
 
 const app = new Hono()
@@ -15,6 +16,7 @@ const app = new Hono()
 		}),
 	)
 
+	.route("/auth", authRoutes)
 	.route("/mcp", mcpRoutes);
 
 export default {
