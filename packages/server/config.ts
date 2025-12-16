@@ -1,4 +1,5 @@
 import { mainnet } from "viem/chains";
+import env, { isProd } from "./env";
 
 const runtimeChain = mainnet;
 
@@ -17,6 +18,8 @@ const jwtOptions = {
 
 const config = {
 	runtimeChain,
+	cookieOptions,
+	jwtOptions,
 };
 
 export default config;
