@@ -1,0 +1,158 @@
+[
+	{
+		"name": "Background",
+		"variations": [
+			{
+				"name": "Pure Black"
+			},
+			{
+				"name": "Starry Night"
+			},
+			{
+				"name": "Soft Noise"
+			},
+			{
+				"name": "Dark Gradient"
+			},
+			{
+				"name": "Garden"
+			}
+		]
+	},
+	{
+		"name": "Body",
+		"variations": [
+			{
+				"name": "Young",
+				"attributes": [
+					{
+						"name": "clothing",
+						"variations": [
+							{
+								"name": "School"
+							},
+							{
+								"name": "Princess"
+							},
+							{
+								"name": "Hoodie"
+							}
+						]
+					},
+					{
+						"name": "hair",
+						"variations": [
+							{
+								"name": "Short"
+							},
+							{
+								"name": "Waving"
+							},
+							{
+								"name": "Tied up"
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "Adult",
+				"attributes": [
+					{
+						"name": "clothing",
+						"variations": [
+							{
+								"name": "Business"
+							},
+							{
+								"name": "Gothic"
+							},
+							{
+								"name": "Winter"
+							}
+						]
+					},
+					{
+						"name": "hair",
+						"variations": [
+							{
+								"name": "Long"
+							},
+							{
+								"name": "Curly"
+							},
+							{
+								"name": "Braided"
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "Futuristic",
+				"attributes": [
+					{
+						"name": "clothing",
+						"variations": [
+							{
+								"name": "Robotic"
+							},
+							{
+								"name": "Holographic"
+							}
+						]
+					},
+					{
+						"name": "hair",
+						"variations": [
+							{
+								"name": "Futuristic standard"
+							},
+							{
+								"name": "Futuristic standard with bow"
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "Ethereal",
+				"attributes": [
+					{
+						"name": "clothing",
+						"variations": [
+							{
+								"name": "Ethereal standard"
+							}
+						]
+					},
+					{
+						"name": "hair",
+						"variations": [
+							{
+								"name": "Flowing"
+							},
+							{
+								"name": "Flowing - mystic"
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"name": "Halftone",
+		"variations": [
+			{
+				"name": "Light"
+			},
+			{
+				"name": "Medium"
+			},
+			{
+				"name": "Heavy"
+			}
+		]
+	}
+]
