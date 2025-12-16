@@ -1,10 +1,13 @@
 import { Hono } from "hono";
+import { setCookie } from "hono/cookie";
+import { SignJWT } from "jose";
 import { isAddress } from "viem";
 import {
 	generateSiweNonce,
 	parseSiweMessage,
 	validateSiweMessage,
 } from "viem/siwe";
+import config from "../../config";
 import { evmClient } from "../../lib/evm";
 import { respond } from "../../lib/utils/respond";
 
@@ -45,5 +48,31 @@ export default new Hono()
 			return respond.err(ctx, "Invalid SIWE signature", 400);
 		}
 
+		const accessToken = await new SignJWT()
+			.setSubject(address)
+			.setIssuedAt()
+			.setExpirationTime("15m")
+			.setNotBefore("0s")
+			.setProtectedHeader({ alg: config.jwtOptions.algorithm })
+			.sign(config.jwtOptions.secret);
+
+		const refreshToken = await new SignJWT({ type: "refresh" })
+			.setSubject(address)
+			.setIssuedAt()
+			.setExpirationTime("7d")
+			.setNotBefore("10m")
+			.setProtectedHeader({ alg: config.jwtOptions.algorithm })
+			.sign(config.jwtOptions.secret);
+
+		setCookie(ctx, "access_token", accessToken, {
+			...config.cookieOptions,
+			maxAge: 60 * 15,
+		});
+
+		setCookie(ctx, "refresh_token", refreshToken, {
+			...config.cookieOptions,
+			path: "/auth/refresh",
+			maxAge: 60 * 60 * 24 * 7,
+		});
 		return respond.ok(ctx, { address }, "Logged in successfully", 200);
 	});
