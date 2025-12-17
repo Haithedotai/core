@@ -19,7 +19,4 @@ const app = new Hono()
 	.route("/auth", authRoutes)
 	.route("/mcp", mcpRoutes);
 
-export default {
-	port: 4040,
-	fetch: app.fetch,
-};
+export default app;
