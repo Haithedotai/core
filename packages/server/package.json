@@ -5,7 +5,8 @@
 	"private": true,
 	"scripts": {
 		"start": "bun run index",
-		"dev": "bun --watch run index"
+		"dev": "bun --watch run index",
+		"db:migrate": "bunx --bun drizzle-kit push"
 	},
 	"dependencies": {
 		"@haithe/shared": "workspace:*",
@@ -20,6 +21,7 @@
 	},
 	"devDependencies": {
 		"@types/express": "^5.0.6",
+		"@types/pg": "^8.16.0",
 		"drizzle-kit": "^0.31.8"
 	},
 	"peerDependencies": {
