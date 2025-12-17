@@ -4,6 +4,7 @@ const envKeys = [
 	"EVM_PRIVATE_KEY_SERVER",
 	"FRONTEND_URL",
 	"RUNTIME_CHAIN_ID",
+	"COOKIE_SIGNING_SECRET",
 	"JWT_SECRET",
 ] as const;
 
