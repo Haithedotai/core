@@ -3,9 +3,9 @@
 import { describe, expect, it } from "bun:test";
 import { testClient } from "hono/testing";
 import { createWalletClient, http } from "viem";
-import { createSiweMessage } from "viem/siwe";
 import { privateKeyToAccount } from "viem/accounts";
 import { hardhat } from "viem/chains";
+import { createSiweMessage } from "viem/siwe";
 import app from "./routes/router";
 
 const evmWallet = createWalletClient({
