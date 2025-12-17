@@ -1,34 +1,68 @@
 import { eq } from "drizzle-orm";
-import { getCookie } from "hono/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import { jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 import { type Address, isAddress } from "viem";
 import config from "../config";
 import dbClient from "../lib/db/client";
 import schema from "../lib/db/schema";
+import { respond } from "../lib/utils/respond";
 
 export const authenticated = createMiddleware<{
 	Variables: {
 		walletAddress: Address;
 	};
 }>(async (ctx, next) => {
-	const token = getCookie(ctx, "access_token");
-	if (!token) return ctx.json({ error: "Unauthorized" }, 401);
+	const accessToken = getCookie(ctx, "access_token");
+
+	if (accessToken) {
+		try {
+			const { payload } = await jwtVerify(accessToken, config.jwtOptions.secret);
+			const address = payload.sub;
+			if (!isAddress(address)) {
+				return respond.err(ctx, "Invalid token", 401);
+			}
+
+			ctx.set("walletAddress", address);
+			await next();
+		} catch {
+			return respond.err(ctx, "Invalid token", 401);
+		}
+	}
+
+	const refreshToken = getCookie(ctx, "refresh_token");
+	if (!refreshToken) return respond.err(ctx, "Unauthorized", 401);
 
 	try {
-		const { payload } = await jwtVerify(token, config.jwtOptions.secret);
+		const { payload } = await jwtVerify(refreshToken, config.jwtOptions.secret);
+		if (payload.type !== "refresh") throw new Error("Invalid refresh token");
+
 		const address = payload.sub;
 		if (!isAddress(address)) {
-			return ctx.json({ error: "Invalid token" }, 401);
+			return respond.err(ctx, "Invalid token", 401);
 		}
+
+		const newAccessToken = await new SignJWT()
+			.setSubject(address)
+			.setIssuedAt()
+			.setExpirationTime("15m")
+			.setNotBefore("0s")
+			.setProtectedHeader({ alg: config.jwtOptions.algorithm })
+			.sign(config.jwtOptions.secret);
+
+		setCookie(ctx, "access_token", newAccessToken, {
+			...config.cookieOptions,
+			maxAge: 60 * 15,
+		});
 
 		ctx.set("walletAddress", address);
 		await next();
 	} catch {
-		return ctx.json({ error: "Invalid token" }, 401);
+		return respond.err(ctx, "Unauthorized", 401);
 	}
 
-	await dbClient
+	console.log("If this is seen tell spandan");
+	dbClient
 		.update(schema.users)
 		.set({
 			lastActiveAt: new Date(),
