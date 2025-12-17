@@ -4,7 +4,8 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"start": "bun run index"
+		"start": "bun run index",
+		"dev": "bun --watch run index"
 	},
 	"dependencies": {
 		"@haithe/shared": "workspace:*",
@@ -17,7 +18,6 @@
 		"zod": "^4.1.13"
 	},
 	"devDependencies": {
-		"@types/bun": "latest",
 		"@types/express": "^5.0.6",
 		"drizzle-kit": "^0.31.8"
 	},
