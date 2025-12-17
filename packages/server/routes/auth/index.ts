@@ -82,14 +82,14 @@ export default new Hono()
 				.setProtectedHeader({ alg: config.jwtOptions.algorithm })
 				.sign(config.jwtOptions.secret);
 
-			setCookie(ctx, "access_token", accessToken, {
+			setCookie(ctx, config.jwtOptions.cookieNames.access, accessToken, {
 				...config.cookieOptions,
 				maxAge: 60 * 15,
 			});
 
 			await setSignedCookie(
 				ctx,
-				"refresh_token",
+				config.jwtOptions.cookieNames.refresh,
 				refreshToken,
 				config.cookieOptions.secret,
 				{

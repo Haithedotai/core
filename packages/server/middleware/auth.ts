@@ -13,13 +13,13 @@ export const authenticated = createMiddleware<{
 		walletAddress: Address;
 	};
 }>(async (ctx, next) => {
-	const accessToken = getCookie(ctx, "access_token");
+	const accessToken = getCookie(ctx, config.jwtOptions.cookieNames.access);
 
 	if (accessToken) {
 		try {
 			const { payload } = await jwtVerify(accessToken, config.jwtOptions.secret);
 			const address = payload.sub;
-			if (!isAddress(address)) {
+			if (!address || !isAddress(address)) {
 				return respond.err(ctx, "Invalid token", 401);
 			}
 
@@ -30,7 +30,7 @@ export const authenticated = createMiddleware<{
 		}
 	}
 
-	const refreshToken = getCookie(ctx, "refresh_token");
+	const refreshToken = getCookie(ctx, config.jwtOptions.cookieNames.refresh);
 	if (!refreshToken) return respond.err(ctx, "Unauthorized", 401);
 
 	try {
@@ -38,7 +38,7 @@ export const authenticated = createMiddleware<{
 		if (payload.type !== "refresh") throw new Error("Invalid refresh token");
 
 		const address = payload.sub;
-		if (!isAddress(address)) {
+		if (!address || !isAddress(address)) {
 			return respond.err(ctx, "Invalid token", 401);
 		}
 
@@ -50,7 +50,7 @@ export const authenticated = createMiddleware<{
 			.setProtectedHeader({ alg: config.jwtOptions.algorithm })
 			.sign(config.jwtOptions.secret);
 
-		setCookie(ctx, "access_token", newAccessToken, {
+		setCookie(ctx, config.jwtOptions.cookieNames.access, newAccessToken, {
 			...config.cookieOptions,
 			maxAge: 60 * 15,
 		});
