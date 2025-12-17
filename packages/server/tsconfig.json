@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"composite": true,
-		"rootDir": "."
+		"rootDir": ".",
+		"strict": true
 	},
 	"include": ["."]
 }
