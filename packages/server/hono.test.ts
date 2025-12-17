@@ -16,6 +16,7 @@ const evmWallet = createWalletClient({
 	),
 });
 
+let authHeaders: { headers: { Cookie: string } };
 const client = testClient(app);
 describe("Auth Flow", () => {
 	let nonce: string;
@@ -63,12 +64,18 @@ describe("Auth Flow", () => {
 		});
 
 		expect(res.status).toBe(200);
+
+		const setCookieHeader = res.headers.getSetCookie()[0];
+		const accessToken = setCookieHeader.split(";")[0].split("=")[1];
+		authHeaders = {
+			headers: { Cookie: `H_access_token=${accessToken}` },
+		};
 	});
 });
 
 describe("User", () => {
 	it("should retrieve self user info", async () => {
-		const user = await client.users.me.$get();
+		const user = await client.users.me.$get(undefined, authHeaders);
 		expect(user.status).toBe(200);
 	});
 });
