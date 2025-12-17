@@ -65,3 +65,10 @@ describe("Auth Flow", () => {
 		expect(res.status).toBe(200);
 	});
 });
+
+describe("User", () => {
+	it("should retrieve self user info", async () => {
+		const user = await client.users.me.$get();
+		expect(user.status).toBe(200);
+	});
+});
