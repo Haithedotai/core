@@ -12,17 +12,17 @@ export default function (config: McpToolRegistrationConfig<EvmMcpConfig>) {
 	const { server, privateKey } = config;
 
 	server.registerTool(
-		"sign-message",
+		"sign-raw-bytes",
 		{
-			title: "Sign Message",
+			title: "Sign Raw Bytes",
 			annotations: {
 				readOnlyHint: false,
 				destructiveHint: false,
 				idempotentHint: true,
 				openWorldHint: true,
-				title: "Sign Message",
+				title: "Sign Raw Bytes",
 			},
-			description: "Sign a message with a user's private key.",
+			description: "Sign raw bytes with a user's private key.",
 			inputSchema,
 		},
 		async ({ bytesHex }) => {
@@ -36,7 +36,7 @@ export default function (config: McpToolRegistrationConfig<EvmMcpConfig>) {
 				content: [
 					{
 						type: "text",
-						text: `The signature of the message is ${signature}`,
+						text: `The signature of the input bytes is ${signature}`,
 					},
 				],
 			};

@@ -3,21 +3,12 @@ import z from "zod";
 import evmMcp from "./evm";
 import telegramBotMcp from "./telegramBot";
 
-export const McpServerRegistry: Record<
-	string,
-	{
-		name: string;
-		configSchema: z.ZodType<object>;
-		creationFn: (
-			config: z.infer<z.ZodType<object>> & { name: string },
-		) => McpServer;
-	}
-> = {
+export const McpServerRegistry = {
 	telegramBot: {
 		name: "Telegram Bot MCP",
 		configSchema: z.object({
 			botToken: z.string().describe("The Telegram bot token."),
-			chatId: z.string().describe("The Telegram chat ID to post messages to."),
+			chatId: z.number().describe("The Telegram chat ID to post messages to."),
 		}),
 		creationFn: telegramBotMcp,
 	},
@@ -37,9 +28,11 @@ export type McpToolRegistrationConfig<T extends object> = {
 	server: McpServer;
 } & T;
 
-export function getMcpServer(
-	name: McpServerName,
-	config: z.infer<(typeof McpServerRegistry)[McpServerName]["configSchema"]>,
+export function getMcpServer<N extends McpServerName>(
+	name: N,
+	config: z.infer<(typeof McpServerRegistry)[N]["configSchema"]>,
 ) {
-	return McpServerRegistry[name].creationFn({ ...config, name });
+	const entry = McpServerRegistry[name];
+	// @ts-expect-error - Complex generic type that TypeScript can't infer properly
+	return entry.creationFn({ ...config, name });
 }

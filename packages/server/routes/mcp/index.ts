@@ -2,9 +2,9 @@ import { StreamableHTTPTransport } from "@hono/mcp";
 import { Hono } from "hono";
 import { getMcpServer } from "../../mcp/registry";
 
-const mcpServer = getMcpServer("telegramBot", {
-	botToken: "8458065504:AAEi0E0LxqhsVUoIDwrIxFSVoasts_lb_WQ",
-	chatId: 1196325945,
+const mcpServer = getMcpServer("evm", {
+	privateKey:
+		"0x67bb0d5f28e5d7d927872063a3f2970160202fffa77e7bd5eb871368abfd75d6",
 });
 
 const transport = new StreamableHTTPTransport();
