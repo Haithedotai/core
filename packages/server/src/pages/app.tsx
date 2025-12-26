@@ -30,6 +30,7 @@ import AgentsConfiguration from './dashboard/agents/configuration';
 import GenerateAPIKey from './dashboard/generateAPIKey';
 import { ChatWithAgent, ChatList, ChatSettings } from './dashboard/agents/chat';
 import Docs from './docs';
+import { NFTPage } from './nft';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -337,6 +338,14 @@ const docsRoute = createRoute({
   },
 })
 
+const NFTRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/mint',
+  component: function NFTRoute() {
+    return withPageErrorBoundary(NFTPage)({});
+  },
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   onboardingRoute,
@@ -360,7 +369,8 @@ const routeTree = rootRoute.addChildren([
   chatListRoute,
   chatWithAgentRoute,
   chatSettingsRoute,
-  docsRoute
+  docsRoute,
+  NFTRoute
 ])
 
 const router = createRouter({

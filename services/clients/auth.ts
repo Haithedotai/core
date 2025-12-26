@@ -105,6 +105,16 @@ export class HaitheAuthClient extends BaseClient {
     this.persistAuthToken(token);
   }
 
+  async signupToWaitlist(email: string): Promise<void> {
+    await this.fetch("/v1/auth/waitlist", null, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+  }
+
   profile(): Promise<UserProfile> {
     return this.fetch("/v1/me", this.authToken);
   }

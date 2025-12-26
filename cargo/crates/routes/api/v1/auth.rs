@@ -36,6 +36,39 @@ struct PostLoginQuery {
     signature: String,
 }
 
+#[derive(Deserialize)]
+struct WaitlistRequest {
+    email: String,
+}
+
+#[post("/waitlist")]
+async fn post_waitlist_handler(
+    payload: web::Json<WaitlistRequest>,
+    state: web::Data<AppState>,
+) -> Result<impl Responder, ApiError> {
+    let email = payload.email.to_lowercase();
+
+    // Basic email validation could go here, but keeping it minimal
+    if email.is_empty() || !email.contains('@') {
+        return Err(ApiError::BadRequest("Invalid email address".into()));
+    }
+
+    sqlx::query("INSERT INTO waitlist (email) VALUES (?)")
+        .bind(&email)
+        .execute(&state.db)
+        .await
+        .map_err(|e| {
+            if let Some(db_err) = e.as_database_error() {
+                if db_err.is_unique_violation() {
+                    return ApiError::BadRequest("Email already registered".into());
+                }
+            }
+            ApiError::InternalServerError(e.to_string())
+        })?;
+
+    Ok(respond::ok("Signed up for waitlist", ()))
+}
+
 #[post("/login")]
 async fn post_login_handler(
     req: HttpRequest,
@@ -116,6 +149,7 @@ async fn post_logout_handler(
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_nonce_handler)
+        .service(post_waitlist_handler)
         .service(post_login_handler)
         .service(post_logout_handler);
 }

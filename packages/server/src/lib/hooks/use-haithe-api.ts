@@ -87,6 +87,20 @@ export function useHaitheApi() {
             }
         }),
 
+        signupToWaitlist: useMutation({
+            mutationKey: ['signupToWaitlist'],
+            mutationFn: (email: string) => {
+                if (!client) throw new Error("Wallet not connected");
+                return client.auth.signupToWaitlist(email);
+            },
+            onSuccess: () => {
+                toast.success('Joined the waitlist successfully!');
+            },
+            onError: (error) => {
+                toast.error(error instanceof Error ? error.message : 'Signup failed');
+            }
+        }),
+
         // Profile query - returns raw API data
         profile: () => useQuery({
             queryKey: ['profile'],
@@ -428,12 +442,14 @@ export function useHaitheApi() {
 
         updateProject: useMutation({
             mutationKey: ['updateProject'],
-            mutationFn: ({ id, updates }: { id: number; updates: {
-                name?: string;
-                search_enabled?: boolean;
-                memory_enabled?: boolean;
-                default_model_id?: number;
-            } }) => {
+            mutationFn: ({ id, updates }: {
+                id: number; updates: {
+                    name?: string;
+                    search_enabled?: boolean;
+                    memory_enabled?: boolean;
+                    default_model_id?: number;
+                }
+            }) => {
                 if (!client) throw new Error("Wallet not connected");
                 return client.updateProject(id, updates);
             },
@@ -656,9 +672,9 @@ export function useHaitheApi() {
 
         updateProduct: useMutation({
             mutationKey: ['updateProduct'],
-            mutationFn: ({ id, updates }: { 
-                id: number; 
-                updates: { description?: string; photo_url?: string } 
+            mutationFn: ({ id, updates }: {
+                id: number;
+                updates: { description?: string; photo_url?: string }
             }) => {
                 if (!client) throw new Error("Wallet not connected");
                 return client.updateProduct(id, updates);

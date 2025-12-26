@@ -5,15 +5,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/lib/components/ui/card";
-import { icons } from "lucide-react";
+import type { icons } from "lucide-react";
 import { useEffect, useRef, useCallback } from "react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { Link } from "@tanstack/react-router";
 import Icon from "@/src/lib/components/custom/Icon";
 import NightSky from "./NightSky";
-import { Image } from "@/src/lib/components/custom/Image";
+
 import { motion } from "framer-motion";
+import { FloatingNFTBanner } from "./FloatingNFTBanner";
 
 type IconName = keyof typeof icons;
 
@@ -86,7 +87,7 @@ export default function Landing() {
                 size="lg"
                 className="text-base lg:text-lg bg-white/90 text-black hover:bg-white border-0 px-8 lg:px-10 py-4 h-auto font-semibold transition-all duration-100 w-full sm:w-auto"
               >
-                <Link to="/docs" className="flex items-center">
+                <Link to="/docs" search={{ doc: undefined, section: undefined }} className="flex items-center">
                   <Icon name="Book" className="ml-1 h-5 w-5" />
                   <span>See Documentation</span>
                 </Link>
@@ -97,7 +98,7 @@ export default function Landing() {
                 size="lg"
                 className="text-base lg:text-lg bg-black border-white/20 text-white/80 hover:bg-white/5 hover:text-white px-8 lg:px-10 py-4 h-auto w-full sm:w-auto"
               >
-                <a href="https://www.youtube.com/watch?v=2HCJYMXJGDk" target="_blank" className="flex items-center">
+                <a href="https://www.youtube.com/watch?v=2HCJYMXJGDk" target="_blank" rel="noopener noreferrer" className="flex items-center">
                   <Icon name="Play" className="mr-1 h-5 w-5" />
                   Watch Demo
                 </a>
@@ -130,8 +131,8 @@ export default function Landing() {
                 title: "Sell on the marketplace",
                 description: "Buy & sell context, knowledge bases, tools and RPCs"
               }
-            ].map((item, index) => (
-              <div key={index} className="relative rounded-2xl border border-white/10 overflow-hidden ">
+            ].map((item) => (
+              <div key={item.title} className="relative rounded-2xl border border-white/10 overflow-hidden ">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.02] rounded-2xl bg-background border" />
                 <div className="relative aspect-video bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center">
                   <img
@@ -236,8 +237,8 @@ export default function Landing() {
                         "Multi-tenant Organizations",
                         "Telegram & Discord Bot Integration",
                         "API Access & Integration",
-                      ].map((feature, index) => (
-                        <li key={index} className="flex items-start">
+                      ].map((feature) => (
+                        <li key={feature} className="flex items-start">
                           <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 lg:mr-4 mt-2 flex-shrink-0" />
                           {feature}
                         </li>
@@ -292,8 +293,8 @@ export default function Landing() {
                   gradient: "from-green-500/20 to-emerald-500/20",
                   iconColor: "text-green-400"
                 }
-              ].map((step, index) => (
-                <Card key={index} className="relative p-6 lg:p-8 border border-white/10 backdrop-blur-sm rounded-2xl h-full group hover:border-white/20 transition-all duration-200">
+              ].map((step) => (
+                <Card key={step.title} className="relative p-6 lg:p-8 border border-white/10 backdrop-blur-sm rounded-2xl h-full group hover:border-white/20 transition-all duration-200">
                   <div className="absolute inset-0 bg-gradient-to-br from-background/[0.05] to-secondary/[0.02] rounded-2xl" />
                   <div className="relative flex items-center space-x-4 mb-6">
                     <div className={`h-12 w-12 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 ${step.iconColor} flex items-center justify-center backdrop-blur-sm transition-all duration-200`}>
@@ -373,8 +374,8 @@ export default function Landing() {
                 gradient: "from-red-500/20 to-pink-500/20",
                 iconColor: "text-red-400"
               },
-            ].map((feature, index) => (
-              <Card key={index} className="relative border border-white/10 backdrop-blur-sm rounded-2xl p-6 lg:p-8 h-full group hover:border-white/20 transition-all duration-200">
+            ].map((feature) => (
+              <Card key={feature.title} className="relative border border-white/10 backdrop-blur-sm rounded-2xl p-6 lg:p-8 h-full group hover:border-white/20 transition-all duration-200">
                 <div className="absolute inset-0 bg-gradient-to-br from-background/[0.05] to-secondary/[0.02] rounded-2xl" />
                 <CardHeader className="relative p-0 pb-4">
                   <div className={`${feature.iconColor} mb-4 transition-all duration-200`}>
@@ -437,8 +438,8 @@ export default function Landing() {
                 gradient: "from-green-500/20 to-emerald-500/20",
                 iconColor: "text-green-400"
               },
-            ].map((community, index) => (
-              <Card key={index} className="relative p-6 lg:p-8 text-center border border-white/10 backdrop-blur-sm rounded-2xl h-full group hover:border-white/20 transition-all duration-200">
+            ].map((community) => (
+              <Card key={community.title} className="relative p-6 lg:p-8 text-center border border-white/10 backdrop-blur-sm rounded-2xl h-full group hover:border-white/20 transition-all duration-200">
                 <div className="absolute inset-0 bg-gradient-to-br from-background/[0.05] to-secondary/[0.02] rounded-2xl" />
                 <div className={`relative h-14 w-14 lg:h-16 lg:w-16 mx-auto mb-4 lg:mb-6 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm transition-all duration-200`}>
                   <Icon name={community.iconName} className={`h-7 w-7 lg:h-8 lg:w-8 ${community.iconColor}`} />
@@ -457,6 +458,7 @@ export default function Landing() {
       <section className="mt-20">
         <Footer />
       </section>
+      <FloatingNFTBanner />
     </div>
   );
 }
