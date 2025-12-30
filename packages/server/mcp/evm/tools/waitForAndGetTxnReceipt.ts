@@ -3,41 +3,62 @@ import type { McpToolRegistrationConfig } from "../../registry";
 import type { EvmMcpConfig } from "..";
 import { createEvmClient } from "../evmClient";
 
+type HexHash = `0x${string}`;
+
+const zTxHash = z
+  .string()
+  .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid transaction hash")
+  .transform((val) => val as HexHash);
+
 const inputSchema = z.object({
-    txHash: z.string().describe("Transaction hash"),
-    confirmations: z.number().optional().describe("Confirmations to wait for"),
-    chainId: z.number().describe("Chain ID"),
+  txHash: zTxHash.describe("Transaction hash"),
+  chainId: z.number().describe("Chain ID"),
 });
 
 export default function (config: McpToolRegistrationConfig<EvmMcpConfig>) {
-    const { server } = config;
+  const { server } = config;
 
-    server.registerTool(
-        "wait-for-and-get-txn-receipt",
-        {
-            title: "Wait For And Get Transaction Receipt",
-            description: "Waits for a transaction and returns its receipt.",
-            annotations: {
-                readOnlyHint: true,
-                destructiveHint: false,
-                idempotentHint: true,
-                openWorldHint: true,
+  server.registerTool(
+    "get-transaction-receipt",
+    {
+      title: "Get Transaction Receipt",
+      description:
+        "Fetches the transaction receipt if mined. Returns a friendly message if not yet available.",
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+      inputSchema,
+    },
+    async ({ txHash, chainId }) => {
+      const client = createEvmClient({ chainId });
+
+      try {
+        const receipt = await client.getTransactionReceipt({
+          hash: txHash, 
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(receipt, null, 2),
             },
-            inputSchema,
-        },
-        async ({ txHash, chainId, confirmations }) => {
-            const client = createEvmClient({ chainId });
-
-            const receipt = await client.waitForTransactionReceipt({
-                hash: txHash as `0x${string}`,   
-                confirmations: confirmations ?? 1,
-            });
-
-            return {
-                content: [
-                    { type: "text", text: JSON.stringify(receipt, null, 2) }
-                ],
-            };
-        }
-    );
+          ],
+        };
+      } catch {
+        return {
+          content: [
+            {
+              type: "text",
+              text:
+                "Transaction has not been mined yet. Please retry this tool after a short delay.",
+            },
+          ],
+        };
+      }
+    }
+  );
 }

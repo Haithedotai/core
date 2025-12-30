@@ -5,7 +5,12 @@ import { createEvmClient } from "../evmClient";
 
 const inputSchema = z.object({
     name: z.string().describe("ENS name to resolve"),
-    chainId: z.number().describe("Chain ID (ONLY works on Ethereum mainnet)"),
+    chainId: z
+        .number()
+        .refine((id) => id === 1, {
+            message: "ENS resolution is only supported on Ethereum mainnet (chainId = 1)",
+        })
+        .describe("Ethereum mainnet chain ID (1)"),
 });
 
 export default function (config: McpToolRegistrationConfig<EvmMcpConfig>) {
@@ -15,7 +20,7 @@ export default function (config: McpToolRegistrationConfig<EvmMcpConfig>) {
         "resolve-ens-address",
         {
             title: "Resolve ENS Address",
-            description: "Resolves an ENS name to an address.",
+            description: "Resolves an ENS name to an Ethereum address (mainnet only).",
             annotations: {
                 readOnlyHint: true,
                 idempotentHint: true,
@@ -31,7 +36,12 @@ export default function (config: McpToolRegistrationConfig<EvmMcpConfig>) {
 
             return {
                 content: [
-                    { type: "text", text: `Resolved ENS: ${address ?? "NOT FOUND"}` },
+                    {
+                        type: "text",
+                        text: address
+                            ? `Resolved ENS ${name} → ${address}`
+                            : `ENS name ${name} not found`,
+                    },
                 ],
             };
         }
