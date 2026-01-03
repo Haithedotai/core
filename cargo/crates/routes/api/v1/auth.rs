@@ -63,7 +63,7 @@ async fn post_waitlist_handler(
                     return ApiError::BadRequest("Email already registered".into());
                 }
             }
-            ApiError::InternalServerError(e.to_string())
+            ApiError::BadRequest(e.to_string())
         })?;
 
     Ok(respond::ok("Signed up for waitlist", ()))
