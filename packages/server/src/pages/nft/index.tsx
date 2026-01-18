@@ -175,7 +175,7 @@ export const NFTPage = () => {
                 {/* 2. Central Hero (Countdown) */}
                 <div className="relative z-10 flex flex-col items-center">
                     <motion.a
-                        href="https://opensea.io"
+                        href="https://opensea.io/collection/haithe-genesis/overview"
                         target="_blank"
                         rel="noopener noreferrer"
                         onMouseEnter={() => setIsHovering(true)}
@@ -189,7 +189,7 @@ export const NFTPage = () => {
                             stiffness: 400,
                             damping: 17
                         }}
-                        className="relative group w-full max-w-lg px-8 py-6 md:py-10 rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/[0.02] backdrop-blur-xl overflow-hidden hover:border-white/20 transition-all flex items-center justify-center block"
+                        className="relative group w-full max-w-lg px-8 py-6 md:py-10 rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/[0.02] backdrop-blur-xl overflow-hidden hover:border-white/20 transition-all flex items-center justify-center"
                     >
                         {/* Animated Shine Effect */}
                         <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
