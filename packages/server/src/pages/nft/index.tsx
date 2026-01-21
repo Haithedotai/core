@@ -175,7 +175,7 @@ export const NFTPage = () => {
                 {/* 2. Central Hero (Countdown) */}
                 <div className="relative z-10 flex flex-col items-center">
                     <motion.a
-                        href="https://opensea.io/collection/haithe-genesis/overview"
+                        href="https://opensea.io/collection/haithedotai/overview"
                         target="_blank"
                         rel="noopener noreferrer"
                         onMouseEnter={() => setIsHovering(true)}
